@@ -8,15 +8,13 @@ import (
 	"github.com/jfcarter2358/ceresdb-go/connection"
 )
 
-var collectionNames = []string{"services", "config", "secrets"}
+var collectionNames = []string{"services", "params", "secrets"}
 var collectionSchemas = []map[string]string{
 	{
-		"dbid":        "STRING",
-		"id":          "STRING",
-		"host":        "STRING",
-		"port":        "INT",
-		"enum_type":   "INT",
-		"string_type": "STRING",
+		"id":   "STRING",
+		"host": "STRING",
+		"port": "INT",
+		"type": "STRING",
 	},
 	{
 		"name":  "STRING",
@@ -35,10 +33,11 @@ func VerifyDatabase(databaseName string) error {
 	}
 	for _, db := range databases {
 		if db["name"].(string) == databaseName {
-			log.Println("Database exists!")
+			log.Printf("Database %v exists!", databaseName)
 			return nil
 		}
 	}
+	log.Printf("Database %v does not exist, creating now", databaseName)
 	_, err = connection.Query(fmt.Sprintf("post database %v", databaseName))
 	return err
 }
@@ -52,7 +51,7 @@ func VerifyCollections(databaseName string) error {
 		exists := false
 		for _, col := range collections {
 			if col["name"].(string) == collectionName {
-				log.Println("Collection exists!")
+				log.Printf("Collection %v exists!", collectionName)
 				exists = true
 				continue
 			}
@@ -60,6 +59,7 @@ func VerifyCollections(databaseName string) error {
 		if exists {
 			continue
 		}
+		log.Printf("Collection %v does not exist, creating now", collectionName)
 		schemaData, _ := json.Marshal(&collectionSchemas[idx])
 		_, err = connection.Query(fmt.Sprintf("post collection %v.%v %v", databaseName, collectionName, string(schemaData)))
 		if err != nil {

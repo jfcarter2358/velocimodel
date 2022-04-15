@@ -17,6 +17,10 @@ import (
 	"github.com/jfcarter2358/ceresdb-go/connection"
 )
 
+const LIMIT_DEFAULT = "0"
+const FILTER_DEFAULT = ""
+const COUNT_DEFAULT = "false"
+
 func LoadSecrets() {
 	jsonFile, err := os.Open(config.Config.SecretsPath)
 	if err != nil {
@@ -29,13 +33,13 @@ func LoadSecrets() {
 	if err != nil {
 		panic(err)
 	}
-	err = UpdateSecrets(secrets)
+	err = UpdateSecret(secrets)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func DeleteSecrets(paramNames []string) error {
+func DeleteSecret(paramNames []string) error {
 	queryString := fmt.Sprintf("get record %v.secrets", config.Config.DBName)
 	currentData, err := connection.Query(queryString)
 	if err != nil {
@@ -53,8 +57,17 @@ func DeleteSecrets(paramNames []string) error {
 	return err
 }
 
-func GetSecrets() (map[string]interface{}, error) {
+func GetSecrets(limit, filter, count string) (map[string]interface{}, error) {
 	queryString := fmt.Sprintf("get record %v.secrets", config.Config.DBName)
+	if filter != FILTER_DEFAULT {
+		queryString += fmt.Sprintf(" | filter %v", filter)
+	}
+	if limit != LIMIT_DEFAULT {
+		queryString += fmt.Sprintf(" | limit %v", limit)
+	}
+	if count != COUNT_DEFAULT {
+		queryString += " | count"
+	}
 	data, err := connection.Query(queryString)
 	if err != nil {
 		return nil, err
@@ -70,7 +83,7 @@ func GetSecrets() (map[string]interface{}, error) {
 	return output, nil
 }
 
-func SetSecrets(input map[string]interface{}) error {
+func RegisterSecret(input map[string]interface{}) error {
 	queryList := make([]map[string]interface{}, 0)
 	for key, val := range input {
 		encryptedVal, err := encrypt(val.(string), config.Config.EncryptionKey)
@@ -87,7 +100,7 @@ func SetSecrets(input map[string]interface{}) error {
 	return err
 }
 
-func UpdateSecrets(input map[string]interface{}) error {
+func UpdateSecret(input map[string]interface{}) error {
 	queryString := fmt.Sprintf("get record %v.secrets", config.Config.DBName)
 	currentData, err := connection.Query(queryString)
 	if err != nil {
@@ -117,12 +130,13 @@ func UpdateSecrets(input map[string]interface{}) error {
 			newData = append(newData, tmpObject)
 		}
 	}
-
-	queryData, _ := json.Marshal(&currentData)
-	queryString = fmt.Sprintf("put record %v.secrets %v", config.Config.DBName, string(queryData))
-	_, err = connection.Query(queryString)
-	if err != nil {
-		return err
+	if len(currentData) > 0 {
+		queryData, _ := json.Marshal(&currentData)
+		queryString = fmt.Sprintf("put record %v.secrets %v", config.Config.DBName, string(queryData))
+		_, err = connection.Query(queryString)
+		if err != nil {
+			return err
+		}
 	}
 	if len(newData) > 0 {
 		queryData, _ := json.Marshal(&newData)

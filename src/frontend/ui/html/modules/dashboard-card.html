@@ -1,0 +1,27 @@
+<div class="w3-card-4 w3-round dark theme-dark w3-border theme-border-light">
+    <div class="w3-container velocimodel-blue w3-round">
+        <h4>Recently Updated Models</h4>
+    </div>
+    <table class="w3-table w3-bordered dark w3-border theme-border-light" id="models-table">
+        <tr>
+            <th>Model Name</th>
+            <th>Last Updated</th>
+            <th>Language</th>
+            <th>Tags</th>
+        </tr>
+        {{ range .models }}
+            <tr>
+                <td>
+                    <a href="/ui/model/{{ .name }}">{{ .name }}</a>
+                </td>
+                <td>{{ .updated }}</td>
+                <td>{{ .language }}</td>
+                <td>
+                    {{ range .tags }}
+                    <span class="w3-tag w3-round velocimodel-blue">{{ . }}</span>
+                    {{ end }}
+                </td>
+            </tr>
+        {{ end }}
+    </table>
+</div>

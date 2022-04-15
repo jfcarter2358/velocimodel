@@ -19,8 +19,15 @@ __     __   _            _ __  __           _      _
    - [x] config storage
    - [x] secret storage
 - [ ] asset-manager
-- [ ] model-manager
-- [ ] api-server
+   - [x] asset registry
+   - [x] local file upload
+   - [ ] local file download
+   - [ ] git sync
+- [x] model-manager
+   - [x] model registry
+   - [x] model snapshots
+   - [x] model releases
+- [x] api-server
 - [ ] frontend
 
 **v1.1.0**
@@ -29,6 +36,7 @@ __     __   _            _ __  __           _      _
 - [ ] runtime-manager
 - [ ] model runtime
 - [ ] oauth provider
+- [ ] asset-manager S3 integration
 
 # Contact
 

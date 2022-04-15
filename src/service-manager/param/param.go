@@ -11,6 +11,10 @@ import (
 	"github.com/jfcarter2358/ceresdb-go/connection"
 )
 
+const LIMIT_DEFAULT = "0"
+const FILTER_DEFAULT = ""
+const COUNT_DEFAULT = "false"
+
 func LoadParams() {
 	jsonFile, err := os.Open(config.Config.ParamsPath)
 	if err != nil {
@@ -23,14 +27,14 @@ func LoadParams() {
 	if err != nil {
 		panic(err)
 	}
-	err = UpdateParams(params)
+	err = UpdateParam(params)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func DeleteParams(paramNames []string) error {
-	queryString := fmt.Sprintf("get record %v.config", config.Config.DBName)
+func DeleteParam(paramNames []string) error {
+	queryString := fmt.Sprintf("get record %v.params", config.Config.DBName)
 	currentData, err := connection.Query(queryString)
 	if err != nil {
 		return err
@@ -42,13 +46,22 @@ func DeleteParams(paramNames []string) error {
 		}
 	}
 	queryData, _ := json.Marshal(&ids)
-	queryString = fmt.Sprintf("delete record %v.config %v", config.Config.DBName, queryData)
+	queryString = fmt.Sprintf("delete record %v.params %v", config.Config.DBName, queryData)
 	_, err = connection.Query(queryString)
 	return err
 }
 
-func GetParams() (map[string]interface{}, error) {
-	queryString := fmt.Sprintf("get record %v.config", config.Config.DBName)
+func GetParams(limit, filter, count string) (map[string]interface{}, error) {
+	queryString := fmt.Sprintf("get record %v.params", config.Config.DBName)
+	if filter != FILTER_DEFAULT {
+		queryString += fmt.Sprintf(" | filter %v", filter)
+	}
+	if limit != LIMIT_DEFAULT {
+		queryString += fmt.Sprintf(" | limit %v", limit)
+	}
+	if count != COUNT_DEFAULT {
+		queryString += " | count"
+	}
 	data, err := connection.Query(queryString)
 	if err != nil {
 		return nil, err
@@ -60,7 +73,7 @@ func GetParams() (map[string]interface{}, error) {
 	return output, nil
 }
 
-func SetParams(input map[string]interface{}) error {
+func RegisterParam(input map[string]interface{}) error {
 	queryList := make([]map[string]interface{}, 0)
 	for key, val := range input {
 		tmpObject := map[string]interface{}{"name": key, "value": val}
@@ -68,13 +81,13 @@ func SetParams(input map[string]interface{}) error {
 	}
 
 	queryData, _ := json.Marshal(&queryList)
-	queryString := fmt.Sprintf("post record %v.config %v", config.Config.DBName, string(queryData))
+	queryString := fmt.Sprintf("post record %v.params %v", config.Config.DBName, string(queryData))
 	_, err := connection.Query(queryString)
 	return err
 }
 
-func UpdateParams(input map[string]interface{}) error {
-	queryString := fmt.Sprintf("get record %v.config", config.Config.DBName)
+func UpdateParam(input map[string]interface{}) error {
+	queryString := fmt.Sprintf("get record %v.params", config.Config.DBName)
 	currentData, err := connection.Query(queryString)
 	if err != nil {
 		return err
@@ -95,16 +108,17 @@ func UpdateParams(input map[string]interface{}) error {
 			newData = append(newData, tmpObject)
 		}
 	}
-
-	queryData, _ := json.Marshal(&currentData)
-	queryString = fmt.Sprintf("put record %v.config %v", config.Config.DBName, string(queryData))
-	_, err = connection.Query(queryString)
-	if err != nil {
-		return err
+	if len(currentData) > 0 {
+		queryData, _ := json.Marshal(&currentData)
+		queryString = fmt.Sprintf("put record %v.params %v", config.Config.DBName, string(queryData))
+		_, err = connection.Query(queryString)
+		if err != nil {
+			return err
+		}
 	}
 	if len(newData) > 0 {
 		queryData, _ := json.Marshal(&newData)
-		queryString = fmt.Sprintf("post record %v.config %v", config.Config.DBName, string(queryData))
+		queryString = fmt.Sprintf("post record %v.params %v", config.Config.DBName, string(queryData))
 		_, err = connection.Query(queryString)
 		if err != nil {
 			return err

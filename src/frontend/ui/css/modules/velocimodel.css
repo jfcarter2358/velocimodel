@@ -1,0 +1,36 @@
+/* background colors */
+.velocimodel-charcoal,.velocimodel-hover-charcoal:hover{color:#fff!important;background-color:#373F51!important}
+.velocimodel-grey,.velocimodel-hover-grey:hover{color:#000!important;background-color:#aaaaaa!important}
+.velocimodel-white,.velocimodel-hover-white:hover{color:#fff!important;background-color:#D8DBE2!important}
+.velocimodel-light-blue,.velocimodel-hover-light-blue:hover{color:#000!important;background-color:#88C0D0!important}
+.velocimodel-blue,.velocimodel-hover-blue:hover{color:#fff!important;background-color:#5E81AC!important}
+.velocimodel-green,.velocimodel-hover-green:hover{color:#fff!important;background-color:#A3BE8C!important}
+.velocimodel-yellow,.velocimodel-hover-yellow:hover{color:#000!important;background-color:#EBCB8B!important}
+.velocimodel-orange,.velocimodel-hover-orange:hover{color:#000!important;background-color:#D08770!important}
+.velocimodel-red,.velocimodel-hover-red:hover{color:#000!important;background-color:#BF616A!important}
+.velocimodel-purple,.velocimodel-hover-purple:hover{color:#000!important;background-color:#B48EAD!important}
+
+/* text colors */
+.velocimodel-text-charcoal,.velocimodel-hover-text-charcoal:hover{color:#373F51!important}
+.velocimodel-text-grey,.velocimodel-hover-text-grey:hover{color:#aaaaaa!important}
+.velocimodel-text-white,.velocimodel-hover-text-white:hover{color:#D8DBE2!important}
+.velocimodel-text-light-blue,.velocimodel-hover-text-light-blue:hover{color:#88C0D0!important}
+.velocimodel-text-blue,.velocimodel-hover-text-blue:hover{color:#5E81AC!important}
+.velocimodel-text-green,.velocimodel-hover-text-green:hover{color:#A3BE8C!important}
+.velocimodel-text-yellow,.velocimodel-hover-text-yellow:hover{color:#EBCB8B!important}
+.velocimodel-text-orange,.velocimodel-hover-text-orange:hover{color:#D08770!important}
+.velocimodel-text-red,.velocimodel-hover-text-red:hover{color:#BF616A!important}
+.velocimodel-text-purple,.velocimodel-hover-text-purple:hover{color:#B48EAD!important}
+
+
+/* border colors */
+.velocimodel-border-charcoal,.velocimodel-hover-border-charcoal:hover{border-color:#373F51!important}
+.velocimodel-border-grey,.velocimodel-hover-border-grey:hover{border-color:#aaaaaa!important}
+.velocimodel-border-white,.velocimodel-hover-border-white:hover{border-color:#D8DBE2!important}
+.velocimodel-border-light-blue,.velocimodel-hover-border-light-blue:hover{border-color:#88C0D0!important}
+.velocimodel-border-blue,.velocimodel-hover-border-blue:hover{border-color:#5E81AC!important}
+.velocimodel-border-green,.velocimodel-hover-border-green:hover{border-color:#A3BE8C!important}
+.velocimodel-border-yellow,.velocimodel-hover-border-yellow:hover{border-color:#EBCB8B!important}
+.velocimodel-border-orange,.velocimodel-hover-border-orange:hover{border-color:#D08770!important}
+.velocimodel-border-red,.velocimodel-hover-border-red:hover{border-color:#BF616A!important}
+.velocimodel-border-purple,.velocimodel-hover-border-purple:hover{border-color:#B48EAD!important}

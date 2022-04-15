@@ -2,23 +2,21 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
 )
 
 type ConfigObject struct {
-	DBUsername        string
-	DBPassword        string
-	DBName            string
-	DBHost            string
-	DBPort            int
-	HTTPPort          int
-	DataPath          string
-	ServiceManagerURL string
+	DBUsername   string
+	DBPassword   string
+	DBName       string
+	DBHost       string
+	DBPort       int
+	HTTPPort     int
+	DataPath     string
+	APIServerURL string
 }
 
 var Config ConfigObject
@@ -34,7 +32,7 @@ func LoadConfig() {
 	dbHost := os.Getenv("ASSET_MANAGER_DB_HOST")
 	dbName := os.Getenv("ASSET_MANAGER_DB_NAME")
 	dbPortString := os.Getenv("ASSET_MANAGER_DB_PORT")
-	serviceManagerURL := os.Getenv("ASSET_MANGER_SERVICE_MANAGER_URL")
+	apiServerURL := os.Getenv("ASSET_MANGER_API_SERVER_URL")
 	dataPath := os.Getenv("ASSET_MANAGER_DATA_PATH")
 	dbPort, err := strconv.Atoi(dbPortString)
 	if err != nil {
@@ -52,16 +50,17 @@ func LoadConfig() {
 	Config.DBPort = dbPort
 	Config.HTTPPort = httpPort
 	Config.DataPath = dataPath
-	Config.ServiceManagerURL = serviceManagerURL
-
-	loadFromConfigManager("/api/param", &Params)
-	loadFromConfigManager("/api/secret", &Secrets)
-
-	log.Println(fmt.Sprintf("%v", Params))
+	Config.APIServerURL = apiServerURL
 }
 
-func loadFromConfigManager(path string, obj *map[string]interface{}) {
-	resp, err := http.Get(Config.ServiceManagerURL + path)
+func LoadParamsSecrets() {
+	loadFromServiceManager("/api/param", &Params)
+	loadFromServiceManager("/api/secret", &Secrets)
+}
+
+func loadFromServiceManager(path string, obj *map[string]interface{}) {
+	tmpObj := make([]map[string]interface{}, 0)
+	resp, err := http.Get(Config.APIServerURL + path)
 	if err != nil {
 		panic(err)
 	}
@@ -70,10 +69,10 @@ func loadFromConfigManager(path string, obj *map[string]interface{}) {
 	if err != nil {
 		panic(err)
 	}
-	log.Println(string(body))
 
-	err = json.Unmarshal([]byte(body), obj)
+	err = json.Unmarshal([]byte(body), &tmpObj)
 	if err != nil {
 		panic(err)
 	}
+	obj = &tmpObj[0]
 }

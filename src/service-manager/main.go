@@ -4,7 +4,7 @@ package main
 
 import (
 	// "os"
-	"log"
+
 	"service-manager/ceresdb"
 	"service-manager/config"
 	"service-manager/param"
@@ -13,7 +13,11 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/jfcarter2358/ceresdb-go/connection"
+
+	"github.com/sirupsen/logrus"
+	ginlogrus "github.com/toorop/gin-logrus"
 )
 
 var router *gin.Engine
@@ -21,6 +25,8 @@ var router *gin.Engine
 func main() {
 	// Set Gin to production mode
 	gin.SetMode(gin.ReleaseMode)
+
+	log := logrus.New()
 
 	config.LoadConfig()
 	routerPort := ":" + strconv.Itoa(config.Config.HTTPPort)
@@ -33,14 +39,28 @@ func main() {
 		panic(err)
 	}
 
-	service.LoadServices()
 	param.LoadParams()
 	secret.LoadSecrets()
+
+	serviceID := uuid.New().String()
+
+	selfService := service.Service{
+		ID:   serviceID,
+		Host: "service-manager",
+		Port: config.Config.HTTPPort,
+		Type: "service-manager",
+	}
+
+	err := service.RegisterService(selfService)
+	if err != nil {
+		panic(err)
+	}
 
 	log.Print("Running with port: " + strconv.Itoa(config.Config.HTTPPort))
 
 	// Set the router as the default one provided by Gin
 	router = gin.Default()
+	router.Use(ginlogrus.Logger(log), gin.Recovery())
 
 	// Initialize the routes
 	initializeRoutes()

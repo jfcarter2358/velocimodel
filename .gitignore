@@ -1,3 +1,7 @@
 /dist
 /docs/build
 /pkg
+/.python-version
+/src/frontend/ui-dist
+/release
+/test.sh

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 	"service-manager/param"
 	"service-manager/secret"
@@ -10,46 +11,71 @@ import (
 	"github.com/google/uuid"
 )
 
+const LIMIT_DEFAULT = "0"
+const FILTER_DEFAULT = ""
+const COUNT_DEFAULT = "false"
+
+var Healthy = true
+
+// Health API
+
+func GetHealth(c *gin.Context) {
+	if Healthy == false {
+		c.Status(http.StatusServiceUnavailable)
+		return
+	}
+	c.Status(http.StatusOK)
+	return
+}
+
+// Service API
+
 func DeleteService(c *gin.Context) {
 	var input []string
 	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	err := service.DeleteService(input)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	err = service.LoadServices()
-	if err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	c.Status(http.StatusOK)
 }
 
-func SyncService(c *gin.Context) {
-	err := service.SyncServices()
+func GetServices(c *gin.Context) {
+	filter := FILTER_DEFAULT
+	limit := LIMIT_DEFAULT
+	count := COUNT_DEFAULT
+	if val, ok := c.GetQuery("filter"); ok {
+		filter = val
+	}
+	if val, ok := c.GetQuery("limit"); ok {
+		limit = val
+	}
+	if val, ok := c.GetQuery("count"); ok {
+		count = val
+	}
+	data, err := service.GetServices(limit, filter, count)
 	if err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.Status(http.StatusOK)
-}
-
-func ReloadService(c *gin.Context) {
-	err := service.LoadServices()
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if len(data) > 0 {
+		c.JSON(http.StatusOK, data)
 		return
 	}
-	c.Status(http.StatusOK)
+	c.Status(http.StatusNotFound)
 }
 
 func PostService(c *gin.Context) {
 	var input service.Service
 	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -57,11 +83,7 @@ func PostService(c *gin.Context) {
 	input.ID = serviceID
 	err := service.RegisterService(input)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	err = service.SyncServices()
-	if err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -71,34 +93,69 @@ func PostService(c *gin.Context) {
 func PutService(c *gin.Context) {
 	var input service.Service
 	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	err := service.UpdateService(input)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	err = service.SyncServices()
-	if err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	c.Status(http.StatusOK)
 }
 
-func GetService(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"services": service.Services})
+// Param API
+
+func DeleteParam(c *gin.Context) {
+	var input []string
+	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Printf("Encountered error: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	err := param.DeleteParam(input)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.Status(http.StatusOK)
+}
+
+func GetParams(c *gin.Context) {
+	filter := FILTER_DEFAULT
+	limit := LIMIT_DEFAULT
+	count := COUNT_DEFAULT
+	if val, ok := c.GetQuery("filter"); ok {
+		filter = val
+	}
+	if val, ok := c.GetQuery("limit"); ok {
+		limit = val
+	}
+	if val, ok := c.GetQuery("count"); ok {
+		count = val
+	}
+	data, err := param.GetParams(limit, filter, count)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, data)
 }
 
 func PostParam(c *gin.Context) {
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := param.SetParams(input)
+	err := param.RegisterParam(input)
 	if err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -108,48 +165,70 @@ func PostParam(c *gin.Context) {
 func PutParam(c *gin.Context) {
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := param.UpdateParams(input)
+	err := param.UpdateParam(input)
 	if err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	c.Status(http.StatusOK)
 }
 
-func GetParam(c *gin.Context) {
-	output, err := param.GetParams()
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, output)
-}
-
-func DeleteParam(c *gin.Context) {
+func DeleteSecret(c *gin.Context) {
 	var input []string
 	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := param.DeleteParams(input)
+	err := secret.DeleteSecret(input)
 	if err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	c.Status(http.StatusOK)
+}
+
+func GetSecrets(c *gin.Context) {
+	filter := FILTER_DEFAULT
+	limit := LIMIT_DEFAULT
+	count := COUNT_DEFAULT
+	if val, ok := c.GetQuery("filter"); ok {
+		filter = val
+	}
+	if val, ok := c.GetQuery("limit"); ok {
+		limit = val
+	}
+	if val, ok := c.GetQuery("count"); ok {
+		count = val
+	}
+	data, err := secret.GetSecrets(limit, filter, count)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if len(data) > 0 {
+		c.JSON(http.StatusOK, data)
+	}
+	c.Status(http.StatusNotFound)
 }
 
 func PostSecret(c *gin.Context) {
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := secret.SetSecrets(input)
+	err := secret.RegisterSecret(input)
 	if err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -159,34 +238,13 @@ func PostSecret(c *gin.Context) {
 func PutSecret(c *gin.Context) {
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := secret.UpdateSecrets(input)
+	err := secret.UpdateSecret(input)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	c.Status(http.StatusOK)
-}
-
-func GetSecret(c *gin.Context) {
-	output, err := secret.GetSecrets()
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, output)
-}
-
-func DeleteSecret(c *gin.Context) {
-	var input []string
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	err := secret.DeleteSecrets(input)
-	if err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

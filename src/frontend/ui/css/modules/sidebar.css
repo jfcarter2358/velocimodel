@@ -1,0 +1,34 @@
+.sidebar {
+    width: 400px;
+}
+
+.sidebar-header {
+    margin: 0px;
+}
+
+.sidebar-header-caret {
+    position:relative;
+    top:2px;
+}
+
+.sidebar-header-text {
+    border:none;
+    display:inline-block;
+    /* padding:8px 16px; */
+    vertical-align:middle;
+    overflow:hidden;
+    text-decoration:none;
+    color:inherit;
+    background-color:inherit;
+    text-align:center;
+    white-space:nowrap
+}
+
+.sidebar-subitem {
+    padding-left: 20px;
+}
+
+.sidebar-end {
+    height: 5px;
+    width: 100%;
+}

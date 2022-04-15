@@ -3,6 +3,7 @@ package api
 import (
 	"asset-manager/asset"
 	"asset-manager/config"
+	"log"
 	"net/http"
 	"path/filepath"
 
@@ -10,46 +11,71 @@ import (
 	"github.com/google/uuid"
 )
 
+const LIMIT_DEFAULT = "0"
+const FILTER_DEFAULT = ""
+const COUNT_DEFAULT = "false"
+
+var Healthy = false
+
+// Health API
+
+func GetHealth(c *gin.Context) {
+	if Healthy == false {
+		c.Status(http.StatusServiceUnavailable)
+		return
+	}
+	c.Status(http.StatusOK)
+	return
+}
+
+// Asset API
+
 func DeleteAsset(c *gin.Context) {
 	var input []string
 	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	err := asset.DeleteAsset(input)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	err = asset.LoadAssets()
-	if err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	c.Status(http.StatusOK)
 }
 
-func SyncAsset(c *gin.Context) {
-	err := asset.SyncAssets()
+func GetAssets(c *gin.Context) {
+	filter := FILTER_DEFAULT
+	limit := LIMIT_DEFAULT
+	count := COUNT_DEFAULT
+	if val, ok := c.GetQuery("filter"); ok {
+		filter = val
+	}
+	if val, ok := c.GetQuery("limit"); ok {
+		limit = val
+	}
+	if val, ok := c.GetQuery("count"); ok {
+		count = val
+	}
+	data, err := asset.GetAssets(limit, filter, count)
 	if err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.Status(http.StatusOK)
-}
-
-func ReloadAsset(c *gin.Context) {
-	err := asset.LoadAssets()
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if len(data) > 0 {
+		c.JSON(http.StatusOK, data)
 		return
 	}
-	c.Status(http.StatusOK)
+	c.Status(http.StatusBadRequest)
 }
 
 func PostAsset(c *gin.Context) {
 	var input asset.Asset
 	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -57,15 +83,27 @@ func PostAsset(c *gin.Context) {
 	input.ID = fileID
 	err := asset.RegisterAsset(input)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	err = asset.SyncAssets()
-	if err != nil {
+		log.Printf("Encountered error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"id": fileID})
+}
+
+func PutAsset(c *gin.Context) {
+	var input asset.Asset
+	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Printf("Encountered error: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	err := asset.UpdateAsset(input)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.Status(http.StatusOK)
 }
 
 func UploadAsset(c *gin.Context) {
@@ -106,33 +144,5 @@ func UploadAsset(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err = asset.SyncAssets()
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
 	c.JSON(http.StatusOK, gin.H{"id": fileID})
-}
-
-func PutAsset(c *gin.Context) {
-	var input asset.Asset
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	err := asset.UpdateAsset(input)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	err = asset.SyncAssets()
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	c.Status(http.StatusOK)
-}
-
-func GetAsset(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"services": asset.Assets})
 }

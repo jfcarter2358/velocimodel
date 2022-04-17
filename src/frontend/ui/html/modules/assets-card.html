@@ -1,0 +1,40 @@
+<div class="w3-card-4 w3-round dark theme-light w3-border theme-border-light">
+    <div class="w3-container velocimodel-blue w3-round asset-title">
+        <h4>Assets</h4>
+        <input id="search" class="w3-input w3-round search-bar" type="text" name="search" placeholder="Search assets" oninput="getAssets()">
+    </div>
+    <br/>
+    <table class="w3-table w3-bordered dark w3-border theme-border-light" id="assets-table">
+        <tr>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                Asset Name
+            </th>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                Last Updated
+            </th>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                Language
+            </th>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                Tags
+            </th>
+            <th>
+            <th>
+                <div class="w3-round w3-button velocimodel-green">Create New</div>
+            </th>
+        </tr>
+        {{ range .assets }}
+            <tr>
+                <td>{{ .name }}</td>
+                <td>{{ .updated }}</td>
+                <td>{{ .type }}</td>
+                <td>
+                    {{ range .tags }}
+                    <span class="w3-tag w3-round velocimodel-green asset-tag">{{ . }}</span>
+                    {{ end }}
+                </td>
+                <td><a href="/ui/asset/{{ .id }}"><i class="fa-solid fa-link"></i></a></td>
+            </tr>
+        {{ end }}
+    </table>
+</div>

@@ -1,0 +1,38 @@
+/* import material.css */
+/* import velocimodel.css */
+/* import sidebar.css */
+/* import dark.css */
+/* import light.css */
+/* import layout.css */
+/* import appearance.css */
+
+.model-title {
+    display:flex;
+    padding-top:5px;
+    padding-bottom:5px;
+    width: 100%;
+}
+
+.model-card {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.search-bar {
+    width:80%;
+    margin-left:5%;
+    float:right;
+}
+
+.model-tag {
+    padding-left: 5px;
+}
+
+.model-ul {
+    width:100%;
+}
+
+.model-li {
+    display: flex;
+    width: 100%;
+}

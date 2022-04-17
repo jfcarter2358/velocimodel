@@ -1,4 +1,4 @@
-function toggle_sidebar() {
+function toggleSidebar() {
     var sidebar = document.getElementById("sidebar")
     var page_darken = document.getElementById("page-darken")
     if (sidebar.className.indexOf("show") == -1) {

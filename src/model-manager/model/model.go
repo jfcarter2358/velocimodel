@@ -14,15 +14,17 @@ import (
 )
 
 type Model struct {
-	ID       string                 `json:"id"`
-	Name     string                 `json:"name"`
-	Created  string                 `json:"created"`
-	Updated  string                 `json:"updated"`
-	Type     string                 `json:"type"`
-	Tags     []string               `json:"tags"`
-	Metadata map[string]interface{} `json:"metadata"`
-	Assets   []string               `json:"assets"`
-	Language string                 `json:"language"`
+	ID        string                 `json:"id"`
+	Name      string                 `json:"name"`
+	Created   string                 `json:"created"`
+	Updated   string                 `json:"updated"`
+	Type      string                 `json:"type"`
+	Tags      []string               `json:"tags"`
+	Metadata  map[string]interface{} `json:"metadata"`
+	Assets    []string               `json:"assets"`
+	Snapshots []string               `json:"snapshots"`
+	Releases  []string               `json:"releases"`
+	Language  string                 `json:"language"`
 }
 
 const GIT_TYPE = "git"
@@ -118,6 +120,24 @@ func UpdateModel(newModel Model) error {
 				}
 				if !reflect.DeepEqual(newModel.Assets, tmpAssets) {
 					datum["assets"] = newModel.Assets
+				}
+			}
+			if newModel.Snapshots != nil {
+				tmpSnapshots := make([]string, len(datum["snapshots"].([]interface{})))
+				for idx, val := range datum["snapshots"].([]interface{}) {
+					tmpSnapshots[idx] = val.(string)
+				}
+				if !reflect.DeepEqual(newModel.Snapshots, tmpSnapshots) {
+					datum["snapshots"] = newModel.Snapshots
+				}
+			}
+			if newModel.Releases != nil {
+				tmpReleases := make([]string, len(datum["releases"].([]interface{})))
+				for idx, val := range datum["releases"].([]interface{}) {
+					tmpReleases[idx] = val.(string)
+				}
+				if !reflect.DeepEqual(newModel.Releases, tmpReleases) {
+					datum["releases"] = newModel.Releases
 				}
 			}
 			currentTime := time.Now().UTC()

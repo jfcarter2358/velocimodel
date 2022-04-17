@@ -1,14 +1,31 @@
-<div class="w3-sidebar w3-bar-block w3-card w3-border dark theme-border-light theme-dark" id="sidebar"
-    style="width:300px;display:block">
-    <div class="w3-container w3-border-bottom dark theme-border-light velocimodel-blue" style="border:4px;">
-        <h3>VelociModel</h3>
+<div class="w3-sidebar w3-bar-block w3-card w3-border dark theme-border-light theme-light sidebar" id="sidebar">
+    <div class="w3-container w3-border-bottom velocimodel-blue w3-container sidebar-header">
+        <div class="w3-large w3-container w3-cell w3-cell-middle w3-left-align default-cursor sidebar-item">
+            <i class="fa-solid fa-bars w3-large" onclick="toggleSidebar()"></i>
+        </div>
+        <div class="w3-large w3-container w3-cell w3-cell-middle w3-left-align sidebar-item">
+            <a href="/ui/dashboard">
+                <h3>VelociModel</h3>
+            </a>
+        </div>
     </div>
-    <a href="/ui/dashboard" class="w3-bar-item w3-button dark theme-hover-ligh w3-border-bottom theme-border-light"><i class="fas fa-columns"></i> Dashboard</a>
-    <div>
-        <div id="sections_collection"></div>
-    </div>
-    <div class="w3-border-top theme-border-light w3-container" style="position:absolute;bottom:0px;width:100%;border:4px;">
+    <a href="/ui/dashboard" class="w3-bar-item w3-button dark theme-hover-light w3-border-bottom theme-border-light">
+        <i class="fa-solid fa-table-columns"></i> Dashboard
+    </a>
+    <a href="/ui/models" class="w3-bar-item w3-button dark theme-hover-light w3-border-bottom theme-border-light">
+        <i class="fa-solid fa-code"></i> Models
+    </a>
+    <a href="/ui/snapshots" class="w3-bar-item w3-button dark theme-hover-light w3-border-bottom theme-border-light">
+        <i class="fa-solid fa-box-archive"></i> Snapshots
+    </a>
+    <a href="/ui/releases" class="w3-bar-item w3-button dark theme-hover-light w3-border-bottom theme-border-light">
+        <i class="fa-solid fa-box-check"></i> Releases
+    </a>
+    <a href="/ui/assets" class="w3-bar-item w3-button dark theme-hover-light w3-border-bottom theme-border-light">
+        <i class="fa-solid fa-database"></i> Assets
+    </a>
+    <div class="w3-border-top theme-border-light w3-container sidebar-copyright">
         &copy; 2022 John Carter
-        <i class="fas fa-palette w3-right" onclick="toggleTheme()" id="theme-button" style="cursor:pointer;margin-top:4px;"></i>
+        <i class="fas fa-palette w3-right sidebar-theme" onclick="toggleTheme()" id="theme-button"></i>
     </div>
 </div>

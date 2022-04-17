@@ -1,0 +1,40 @@
+<div class="w3-card-4 w3-round dark theme-light w3-border theme-border-light">
+    <div class="w3-container velocimodel-blue w3-round snapshot-title">
+        <h4>Snapshots</h4>
+        <input id="search" class="w3-input w3-round search-bar" type="text" name="search" placeholder="Search snapshots" oninput="getSnapshots()">
+    </div>
+    <br/>
+    <table class="w3-table w3-bordered dark w3-border theme-border-light" id="snapshots-table">
+        <tr>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                Snapshot Name
+            </th>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                Last Updated
+            </th>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                Language
+            </th>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                Tags
+            </th>
+            <th>
+            <th>
+                <div class="w3-round w3-button velocimodel-green">Create New</div>
+            </th>
+        </tr>
+        {{ range .snapshots }}
+            <tr>
+                <td>{{ .name }}</td>
+                <td>{{ .updated }}</td>
+                <td>{{ .language }}</td>
+                <td>
+                    {{ range .tags }}
+                    <span class="w3-tag w3-round velocimodel-green snapshot-tag">{{ . }}</span>
+                    {{ end }}
+                </td>
+                <td><a href="/ui/snapshot/{{ .id }}"><i class="fa-solid fa-link"></i></a></td>
+            </tr>
+        {{ end }}
+    </table>
+</div>

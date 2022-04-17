@@ -14,17 +14,20 @@ func initializeRoutes() {
 
 	router.GET("/", page.RedirectIndexPage)
 
-	apiRoutes := router.Group("/api")
+	apiRoutes := router.Group("/script/api")
 	{
-		apiRoutes.DELETE("/:path", api.DoDelete)
-		apiRoutes.GET("/:path", api.DoGet)
-		apiRoutes.POST("/:path", api.DoPost)
-		apiRoutes.PUT("/:path", api.DoPut)
-		apiRoutes.POST("/:path/upload", api.DoUpload)
+		apiRoutes.GET("/model", api.GetModels)
+		apiRoutes.GET("/model/:id", api.GetModel)
 	}
 
 	uiRoutes := router.Group("/ui")
 	{
-		uiRoutes.GET("/dashboard", page.ShowHomePage)
+		uiRoutes.GET("/assets", page.ShowAssetsPage)
+		uiRoutes.GET("/dashboard", page.ShowDashboardPage)
+		uiRoutes.GET("/models", page.ShowModelsPage)
+		uiRoutes.GET("/model/:id", page.ShowModelPage)
+		uiRoutes.GET("/model/:id/edit", page.ShowModelEditPage)
+		uiRoutes.GET("/releases", page.ShowReleasesPage)
+		uiRoutes.GET("/snapshots", page.ShowSnapshotsPage)
 	}
 }

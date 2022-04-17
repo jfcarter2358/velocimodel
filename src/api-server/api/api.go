@@ -2,6 +2,7 @@ package api
 
 import (
 	"api-server/config"
+	"api-server/utils"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -328,14 +329,12 @@ func DeleteAsset(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input []string
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := sendDelete("asset-manager", "asset", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -345,28 +344,22 @@ func GetAssets(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	data, err := sendGet("asset-manager", "asset", "", queryParams)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	if len(data) > 0 {
-		c.JSON(http.StatusOK, data)
-	}
-	c.Status(http.StatusNotFound)
+	c.JSON(http.StatusOK, data)
 }
 
 func PostAsset(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	data, err := sendPost("asset-manager", "asset", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.JSON(http.StatusOK, data)
@@ -376,14 +369,12 @@ func PutAsset(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := sendPut("asset-manager", "asset", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -392,8 +383,8 @@ func PutAsset(c *gin.Context) {
 func UploadAsset(c *gin.Context) {
 	data, err := sendPostFile("asset-manager", "asset", "upload", c)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
 	}
 	c.JSON(http.StatusOK, data)
 }
@@ -402,14 +393,12 @@ func DeleteModel(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input []string
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := sendDelete("model-manager", "model", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -419,28 +408,22 @@ func GetModels(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	data, err := sendGet("model-manager", "model", "", queryParams)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	if len(data) > 0 {
-		c.JSON(http.StatusOK, data)
-	}
-	c.Status(http.StatusNotFound)
+	c.JSON(http.StatusOK, data)
 }
 
 func PostModel(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	data, err := sendPost("model-manager", "model", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.JSON(http.StatusOK, data)
@@ -450,14 +433,12 @@ func PutModel(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := sendPut("model-manager", "model", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -467,14 +448,12 @@ func DeleteParam(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input []string
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := sendDelete("service-manager", "param", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -484,28 +463,22 @@ func GetParams(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	data, err := sendGet("service-manager", "param", "", queryParams)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	if len(data) > 0 {
-		c.JSON(http.StatusOK, data)
-	}
-	c.Status(http.StatusNotFound)
+	c.JSON(http.StatusOK, data)
 }
 
 func PostParam(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	data, err := sendPost("service-manager", "param", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.JSON(http.StatusOK, data)
@@ -515,14 +488,12 @@ func PutParam(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := sendPut("service-manager", "param", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -532,14 +503,12 @@ func DeleteRelease(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input []string
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := sendDelete("model-manager", "release", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -549,28 +518,22 @@ func GetReleases(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	data, err := sendGet("model-manager", "release", "", queryParams)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	if len(data) > 0 {
-		c.JSON(http.StatusOK, data)
-	}
-	c.Status(http.StatusNotFound)
+	c.JSON(http.StatusOK, data)
 }
 
 func PostRelease(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	data, err := sendPost("model-manager", "release", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.JSON(http.StatusOK, data)
@@ -580,14 +543,12 @@ func PutRelease(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := sendPut("model-manager", "release", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -597,14 +558,12 @@ func DeleteSecret(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input []string
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := sendDelete("service-manager", "secret", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -614,28 +573,22 @@ func GetSecrets(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	data, err := sendGet("service-manager", "secret", "", queryParams)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	if len(data) > 0 {
-		c.JSON(http.StatusOK, data)
-	}
-	c.Status(http.StatusNotFound)
+	c.JSON(http.StatusOK, data)
 }
 
 func PostSecret(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	data, err := sendPost("service-manager", "secret", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.JSON(http.StatusOK, data)
@@ -645,14 +598,12 @@ func PutSecret(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := sendPut("service-manager", "secret", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -662,14 +613,12 @@ func DeleteService(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input []string
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := sendDelete("service-manager", "service", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -679,28 +628,22 @@ func GetServices(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	data, err := sendGet("service-manager", "service", "", queryParams)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	if len(data) > 0 {
-		c.JSON(http.StatusOK, data)
-	}
-	c.Status(http.StatusNotFound)
+	c.JSON(http.StatusOK, data)
 }
 
 func PostService(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	data, err := sendPost("service-manager", "service", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.JSON(http.StatusOK, data)
@@ -710,14 +653,12 @@ func PutService(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := sendPut("service-manager", "service", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -727,14 +668,12 @@ func DeleteSnapshot(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input []string
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := sendDelete("model-manager", "snapshot", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -744,28 +683,22 @@ func GetSnapshots(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	data, err := sendGet("model-manager", "snapshot", "", queryParams)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	if len(data) > 0 {
-		c.JSON(http.StatusOK, data)
-	}
-	c.Status(http.StatusNotFound)
+	c.JSON(http.StatusOK, data)
 }
 
 func PostSnapshot(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	data, err := sendPost("model-manager", "snapshot", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.JSON(http.StatusOK, data)
@@ -775,14 +708,12 @@ func PutSnapshot(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := sendPut("model-manager", "snapshot", "", queryParams, input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)

@@ -1,27 +1,36 @@
 var theme;
 
 $(document).ready(function() {
-    theme = localStorage.getItem('moc-builder-theme');
+    theme = localStorage.getItem('velocimodel-theme');
     if (theme) {
         if (theme == 'light') {
             $('.dark').addClass('light').removeClass('dark');
-            // $("#theme-button").addClass('fa-sun').removeClass('fa-moon')
         }
     } else {
         theme = 'light'
-        localStorage.setItem('moc-builder-theme', theme);
+        localStorage.setItem('velocimodel-theme', theme);
     }
 })
 
 function toggleTheme() {
     if (theme == 'light') {
         theme = 'dark'
-        // $("#theme-button").addClass('fa-moon').removeClass('fa-sun')
         $('.light').addClass('dark').removeClass('light');
+        if (typeof editor === 'undefined' || editor === null) {
+            console.log("Editor not found!")
+        } else {
+            console.log("Editor found!")
+            monaco.editor.setTheme('velocimodelDarkTheme');
+        }
     } else {
         theme = 'light'
-        // $("#theme-button").addClass('fa-sun').removeClass('fa-moon')
         $('.dark').addClass('light').removeClass('dark');
+        if (typeof editor === 'undefined' || editor === null) {
+            console.log("Editor not found!")
+        } else {
+            console.log("Editor found!")
+            monaco.editor.setTheme('velocimodelLightTheme');
+        }
     }
-    localStorage.setItem('moc-builder-theme', theme);
+    localStorage.setItem('velocimodel-theme', theme);
 }

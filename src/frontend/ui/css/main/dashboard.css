@@ -1,6 +1,23 @@
 /* import material.css */
 /* import velocimodel.css */
-/* import topbar.css */
 /* import sidebar.css */
 /* import dark.css */
 /* import light.css */
+/* import layout.css */
+/* import table.css */
+/* import search-bar.css */
+/* import appearance.css */
+
+.model-tag {
+    padding-left: 5px;
+}
+
+.table-button {
+    width: 20%
+}
+
+.table-title {
+    text-align: left;
+    margin-top: 8px;
+    width: 20%;
+}

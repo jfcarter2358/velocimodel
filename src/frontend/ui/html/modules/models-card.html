@@ -1,0 +1,43 @@
+<div class="w3-card-4 w3-round dark theme-light w3-border theme-border-light">
+    <div class="w3-container velocimodel-blue w3-round model-title">
+        <h4>Models</h4>
+        <input id="search" class="w3-input w3-round search-bar dark theme-light" type="text" name="search" placeholder="Search models" oninput="getModels()">
+    </div>
+    <table class="w3-table w3-bordered dark w3-border theme-border-light" id="models-table">
+        <tr>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                <span class="table-title-text">Model Name</span>
+            </th>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                <span class="table-title-text">Last Updated</span>
+            </th>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                <span class="table-title-text">Language</span>
+            </th>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                <span class="table-title-text">Tags</span>
+            </th>
+            <th>
+            <th>
+                <div class="w3-round w3-button velocimodel-green">Create New</div>
+            </th>
+        </tr>
+        {{ range .models }}
+            <tr>
+                <td>{{ .name }}</td>
+                <td>{{ .updated }}</td>
+                <td>{{ .language }}</td>
+                <td>
+                    {{ range .tags }}
+                    <span class="w3-tag w3-round velocimodel-green model-tag">{{ . }}</span>
+                    {{ end }}
+                </td>
+                <td class="table-link-cell">
+                    <a href="/ui/model/{{ .id }}" class="table-link-link">
+                        <i class="fa-solid fa-link"></i>
+                    </a>
+                </td>
+            </tr>
+        {{ end }}
+    </table>
+</div>

@@ -1,25 +1,37 @@
-<div class="w3-card-4 w3-round dark theme-dark w3-border theme-border-light">
+<div class="w3-card-4 w3-round dark theme-light w3-border theme-border-light">
     <div class="w3-container velocimodel-blue w3-round">
         <h4>Recently Updated Models</h4>
     </div>
-    <table class="w3-table w3-bordered dark w3-border theme-border-light" id="models-table">
+    <table class="w3-table w3-bordered w3-border" id="models-table">
         <tr>
-            <th>Model Name</th>
-            <th>Last Updated</th>
-            <th>Language</th>
-            <th>Tags</th>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                <span class="table-title-text">Model Name</span>
+            </th>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                <span class="table-title-text">Last Updated</span>
+            </th>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                <span class="table-title-text">Language</span>
+            </th>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                <span class="table-title-text">Tags</span>
+            </th>
+            <th class="table-link"></th>
         </tr>
         {{ range .models }}
             <tr>
-                <td>
-                    <a href="/ui/model/{{ .name }}">{{ .name }}</a>
-                </td>
+                <td>{{ .name }}</td>
                 <td>{{ .updated }}</td>
                 <td>{{ .language }}</td>
                 <td>
                     {{ range .tags }}
-                    <span class="w3-tag w3-round velocimodel-blue">{{ . }}</span>
+                    <span class="w3-tag w3-round velocimodel-green model-tag">{{ . }}</span>
                     {{ end }}
+                </td>
+                <td class="table-link-cell">
+                    <a href="/ui/model/{{ .id }}" class="table-link-link">
+                        <i class="fa-solid fa-link"></i>
+                    </a>
                 </td>
             </tr>
         {{ end }}

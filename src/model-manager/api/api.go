@@ -1,10 +1,10 @@
 package api
 
 import (
-	"log"
 	"model-manager/model"
 	"model-manager/release"
 	"model-manager/snapshot"
+	"model-manager/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -35,14 +35,12 @@ func GetHealth(c *gin.Context) {
 func DeleteModel(c *gin.Context) {
 	var input []string
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := model.DeleteModel(input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -71,30 +69,23 @@ func GetModels(c *gin.Context) {
 	}
 	data, err := model.GetModels(limit, filter, count, orderasc, orderdsc)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	if len(data) > 0 {
-		c.JSON(http.StatusOK, data)
-		return
-	}
-	c.Status(http.StatusNotFound)
+	c.JSON(http.StatusOK, data)
 }
 
 func PostModel(c *gin.Context) {
 	var input model.Model
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	fileID := uuid.New().String()
 	input.ID = fileID
 	err := model.RegisterModel(input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"id": fileID})
@@ -103,14 +94,12 @@ func PostModel(c *gin.Context) {
 func PutModel(c *gin.Context) {
 	var input model.Model
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := model.UpdateModel(input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -121,14 +110,12 @@ func PutModel(c *gin.Context) {
 func DeleteRelease(c *gin.Context) {
 	var input []string
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := release.DeleteRelease(input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -149,30 +136,23 @@ func GetReleases(c *gin.Context) {
 	}
 	data, err := release.GetReleases(limit, filter, count)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	if len(data) > 0 {
-		c.JSON(http.StatusOK, data)
-		return
-	}
-	c.Status(http.StatusNotFound)
+	c.JSON(http.StatusOK, data)
 }
 
 func PostRelease(c *gin.Context) {
 	var input release.Release
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	fileID := uuid.New().String()
 	input.ID = fileID
 	err := release.RegisterRelease(input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"id": fileID})
@@ -183,14 +163,12 @@ func PostRelease(c *gin.Context) {
 func DeleteSnapshot(c *gin.Context) {
 	var input []string
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := snapshot.DeleteSnapshot(input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -211,30 +189,23 @@ func GetSnapshots(c *gin.Context) {
 	}
 	data, err := snapshot.GetSnapshots(limit, filter, count)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	if len(data) > 0 {
-		c.JSON(http.StatusOK, data)
-		return
-	}
-	c.Status(http.StatusNotFound)
+	c.JSON(http.StatusOK, data)
 }
 
 func PostSnapshot(c *gin.Context) {
 	var input snapshot.Snapshot
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	fileID := uuid.New().String()
 	input.ID = fileID
 	err := snapshot.RegisterSnapshot(input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"id": fileID})
@@ -243,14 +214,12 @@ func PostSnapshot(c *gin.Context) {
 func PutSnapshot(c *gin.Context) {
 	var input snapshot.Snapshot
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := snapshot.UpdateSnapshot(input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)

@@ -1,8 +1,10 @@
 <div class="w3-card-4 w3-round dark theme-light w3-border theme-border-light full-height full-min-height">
-    <div class="w3-container velocimodel-blue w3-round snapshot-title">
+    <div class="w3-container velocimodel-blue w3-round release-title">
         <div class="card-title-bar">
-            <h4 class="card-title">{{ .snapshot.name }}</h4>
-            <i class="fa-solid fa-floppy-disk w3-large icon"></i>
+            <h4 class="card-title">{{ .release.name }}</h4>
+            <a href="/ui/release/{{ .release_id }}" class="icon">
+                <i class="fa-solid fa-trash-undo"></i>
+            </a>
         </div>
     </div>
     <div class="w3-container monaco-pane dark theme-light">

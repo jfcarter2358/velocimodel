@@ -2,12 +2,17 @@
 <html style="height:100%;min-height:100%;">
   <head>
     <!-- import head.html -->
+    <!-- Add tagify -->
+    <script src="https://unpkg.com/@yaireo/tagify"></script>
+    <script src="https://unpkg.com/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
+    <link href="https://unpkg.com/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
     <!-- add custom css -->
     <link rel="stylesheet" type="text/css" href="/static/css/snapshot.css">
     <!-- add custom js -->
     <script src="/static/js/snapshot.js"></script>
   </head>
   <body class="dark theme-dark">
+    <!-- import error-modal.html -->
     <!-- import sidebar.html -->
     <div class="main">
       <!-- import snapshot-header.html -->
@@ -20,5 +25,6 @@
       </div>
     </div>
     <div class="full-page darken" id="page-darken" style="opacity:0;"></div>
+    <div id="spinner"></div>
   </body>
 </html>

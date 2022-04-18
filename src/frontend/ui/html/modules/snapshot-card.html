@@ -2,10 +2,13 @@
     <div class="w3-container velocimodel-blue w3-round snapshot-title">
         <div class="w3-container velocimodel-blue w3-round snapshot-title">
             <div class="card-title-bar">
-                <h4 class="card-title">{{ .snapshot.name }}</h4>
-                <a href="/ui/snapshot/{{ .snapshot.id }}/edit" class="icon">
-                    <i class="fa-solid fa-pen-to-square w3-large"></i>
+                <input id="snapshot-name" class="w3-input card-title name-field dark theme-text-light" type="text" value="{{ .snapshot.name }}">
+                <a href="/ui/snapshot/{{ .snapshot.id }}/code" class="icon">
+                    <i class="fa-solid fa-code w3-large"></i>
                 </a>
+                <div class="icon">
+                    <i class="fa-solid fa-floppy-disk w3-large pointer-cursor" onclick="saveSnapshot()"></i>
+                </div>
             </div>
         </div>
     </div>
@@ -17,55 +20,108 @@
             </div>
             <div class="snapshot-card">
                 <div class="w3-left-align">ID: {{ .snapshot.id }}</div>
-                <div class="w3-left-align">Model: {{ .snapshot.model }}</div>
+                <div class="w3-left-align">Model: <a href="/ui/model/{{ .snapshot.model }}">{{ .snapshot.model }}</a></div>
+                <div class="w3-left-align">Version: {{ .snapshot.version }}</div>
                 <div class="w3-left-align">Created: {{ .snapshot.created }}</div>
                 <div class="w3-left-align">Updated: {{ .snapshot.updated }}</div>
                 <div class="w3-left-align">Language: {{ .snapshot.language }}</div>
                 <div class="w3-code jsHigh notranslate dark theme-base">
-                    {{ .snapshot.metadata }}
+                    {{ .metadata_json }}
                 </div>
             </div>
         </div>
         <br>
         <div class="w3-card-4 w3-round w3-border theme-border-light theme-light dark">
-            <div class="w3-container velocimodel-blue w3-round snapshot-title">
-                <h4 class="w3-left-align">Tags</h4>
+            <div class="w3-container velocimodel-blue w3-round model-title">
+                <div class="card-title-bar">
+                    <h4 class="w3-left-align card-header">Tags</h4>
+                </div>
             </div>
             <br>
-            <div class="snapshot-card">
-                {{ range .snapshot.tags }}
-                <span class="w3-tag w3-round velocimodel-green snapshot-tag">{{ . }}</span>
-                {{ end }}
+            <div class="model-card" id="tags">
+                <input id="tag-input" value="{{ .tag_json }}" class="velocimodelTag">
             </div>
             <br>
         </div>
         <br>
         <div class="w3-card-4 w3-round w3-border theme-border-light theme-light dark">
-            <div class="w3-container velocimodel-blue w3-round snapshot-title">
-                <h4 class="w3-left-align">Assets</h4>
+            <div class="w3-container velocimodel-blue w3-round model-title">
+                <div class="card-title-bar">
+                    <h4 class="w3-left-align card-header">Assets</h4>
+                </div>
             </div>
-            <ul class="w3-ul w3-card-4 snapshot-ul">
-                {{ range .snapshot.assets }}
-                <li class="snapshot-li">
-                    <a href="/ui/asset/{{ . }}"><i class="fa-solid fa-link"></i></a>
-                    <span class="small-margin-left">{{ . }}</span>
-                </li>
+            <table class="w3-table w3-bordered">
+                <tr>
+                    <th class="table-title w3-medium velocimodel-text-blue">
+                        <span class="table-title-text">Name</span>
+                    </th>
+                    <th class="table-title w3-medium velocimodel-text-blue">
+                        <span class="table-title-text">Last Updated</span>
+                    </th>
+                    <th class="table-title w3-medium velocimodel-text-blue">
+                        <span class="table-title-text">Type</span>
+                    </th>
+                    <th class="table-title w3-medium velocimodel-text-blue">
+                        <span class="table-title-text">ID</span>
+                    </th>
+                    <th class="table-link" style="width:20px";></th>
+                    <th class="table-link" style="width:20px";></th>
+                </tr>
+                {{ range .assets }}
+                    <tr>
+                        <td>{{ .name }}</td>
+                        <td>{{ .updated }}</td>
+                        <td>{{ .type }}</td>
+                        <td class="asset-id">{{ .id }}</td>
+                        <td class="table-link-cell" style="width:20px;">
+                            <a href="/ui/asset/{{ .id }}" class="table-link-link">
+                                <i class="fa-solid fa-link"></i>
+                            </a>
+                        </td>
+                        <td class="table-link-cell" style="width:20px;">
+                            <i class="fa-solid fa-trash"></i>
+                        </td>
+                    </tr>
                 {{ end }}
-            </ul>
+            </table>
         </div>
         <br>
         <div class="w3-card-4 w3-round w3-border theme-border-light theme-light dark">
-            <div class="w3-container velocimodel-blue w3-round snapshot-title">
-                <h4 class="w3-left-align">Releases</h4>
+            <div class="w3-container velocimodel-blue w3-round model-title">
+                <div class="card-title-bar">
+                    <h4 class="w3-left-align card-header">Releases</h4>
+                </div>
             </div>
-            <ul class="w3-ul w3-card-4 snapshot-ul">
-                {{ range .snapshot.releases }}
-                <li class="snapshot-li">
-                    <a href="/ui/release/{{ . }}"><i class="fa-solid fa-link"></i></a>
-                    <span class="small-margin-left">{{ . }}</span>
-                </li>
+            <table class="w3-table w3-bordered">
+                <tr>
+                    <th class="table-title w3-medium velocimodel-text-blue">
+                        <span class="table-title-text">Name</span>
+                    </th>
+                    <th class="table-title w3-medium velocimodel-text-blue">
+                        <span class="table-title-text">Last Updated</span>
+                    </th>
+                    <th class="table-title w3-medium velocimodel-text-blue">
+                        <span class="table-title-text">Version</span>
+                    </th>
+                    <th class="table-title w3-medium velocimodel-text-blue">
+                        <span class="table-title-text">ID</span>
+                    </th>
+                    <th class="table-link"></th>
+                </tr>
+                {{ range .releases }}
+                    <tr>
+                        <td>{{ .name }}</td>
+                        <td>{{ .updated }}</td>
+                        <td>{{ .version }}</td>
+                        <td>{{ .id }}</td>
+                        <td class="table-link-cell">
+                            <a href="/ui/release/{{ .id }}" class="table-link-link">
+                                <i class="fa-solid fa-link"></i>
+                            </a>
+                        </td>
+                    </tr>
                 {{ end }}
-            </ul>
+            </table>
         </div>
         <br>
     </div>

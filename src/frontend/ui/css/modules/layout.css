@@ -37,6 +37,7 @@
 
 .icon {
     margin-top: 16px;
+    margin-right: 16px;
     float: right;
 }
 
@@ -84,4 +85,17 @@
 
 .breadcrumb {
     padding: 6px;
+}
+
+.tag_x {
+    margin-left: 16px;
+}
+
+.card-header {
+    display: inline-block;
+}
+
+.card-header-button {
+    float: right;
+    margin-top: 6px;
 }

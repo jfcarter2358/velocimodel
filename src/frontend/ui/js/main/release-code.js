@@ -66,7 +66,8 @@ $(document).ready(
                 minimap: {
                     enabled: false
                 },
-                automaticLayout: true
+                automaticLayout: true,
+                readOnly: true
             });
         }
     )

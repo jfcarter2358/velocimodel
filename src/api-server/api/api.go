@@ -160,13 +160,11 @@ func sendPost(serviceName, objectType, path string, queryParams map[string][]str
 		if data != nil {
 			json_data, err := json.Marshal(data)
 			if err != nil {
-				log.Println("JSON MARSHAL ERROR")
 				log.Printf("Encountered error: %v", err)
 				return nil, err
 			}
 			resp, err := http.Post(requestURL, "application/json", bytes.NewBuffer(json_data))
 			if err != nil {
-				log.Println("HTTP POST ERROR")
 				log.Printf("Encountered error: %v", err)
 				return nil, err
 			}
@@ -175,13 +173,11 @@ func sendPost(serviceName, objectType, path string, queryParams map[string][]str
 			}
 			body, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
-				log.Println("BODY READ ERROR")
 				log.Printf("Encountered error: %v", err)
 				continue
 			}
 			err = json.Unmarshal([]byte(body), &obj)
 			if err != nil {
-				log.Println("JSON UNMARSHAL ERROR")
 				log.Printf("Encountered error: %v", err)
 				continue
 			}

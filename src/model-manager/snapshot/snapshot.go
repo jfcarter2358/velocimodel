@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"model-manager/config"
-	"model-manager/utils"
 	"model-manager/model"
+	"model-manager/utils"
 	"reflect"
 	"time"
 
@@ -38,38 +38,34 @@ const COUNT_DEFAULT = "false"
 var allowedTypes = []string{GIT_TYPE, RAW_TYPE}
 
 func CreateSnapshotFromModel(input model.Model) (string, error) {
-	countObj, err := connection.Query(fmt.Sprintf("get record %v.snapshots | count", config.Config.DBName))
+	countObj, err := connection.Query(fmt.Sprintf("get record %v.snapshots | filter model = \"%v\" | count", config.Config.DBName, input.ID))
 	if err != nil {
 		return "", err
 	}
 	startCount := int(countObj[0]["count"].(float64))
-	endCount := startCount
 	currentTime := time.Now().UTC()
 	snapshotID := uuid.New().String()
 	newSnapshot := Snapshot{
-		ID: snapshotID,
-		Name: input.Name,
-		Created: currentTime.Format("2006-01-02T15:04:05Z"),
-		Updated: currentTime.Format("2006-01-02T15:04:05Z"),
-		Type: input.Type,
+		ID:       snapshotID,
+		Name:     input.Name,
+		Created:  currentTime.Format("2006-01-02T15:04:05Z"),
+		Updated:  currentTime.Format("2006-01-02T15:04:05Z"),
+		Type:     input.Type,
 		Metadata: input.Metadata,
-		Assets: input.Assets,
+		Assets:   input.Assets,
 		Language: input.Language,
-		Tags: input.Tags,
-		Model: input.ID,
+		Tags:     input.Tags,
+		Model:    input.ID,
 		Releases: make([]string, 0),
-		Version: startCount + 1,
+		Version:  startCount + 1,
 	}
 	queryData, _ := json.Marshal(&newSnapshot)
-	for endCount == startCount {
-		queryString := fmt.Sprintf("post record %v.snapshots %v", config.Config.DBName, string(queryData))
-		_, err := connection.Query(queryString)
-		if err != nil {
-			return "", err
-		}
-		countObj, _ := connection.Query(fmt.Sprintf("get record %v.snapshots | count", config.Config.DBName))
-		endCount = int(countObj[0]["count"].(float64))
+	queryString := fmt.Sprintf("post record %v.snapshots %v", config.Config.DBName, string(queryData))
+	_, err = connection.Query(queryString)
+	if err != nil {
+		return "", err
 	}
+
 	modelObjects, err := connection.Query(fmt.Sprintf("get record %v.models | filter id = \"%v\"", config.Config.DBName, input.ID))
 	if err != nil {
 		return "", err
@@ -78,7 +74,7 @@ func CreateSnapshotFromModel(input model.Model) (string, error) {
 		return "", errors.New(fmt.Sprintf("Snapshot not found with ID %v", input.ID))
 	}
 	realModelID := modelObjects[0][".id"].(string)
-	snapshotList := input.Snapshots
+	snapshotList := modelObjects[0]["snapshots"].([]interface{})
 	snapshotList = append(snapshotList, snapshotID)
 	snapshotBytes, _ := json.Marshal(snapshotList)
 	_, err = connection.Query(fmt.Sprintf("patch record %v.models \"%v\" {\"snapshots\":%v}", config.Config.DBName, realModelID, string(snapshotBytes)))
@@ -89,9 +85,6 @@ func CreateSnapshotFromModel(input model.Model) (string, error) {
 }
 
 func RegisterSnapshot(newSnapshot Snapshot) error {
-	countObj, _ := connection.Query(fmt.Sprintf("get record %v.snapshots | count", config.Config.DBName))
-	startCount := int(countObj[0]["count"].(float64))
-	endCount := startCount
 	if newSnapshot.ID == "" {
 		newSnapshot.ID = uuid.New().String()
 	}
@@ -103,15 +96,12 @@ func RegisterSnapshot(newSnapshot Snapshot) error {
 	newSnapshot.Created = currentTime.Format("2006-01-02T15:04:05Z")
 	newSnapshot.Updated = currentTime.Format("2006-01-02T15:04:05Z")
 	queryData, _ := json.Marshal(&newSnapshot)
-	for endCount == startCount {
-		queryString := fmt.Sprintf("post record %v.snapshots %v", config.Config.DBName, string(queryData))
-		_, err := connection.Query(queryString)
-		if err != nil {
-			return err
-		}
-		countObj, _ := connection.Query(fmt.Sprintf("get record %v.snapshots | count", config.Config.DBName))
-		endCount = int(countObj[0]["count"].(float64))
+	queryString := fmt.Sprintf("post record %v.snapshots %v", config.Config.DBName, string(queryData))
+	_, err := connection.Query(queryString)
+	if err != nil {
+		return err
 	}
+
 	return nil
 }
 

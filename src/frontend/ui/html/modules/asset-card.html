@@ -2,10 +2,13 @@
     <div class="w3-container velocimodel-blue w3-round model-title">
         <div class="w3-container velocimodel-blue w3-round model-title">
             <div class="card-title-bar">
-                <h4 class="card-title">{{ .asset.name }}</h4>
-                <a href="/ui/asset/{{ .asset.id }}/edit" class="icon">
-                    <i class="fa-solid fa-pen-to-square w3-large"></i>
+                <input class="w3-input card-title name-field" type="text" value="{{ .asset.name }}">
+                <a href="/ui/asset/{{ .asset.id }}/code" class="icon">
+                    <i class="fa-solid fa-code w3-large"></i>
                 </a>
+                <div class="icon">
+                    <i class="fa-solid fa-floppy-disk w3-large pointer-cursor" onclick="saveAsset()"></i>
+                </div>
             </div>
         </div>
     </div>
@@ -19,38 +22,62 @@
                 <div class="w3-left-align">ID: {{ .asset.id }}</div>
                 <div class="w3-left-align">Created: {{ .asset.created }}</div>
                 <div class="w3-left-align">Updated: {{ .asset.updated }}</div>
-                <div class="w3-left-align">Language: {{ .asset.language }}</div>
+                <div class="w3-left-align">Type: {{ .asset.type }}</div>
                 <div class="w3-code jsHigh notranslate dark theme-base">
-                    {{ .asset.metadata }}
+                    {{ .metadata_json }}
                 </div>
             </div>
         </div>
         <br>
         <div class="w3-card-4 w3-round w3-border theme-border-light theme-light dark">
-            <div class="w3-container velocimodel-blue w3-round asset-title">
-                <h4 class="w3-left-align">Tags</h4>
+            <div class="w3-container velocimodel-blue w3-round model-title">
+                <div class="card-title-bar">
+                    <h4 class="w3-left-align card-header">Tags</h4>
+                </div>
             </div>
             <br>
-            <div class="asset-card">
-                {{ range .asset.tags }}
-                <span class="w3-tag w3-round velocimodel-green asset-tag">{{ . }}</span>
-                {{ end }}
+            <div class="model-card" id="tags">
+                <input id="tag-input" value="{{ .tag_json }}" class="velocimodelTag">
             </div>
             <br>
         </div>
         <br>
         <div class="w3-card-4 w3-round w3-border theme-border-light theme-light dark">
-            <div class="w3-container velocimodel-blue w3-round asset-title">
-                <h4 class="w3-left-align">Models</h4>
+            <div class="w3-container velocimodel-blue w3-round model-title">
+                <div class="card-title-bar">
+                    <h4 class="w3-left-align card-header">Models</h4>
+                </div>
             </div>
-            <ul class="w3-ul w3-card-4 asset-ul">
-                {{ range .asset.models }}
-                <li class="asset-li">
-                    <a href="/ui/model/{{ . }}"><i class="fa-solid fa-link"></i></a>
-                    <span class="small-margin-left">{{ . }}</span>
-                </li>
+            <table class="w3-table w3-bordered">
+                <tr>
+                    <th class="table-title w3-medium velocimodel-text-blue">
+                        <span class="table-title-text">Name</span>
+                    </th>
+                    <th class="table-title w3-medium velocimodel-text-blue">
+                        <span class="table-title-text">Last Updated</span>
+                    </th>
+                    <th class="table-title w3-medium velocimodel-text-blue">
+                        <span class="table-title-text">Version</span>
+                    </th>
+                    <th class="table-title w3-medium velocimodel-text-blue">
+                        <span class="table-title-text">ID</span>
+                    </th>
+                    <th class="table-link"></th>
+                </tr>
+                {{ range .models }}
+                    <tr>
+                        <td>{{ .name }}</td>
+                        <td>{{ .updated }}</td>
+                        <td>{{ .language }}</td>
+                        <td>{{ .id }}</td>
+                        <td class="table-link-cell">
+                            <a href="/ui/model/{{ .id }}" class="table-link-link">
+                                <i class="fa-solid fa-link"></i>
+                            </a>
+                        </td>
+                    </tr>
                 {{ end }}
-            </ul>
+            </table>
         </div>
         <br>
     </div>

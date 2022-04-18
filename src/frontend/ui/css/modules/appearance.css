@@ -3,8 +3,17 @@ a {
     text-decoration: none;
 }
 
+a:visited
+{ 
+    text-decoration: none !important;
+}
+
 .default-cursor {
     cursor:default;
+}
+
+.pointer-cursor {
+    cursor:pointer;
 }
 
 ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
@@ -18,4 +27,14 @@ a {
 
 ::-ms-input-placeholder { /* Microsoft Edge */
     color: black;
+}
+
+.velocimodelTag{
+    --tag-bg: #a3be8c;
+    --tag-text-color: #ffffff;
+    --tags-disabled-bg: #373f51;
+}
+
+.velocimodelTag .tagify__tag > div{
+    border-radius: 4px;
 }

@@ -4,12 +4,8 @@ package page
 
 import (
 	"encoding/json"
-	"fmt"
-	"frontend/config"
-	"io/ioutil"
-	"log"
+	"frontend/action"
 	"net/http"
-	"net/url"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,539 +15,413 @@ func RedirectIndexPage(c *gin.Context) {
 }
 
 func ShowDashboardPage(c *gin.Context) {
-	var obj []map[string]interface{}
-	params := url.Values{}
-	params.Add("orderdsc", "updated")
-	params.Add("limit", "10")
-	requestURL := fmt.Sprintf("%v/api/model?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+	assets, err := action.GetAssetsLimitLatest("10")
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
+	models, err := action.GetModelsLimitLatest("10")
+	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	releases, err := action.GetReleasesLimitLatest("10")
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	err = json.Unmarshal([]byte(body), &obj)
+	snapshots, err := action.GetSnapshotsLimitLatest("10")
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	// Render the dashboard.html page
 	render(c, gin.H{
-		"models": obj},
+		"assets":    assets,
+		"models":    models,
+		"releases":  releases,
+		"snapshots": snapshots},
 		"dashboard.html")
 }
 
 func ShowAssetPage(c *gin.Context) {
 	assetID := c.Param("id")
-	var obj []map[string]interface{}
-	params := url.Values{}
-	params.Add("filter", fmt.Sprintf("id = \"%v\"", assetID))
-	requestURL := fmt.Sprintf("%v/api/asset?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+
+	asset, err := action.GetAssetByID(assetID)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	err = json.Unmarshal([]byte(body), &obj)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	if len(obj) == 0 {
-		obj = append(obj, map[string]interface{}{})
+	if asset == nil {
+		c.Status(http.StatusNotFound)
+		return
 	}
 
-	// Render the models.html page
+	modelIDList := make([]string, len(asset["models"].([]interface{})))
+	for idx, val := range asset["models"].([]interface{}) {
+		modelIDList[idx] = val.(string)
+	}
+	models, err := action.GetModelsByIDList(modelIDList)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	tagObj := make([]map[string]string, len(asset["tags"].([]interface{})))
+	for idx, val := range asset["tags"].([]interface{}) {
+		tagObj[idx] = map[string]string{
+			"value": val.(string),
+			// "class": "w3-round velocimodel-green",
+		}
+	}
+
+	tagJSON, _ := json.Marshal(tagObj)
+	metadataJSON, _ := json.MarshalIndent(asset["metadata"], "", "    ")
+
 	render(c, gin.H{
-		"asset": obj[0]},
+		"asset":         asset,
+		"models":        models,
+		"tag_json":      string(tagJSON),
+		"metadata_json": string(metadataJSON)},
 		"asset.html")
 }
 
 func ShowAssetsPage(c *gin.Context) {
-	var obj []map[string]interface{}
-	params := url.Values{}
-	params.Add("orderdsc", "name")
-	requestURL := fmt.Sprintf("%v/api/asset?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+	assets, err := action.GetAssetsLimit("10")
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	err = json.Unmarshal([]byte(body), &obj)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	// Render the models.html page
 	render(c, gin.H{
-		"assets": obj},
+		"assets": assets},
 		"assets.html")
 }
 
-func ShowAssetEditPage(c *gin.Context) {
+func ShowAssetCodePage(c *gin.Context) {
 	assetID := c.Param("id")
-	var obj []map[string]interface{}
-	params := url.Values{}
-	params.Add("filter", fmt.Sprintf("id = \"%v\"", assetID))
-	requestURL := fmt.Sprintf("%v/api/asset?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+
+	asset, err := action.GetAssetByID(assetID)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	err = json.Unmarshal([]byte(body), &obj)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	if len(obj) == 0 {
-		obj = append(obj, map[string]interface{}{})
-	} else {
-		delete(obj[0], ".id")
-		delete(obj[0], "created")
-		delete(obj[0], "id")
-		delete(obj[0], "url")
-		delete(obj[0], "type")
-		delete(obj[0], "updated")
+	if asset == nil {
+		c.Status(http.StatusNotFound)
+		return
 	}
 
-	jsonString, _ := json.Marshal(obj[0])
+	delete(asset, ".id")
+	delete(asset, "created")
+	delete(asset, "id")
+	delete(asset, "url")
+	delete(asset, "type")
+	delete(asset, "updated")
 
-	// Render the asset.html page
+	jsonString, _ := json.Marshal(asset)
+
 	render(c, gin.H{
+		"asset_id":   assetID,
 		"asset_json": string(jsonString),
-		"asset":      obj[0]},
-		"asset-edit.html")
+		"asset":      asset},
+		"asset-code.html")
 }
 
 func ShowModelPage(c *gin.Context) {
 	modelID := c.Param("id")
-	var obj []map[string]interface{}
-	params := url.Values{}
-	params.Add("filter", fmt.Sprintf("id = \"%v\"", modelID))
-	requestURL := fmt.Sprintf("%v/api/model?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+
+	model, err := action.GetModelByID(modelID)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	err = json.Unmarshal([]byte(body), &obj)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	if len(obj) == 0 {
-		obj = append(obj, map[string]interface{}{})
+	if model == nil {
+		c.Status(http.StatusNotFound)
+		return
 	}
 
-	// Render the models.html page
+	assetIDList := make([]string, len(model["assets"].([]interface{})))
+	for idx, val := range model["assets"].([]interface{}) {
+		assetIDList[idx] = val.(string)
+	}
+	assets, err := action.GetAssetsByIDList(assetIDList)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	for idx, val := range assets {
+		assetMetadataJSON, _ := json.MarshalIndent(val["metadata"].(map[string]interface{}), "", "    ")
+		val["metadata_json"] = string(assetMetadataJSON)
+		assets[idx] = val
+	}
+
+	snapshotIDList := make([]string, len(model["snapshots"].([]interface{})))
+	for idx, val := range model["snapshots"].([]interface{}) {
+		snapshotIDList[idx] = val.(string)
+	}
+	snapshots, err := action.GetSnapshotsByIDList(snapshotIDList)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	releaseIDList := make([]string, len(model["releases"].([]interface{})))
+	for idx, val := range model["releases"].([]interface{}) {
+		releaseIDList[idx] = val.(string)
+	}
+	releases, err := action.GetReleasesByIDList(releaseIDList)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	tagObj := make([]map[string]string, len(model["tags"].([]interface{})))
+	for idx, val := range model["tags"].([]interface{}) {
+		tagObj[idx] = map[string]string{
+			"value": val.(string),
+			// "class": "w3-round velocimodel-green",
+		}
+	}
+
+	tagJSON, _ := json.Marshal(tagObj)
+	metadataJSON, _ := json.MarshalIndent(model["metadata"], "", "    ")
+
 	render(c, gin.H{
-		"model": obj[0]},
+		"model":         model,
+		"assets":        assets,
+		"snapshots":     snapshots,
+		"releases":      releases,
+		"tag_json":      string(tagJSON),
+		"metadata_json": string(metadataJSON)},
 		"model.html")
 }
 
 func ShowModelsPage(c *gin.Context) {
-	var obj []map[string]interface{}
-	params := url.Values{}
-	params.Add("orderdsc", "name")
-	requestURL := fmt.Sprintf("%v/api/model?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+	models, err := action.GetModelsLimit("10")
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	err = json.Unmarshal([]byte(body), &obj)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	// Render the models.html page
 	render(c, gin.H{
-		"models": obj},
+		"models": models},
 		"models.html")
 }
 
-func ShowModelEditPage(c *gin.Context) {
+func ShowModelCodePage(c *gin.Context) {
 	modelID := c.Param("id")
-	var obj []map[string]interface{}
-	params := url.Values{}
-	params.Add("filter", fmt.Sprintf("id = \"%v\"", modelID))
-	requestURL := fmt.Sprintf("%v/api/model?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+
+	model, err := action.GetModelByID(modelID)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	err = json.Unmarshal([]byte(body), &obj)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	if len(obj) == 0 {
-		obj = append(obj, map[string]interface{}{})
-	} else {
-		delete(obj[0], ".id")
-		delete(obj[0], "created")
-		delete(obj[0], "id")
-		delete(obj[0], "language")
-		delete(obj[0], "type")
-		delete(obj[0], "updated")
+	if model == nil {
+		c.Status(http.StatusNotFound)
+		return
 	}
 
-	jsonString, _ := json.Marshal(obj[0])
+	delete(model, ".id")
+	delete(model, "created")
+	delete(model, "id")
+	delete(model, "language")
+	delete(model, "type")
+	delete(model, "updated")
 
-	// Render the models.html page
+	jsonString, _ := json.Marshal(model)
+
 	render(c, gin.H{
+		"model_id":   modelID,
 		"model_json": string(jsonString),
-		"model":      obj[0]},
-		"model-edit.html")
+		"model":      model},
+		"model-code.html")
 }
 
 func ShowReleasePage(c *gin.Context) {
 	releaseID := c.Param("id")
-	var obj []map[string]interface{}
-	params := url.Values{}
-	params.Add("filter", fmt.Sprintf("id = \"%v\"", releaseID))
-	requestURL := fmt.Sprintf("%v/api/release?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+
+	release, err := action.GetReleaseByID(releaseID)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	err = json.Unmarshal([]byte(body), &obj)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	if len(obj) == 0 {
-		obj = append(obj, map[string]interface{}{})
+	if release == nil {
+		c.Status(http.StatusNotFound)
+		return
 	}
 
-	// Render the models.html page
+	assetIDList := make([]string, len(release["assets"].([]interface{})))
+	for idx, val := range release["assets"].([]interface{}) {
+		assetIDList[idx] = val.(string)
+	}
+	assets, err := action.GetAssetsByIDList(assetIDList)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	tagObj := make([]map[string]string, len(release["tags"].([]interface{})))
+	for idx, val := range release["tags"].([]interface{}) {
+		tagObj[idx] = map[string]string{
+			"value": val.(string),
+			// "class": "w3-round velocimodel-green",
+		}
+	}
+
+	tagJSON, _ := json.Marshal(tagObj)
+	metadataJSON, _ := json.MarshalIndent(release["metadata"], "", "    ")
+
 	render(c, gin.H{
-		"release": obj[0]},
+		"release":       release,
+		"assets":        assets,
+		"tag_json":      string(tagJSON),
+		"metadata_json": string(metadataJSON)},
 		"release.html")
 }
 
 func ShowReleasesPage(c *gin.Context) {
-	var obj []map[string]interface{}
-	params := url.Values{}
-	params.Add("orderdsc", "name")
-	requestURL := fmt.Sprintf("%v/api/release?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+	releases, err := action.GetReleasesLimit("10")
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	err = json.Unmarshal([]byte(body), &obj)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	// Render the models.html page
 	render(c, gin.H{
-		"releases": obj},
+		"releases": releases},
 		"releases.html")
 }
 
-func ShowReleaseEditPage(c *gin.Context) {
+func ShowReleaseCodePage(c *gin.Context) {
 	releaseID := c.Param("id")
-	var obj []map[string]interface{}
-	params := url.Values{}
-	params.Add("filter", fmt.Sprintf("id = \"%v\"", releaseID))
-	requestURL := fmt.Sprintf("%v/api/release?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+
+	release, err := action.GetReleaseByID(releaseID)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	err = json.Unmarshal([]byte(body), &obj)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	if len(obj) == 0 {
-		obj = append(obj, map[string]interface{}{})
-	} else {
-		delete(obj[0], ".id")
-		delete(obj[0], "created")
-		delete(obj[0], "id")
-		delete(obj[0], "language")
-		delete(obj[0], "type")
-		delete(obj[0], "updated")
+	if release == nil {
+		c.Status(http.StatusNotFound)
+		return
 	}
 
-	jsonString, _ := json.Marshal(obj[0])
+	delete(release, ".id")
+	delete(release, "created")
+	delete(release, "id")
+	delete(release, "language")
+	delete(release, "type")
+	delete(release, "updated")
 
-	// Render the models.html page
+	jsonString, _ := json.Marshal(release)
+
 	render(c, gin.H{
+		"release_id":   releaseID,
 		"release_json": string(jsonString),
-		"release":      obj[0]},
-		"release-edit.html")
+		"release":      release},
+		"release-code.html")
 }
 
 func ShowSnapshotPage(c *gin.Context) {
 	snapshotID := c.Param("id")
-	var obj []map[string]interface{}
-	params := url.Values{}
-	params.Add("filter", fmt.Sprintf("id = \"%v\"", snapshotID))
-	requestURL := fmt.Sprintf("%v/api/snapshot?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+
+	snapshot, err := action.GetSnapshotByID(snapshotID)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	err = json.Unmarshal([]byte(body), &obj)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	if len(obj) == 0 {
-		obj = append(obj, map[string]interface{}{})
+	if snapshot == nil {
+		c.Status(http.StatusNotFound)
+		return
 	}
 
-	// Render the models.html page
+	assetIDList := make([]string, len(snapshot["assets"].([]interface{})))
+	for idx, val := range snapshot["assets"].([]interface{}) {
+		assetIDList[idx] = val.(string)
+	}
+	assets, err := action.GetAssetsByIDList(assetIDList)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	releaseIDList := make([]string, len(snapshot["releases"].([]interface{})))
+	for idx, val := range snapshot["releases"].([]interface{}) {
+		releaseIDList[idx] = val.(string)
+	}
+	releases, err := action.GetReleasesByIDList(releaseIDList)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	tagObj := make([]map[string]string, len(snapshot["tags"].([]interface{})))
+	for idx, val := range snapshot["tags"].([]interface{}) {
+		tagObj[idx] = map[string]string{
+			"value": val.(string),
+			// "class": "w3-round velocimodel-green",
+		}
+	}
+
+	tagJSON, _ := json.Marshal(tagObj)
+	metadataJSON, _ := json.MarshalIndent(snapshot["metadata"], "", "    ")
+
 	render(c, gin.H{
-		"snapshot": obj[0]},
+		"snapshot":      snapshot,
+		"assets":        assets,
+		"releases":      releases,
+		"tag_json":      string(tagJSON),
+		"metadata_json": string(metadataJSON)},
 		"snapshot.html")
 }
 
 func ShowSnapshotsPage(c *gin.Context) {
-	var obj []map[string]interface{}
-	params := url.Values{}
-	params.Add("orderdsc", "name")
-	requestURL := fmt.Sprintf("%v/api/snapshot?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+	snapshots, err := action.GetSnapshotsLimit("10")
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	err = json.Unmarshal([]byte(body), &obj)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
 	// Render the models.html page
 	render(c, gin.H{
-		"snapshots": obj},
+		"snapshots": snapshots},
 		"snapshots.html")
 }
 
-func ShowSnapshotEditPage(c *gin.Context) {
+func ShowSnapshotCodePage(c *gin.Context) {
 	snapshotID := c.Param("id")
-	var obj []map[string]interface{}
-	params := url.Values{}
-	params.Add("filter", fmt.Sprintf("id = \"%v\"", snapshotID))
-	requestURL := fmt.Sprintf("%v/api/snapshot?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+
+	snapshot, err := action.GetSnapshotByID(snapshotID)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-	err = json.Unmarshal([]byte(body), &obj)
-	if err != nil {
-		log.Printf("Encountered error: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	if len(obj) == 0 {
-		obj = append(obj, map[string]interface{}{})
-	} else {
-		delete(obj[0], ".id")
-		delete(obj[0], "created")
-		delete(obj[0], "id")
-		delete(obj[0], "language")
-		delete(obj[0], "type")
-		delete(obj[0], "updated")
+	if snapshot == nil {
+		c.Status(http.StatusNotFound)
+		return
 	}
 
-	jsonString, _ := json.Marshal(obj[0])
+	delete(snapshot, ".id")
+	delete(snapshot, "created")
+	delete(snapshot, "id")
+	delete(snapshot, "language")
+	delete(snapshot, "type")
+	delete(snapshot, "updated")
+
+	jsonString, _ := json.Marshal(snapshot)
 
 	// Render the models.html page
 	render(c, gin.H{
+		"snapshot_id":   snapshotID,
 		"snapshot_json": string(jsonString),
-		"snapshot":      obj[0]},
-		"snapshot-edit.html")
+		"snapshot":      snapshot},
+		"snapshot-code.html")
 }
 
 func render(c *gin.Context, data gin.H, templateName string) {

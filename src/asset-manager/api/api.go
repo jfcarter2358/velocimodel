@@ -65,11 +65,7 @@ func GetAssets(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if len(data) > 0 {
-		c.JSON(http.StatusOK, data)
-		return
-	}
-	c.Status(http.StatusBadRequest)
+	c.JSON(http.StatusOK, data)
 }
 
 func PostAsset(c *gin.Context) {

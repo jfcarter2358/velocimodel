@@ -48,7 +48,7 @@ func GetServicesLoop() {
 	}
 }
 
-func sendDelete(serviceName, objectType, path string, queryParams map[string][]string, data []string) error {
+func sendDelete(serviceName, objectType, path string, queryParams map[string][]string, data interface{}) error {
 	// try each service of the correct type we want to talk to
 	for _, service := range Services {
 		if service["type"].(string) != serviceName {
@@ -160,11 +160,13 @@ func sendPost(serviceName, objectType, path string, queryParams map[string][]str
 		if data != nil {
 			json_data, err := json.Marshal(data)
 			if err != nil {
+				log.Println("JSON MARSHAL ERROR")
 				log.Printf("Encountered error: %v", err)
 				return nil, err
 			}
 			resp, err := http.Post(requestURL, "application/json", bytes.NewBuffer(json_data))
 			if err != nil {
+				log.Println("HTTP POST ERROR")
 				log.Printf("Encountered error: %v", err)
 				return nil, err
 			}
@@ -173,11 +175,13 @@ func sendPost(serviceName, objectType, path string, queryParams map[string][]str
 			}
 			body, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
+				log.Println("BODY READ ERROR")
 				log.Printf("Encountered error: %v", err)
 				continue
 			}
 			err = json.Unmarshal([]byte(body), &obj)
 			if err != nil {
+				log.Println("JSON UNMARSHAL ERROR")
 				log.Printf("Encountered error: %v", err)
 				continue
 			}
@@ -404,6 +408,21 @@ func DeleteModel(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+func DeleteModelAsset(c *gin.Context) {
+	queryParams := c.Request.URL.Query()
+	var input map[string]interface{}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	err := sendDelete("model-manager", "model", "asset", queryParams, input)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.Status(http.StatusOK)
+}
+
 func GetModels(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	data, err := sendGet("model-manager", "model", "", queryParams)
@@ -422,6 +441,21 @@ func PostModel(c *gin.Context) {
 		return
 	}
 	data, err := sendPost("model-manager", "model", "", queryParams, input)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, data)
+}
+
+func PostModelAsset(c *gin.Context) {
+	queryParams := c.Request.URL.Query()
+	var input map[string]interface{}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	data, err := sendPost("model-manager", "model", "asset", queryParams, input)
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
@@ -499,20 +533,20 @@ func PutParam(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func DeleteRelease(c *gin.Context) {
-	queryParams := c.Request.URL.Query()
-	var input []string
-	if err := c.ShouldBindJSON(&input); err != nil {
-		utils.Error(err, c, http.StatusInternalServerError)
-		return
-	}
-	err := sendDelete("model-manager", "release", "", queryParams, input)
-	if err != nil {
-		utils.Error(err, c, http.StatusInternalServerError)
-		return
-	}
-	c.Status(http.StatusOK)
-}
+// func DeleteRelease(c *gin.Context) {
+// 	queryParams := c.Request.URL.Query()
+// 	var input []string
+// 	if err := c.ShouldBindJSON(&input); err != nil {
+// 		utils.Error(err, c, http.StatusInternalServerError)
+// 		return
+// 	}
+// 	err := sendDelete("model-manager", "release", "", queryParams, input)
+// 	if err != nil {
+// 		utils.Error(err, c, http.StatusInternalServerError)
+// 		return
+// 	}
+// 	c.Status(http.StatusOK)
+// }
 
 func GetReleases(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
@@ -539,20 +573,35 @@ func PostRelease(c *gin.Context) {
 	c.JSON(http.StatusOK, data)
 }
 
-func PutRelease(c *gin.Context) {
+func PostReleaseSnapshot(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	err := sendPut("model-manager", "release", "", queryParams, input)
+	data, err := sendPost("model-manager", "release", "snapshot", queryParams, input)
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, data)
 }
+
+// func PutRelease(c *gin.Context) {
+// 	queryParams := c.Request.URL.Query()
+// 	var input map[string]interface{}
+// 	if err := c.ShouldBindJSON(&input); err != nil {
+// 		utils.Error(err, c, http.StatusInternalServerError)
+// 		return
+// 	}
+// 	err := sendPut("model-manager", "release", "", queryParams, input)
+// 	if err != nil {
+// 		utils.Error(err, c, http.StatusInternalServerError)
+// 		return
+// 	}
+// 	c.Status(http.StatusOK)
+// }
 
 func DeleteSecret(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
@@ -664,20 +713,20 @@ func PutService(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func DeleteSnapshot(c *gin.Context) {
-	queryParams := c.Request.URL.Query()
-	var input []string
-	if err := c.ShouldBindJSON(&input); err != nil {
-		utils.Error(err, c, http.StatusInternalServerError)
-		return
-	}
-	err := sendDelete("model-manager", "snapshot", "", queryParams, input)
-	if err != nil {
-		utils.Error(err, c, http.StatusInternalServerError)
-		return
-	}
-	c.Status(http.StatusOK)
-}
+// func DeleteSnapshot(c *gin.Context) {
+// 	queryParams := c.Request.URL.Query()
+// 	var input []string
+// 	if err := c.ShouldBindJSON(&input); err != nil {
+// 		utils.Error(err, c, http.StatusInternalServerError)
+// 		return
+// 	}
+// 	err := sendDelete("model-manager", "snapshot", "", queryParams, input)
+// 	if err != nil {
+// 		utils.Error(err, c, http.StatusInternalServerError)
+// 		return
+// 	}
+// 	c.Status(http.StatusOK)
+// }
 
 func GetSnapshots(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
@@ -704,17 +753,32 @@ func PostSnapshot(c *gin.Context) {
 	c.JSON(http.StatusOK, data)
 }
 
-func PutSnapshot(c *gin.Context) {
+func PostSnapshotModel(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	err := sendPut("model-manager", "snapshot", "", queryParams, input)
+	data, err := sendPost("model-manager", "snapshot", "model", queryParams, input)
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, data)
 }
+
+// func PutSnapshot(c *gin.Context) {
+// 	queryParams := c.Request.URL.Query()
+// 	var input map[string]interface{}
+// 	if err := c.ShouldBindJSON(&input); err != nil {
+// 		utils.Error(err, c, http.StatusInternalServerError)
+// 		return
+// 	}
+// 	err := sendPut("model-manager", "snapshot", "", queryParams, input)
+// 	if err != nil {
+// 		utils.Error(err, c, http.StatusInternalServerError)
+// 		return
+// 	}
+// 	c.Status(http.StatusOK)
+// }

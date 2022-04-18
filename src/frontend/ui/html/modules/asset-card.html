@@ -1,0 +1,57 @@
+<div class="w3-card-4 w3-round dark theme-base w3-border theme-border-light">
+    <div class="w3-container velocimodel-blue w3-round model-title">
+        <div class="w3-container velocimodel-blue w3-round model-title">
+            <div class="card-title-bar">
+                <h4 class="card-title">{{ .asset.name }}</h4>
+                <a href="/ui/asset/{{ .asset.id }}/edit" class="icon">
+                    <i class="fa-solid fa-pen-to-square w3-large"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="asset-card">
+        <div class="w3-card-4 w3-round w3-border theme-border-light theme-light dark">
+            <div class="w3-container velocimodel-blue w3-round asset-title">
+                <h4 class="w3-left-align">Metadata</h4>
+            </div>
+            <div class="asset-card">
+                <div class="w3-left-align">ID: {{ .asset.id }}</div>
+                <div class="w3-left-align">Created: {{ .asset.created }}</div>
+                <div class="w3-left-align">Updated: {{ .asset.updated }}</div>
+                <div class="w3-left-align">Language: {{ .asset.language }}</div>
+                <div class="w3-code jsHigh notranslate dark theme-base">
+                    {{ .asset.metadata }}
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="w3-card-4 w3-round w3-border theme-border-light theme-light dark">
+            <div class="w3-container velocimodel-blue w3-round asset-title">
+                <h4 class="w3-left-align">Tags</h4>
+            </div>
+            <br>
+            <div class="asset-card">
+                {{ range .asset.tags }}
+                <span class="w3-tag w3-round velocimodel-green asset-tag">{{ . }}</span>
+                {{ end }}
+            </div>
+            <br>
+        </div>
+        <br>
+        <div class="w3-card-4 w3-round w3-border theme-border-light theme-light dark">
+            <div class="w3-container velocimodel-blue w3-round asset-title">
+                <h4 class="w3-left-align">Models</h4>
+            </div>
+            <ul class="w3-ul w3-card-4 asset-ul">
+                {{ range .asset.models }}
+                <li class="asset-li">
+                    <a href="/ui/model/{{ . }}"><i class="fa-solid fa-link"></i></a>
+                    <span class="small-margin-left">{{ . }}</span>
+                </li>
+                {{ end }}
+            </ul>
+        </div>
+        <br>
+    </div>
+</div>

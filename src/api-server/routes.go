@@ -22,6 +22,8 @@ func initializeRoutes() {
 		apiRoutes.GET("/model", api.GetModels)
 		apiRoutes.POST("/model", api.PostModel)
 		apiRoutes.PUT("/model", api.PutModel)
+		apiRoutes.DELETE("/model/asset", api.DeleteModelAsset)
+		apiRoutes.POST("/model/asset", api.PostModelAsset)
 
 		// Param
 		apiRoutes.DELETE("/param", api.DeleteParam)
@@ -30,10 +32,11 @@ func initializeRoutes() {
 		apiRoutes.PUT("/param", api.PutParam)
 
 		// Release
-		apiRoutes.DELETE("/release", api.DeleteRelease)
+		// apiRoutes.DELETE("/release", api.DeleteRelease)
 		apiRoutes.GET("/release", api.GetReleases)
 		apiRoutes.POST("/release", api.PostRelease)
-		apiRoutes.PUT("/release", api.PutRelease)
+		apiRoutes.POST("/release/snapshot", api.PostReleaseSnapshot)
+		// apiRoutes.PUT("/release", api.PutRelease)
 
 		// Secret
 		apiRoutes.DELETE("/secret", api.DeleteSecret)
@@ -48,9 +51,10 @@ func initializeRoutes() {
 		apiRoutes.PUT("/service", api.PutService)
 
 		// Snapshot
-		apiRoutes.DELETE("/snapshot", api.DeleteSnapshot)
+		// apiRoutes.DELETE("/snapshot", api.DeleteSnapshot)
 		apiRoutes.GET("/snapshot", api.GetSnapshots)
 		apiRoutes.POST("/snapshot", api.PostSnapshot)
-		apiRoutes.PUT("/snapshot", api.PutSnapshot)
+		apiRoutes.POST("/snapshot/model", api.PostSnapshotModel)
+		// apiRoutes.PUT("/snapshot", api.PutSnapshot)
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"model-manager/snapshot"
 	"model-manager/utils"
 	"net/http"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -31,6 +32,35 @@ func GetHealth(c *gin.Context) {
 }
 
 // Model API
+
+func AddAsset(c *gin.Context) {
+	var input map[string]string
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	log.Println("Adding asset")
+	err := model.AddAsset(input["model"], input["asset"])
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
+}
+
+func DeleteAsset(c *gin.Context) {
+	var input map[string]string
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	err := model.DeleteAsset(input["model"], input["asset"])
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
+}
 
 func DeleteModel(c *gin.Context) {
 	var input []string
@@ -107,6 +137,20 @@ func PutModel(c *gin.Context) {
 
 // Release API
 
+func CreateRelease(c *gin.Context) {
+	var input snapshot.Snapshot
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	fileID, err := release.CreateReleaseFromSnapshot(input)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"id": fileID})
+}
+
 func DeleteRelease(c *gin.Context) {
 	var input []string
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -159,6 +203,20 @@ func PostRelease(c *gin.Context) {
 }
 
 // Snapshot API
+
+func CreateSnapshot(c *gin.Context) {
+	var input model.Model
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	fileID, err := snapshot.CreateSnapshotFromModel(input)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"id": fileID})
+}
 
 func DeleteSnapshot(c *gin.Context) {
 	var input []string

@@ -15,14 +15,18 @@ func initializeRoutes() {
 		apiRoutes.GET("/model", api.GetModels)
 		apiRoutes.POST("/model", api.PostModel)
 		apiRoutes.PUT("/model", api.PutModel)
+		apiRoutes.POST("/model/asset", api.AddAsset)
+		apiRoutes.DELETE("/model/asset", api.DeleteAsset)
 		// Release
-		apiRoutes.DELETE("/release", api.DeleteRelease)
+		// apiRoutes.DELETE("/release", api.DeleteRelease)
 		apiRoutes.GET("/release", api.GetReleases)
 		apiRoutes.POST("/release", api.PostRelease)
+		apiRoutes.POST("/release/snapshot", api.CreateRelease)
 		// Snapshot
-		apiRoutes.DELETE("/snapshot", api.DeleteSnapshot)
+		// apiRoutes.DELETE("/snapshot", api.DeleteSnapshot)
 		apiRoutes.GET("/snapshot", api.GetSnapshots)
 		apiRoutes.POST("/snapshot", api.PostSnapshot)
-		apiRoutes.PUT("/snapshot", api.PutSnapshot)
+		// apiRoutes.PUT("/snapshot", api.PutSnapshot)
+		apiRoutes.POST("/snapshot/model", api.CreateSnapshot)
 	}
 }

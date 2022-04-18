@@ -8,6 +8,7 @@ import (
 	"model-manager/utils"
 	"reflect"
 	"time"
+	"log"
 
 	"github.com/google/uuid"
 	"github.com/jfcarter2358/ceresdb-go/connection"
@@ -36,6 +37,82 @@ const ORDERASC_DEFAULT = "NA"
 const ORDERDSC_DEFAULT = "NA"
 
 var allowedTypes = []string{GIT_TYPE, RAW_TYPE}
+
+func AddAsset(modelID, assetID string) error {
+	currentTime := time.Now().UTC()
+	updatedTime := currentTime.Format("2006-01-02T15:04:05Z")
+	log.Printf("get record %v.models | filter id = \"%v\"", config.Config.DBName, modelID)
+	modelObjects, err := connection.Query(fmt.Sprintf("get record %v.models | filter id = \"%v\"", config.Config.DBName, modelID))
+	if err != nil {
+		return err
+	}
+	if len(modelObjects) == 0 {
+		return errors.New(fmt.Sprintf("Model not found with ID %v", modelID))
+	}
+	realModelID := modelObjects[0][".id"].(string)
+	assetList := modelObjects[0]["assets"].([]interface{})
+	assetList = append(assetList, assetID)
+	assetBytes, _ := json.Marshal(assetList)
+	log.Printf("patch record %v.models \"%v\" {\"updated\":\"%v\",\"assets\":%v}", config.Config.DBName, realModelID, updatedTime, string(assetBytes))
+	_, err = connection.Query(fmt.Sprintf("patch record %v.models \"%v\" {\"updated\":\"%v\",\"assets\":%v}", config.Config.DBName, realModelID, updatedTime, string(assetBytes)))
+
+	log.Printf("get record %v.assets | filter id = \"%v\"", config.Config.DBName, assetID)
+	assetObjects, err := connection.Query(fmt.Sprintf("get record %v.assets | filter id = \"%v\"", config.Config.DBName, assetID))
+	if err != nil {
+		return err
+	}
+	if len(assetObjects) == 0 {
+		return errors.New(fmt.Sprintf("Asset not found with ID %v", assetID))
+	}
+	realAssetID := assetObjects[0][".id"].(string)
+	modelList := assetObjects[0]["models"].([]interface{})
+	modelList = append(modelList, modelID)
+	modelBytes, _ := json.Marshal(modelList)
+	log.Printf("patch record %v.assets \"%v\" {\"updated\":\"%v\",\"models\":%v}", config.Config.DBName, realAssetID, updatedTime, string(modelBytes))
+	_, err = connection.Query(fmt.Sprintf("patch record %v.assets \"%v\" {\"updated\":\"%v\",\"models\":%v}", config.Config.DBName, realAssetID, updatedTime, string(modelBytes)))
+	return nil
+}
+
+func DeleteAsset(modelID, assetID string) error {
+	currentTime := time.Now().UTC()
+	updatedTime := currentTime.Format("2006-01-02T15:04:05Z")
+	modelObjects, err := connection.Query(fmt.Sprintf("get record %v.models | filter id = \"%v\"", config.Config.DBName, modelID))
+	if err != nil {
+		return err
+	}
+	if len(modelObjects) == 0 {
+		return errors.New(fmt.Sprintf("Model not found with ID %v", modelID))
+	}
+	realModelID := modelObjects[0][".id"].(string)
+	assetList := modelObjects[0]["assets"].([]interface{})
+	for idx, val := range assetList {
+		if val.(string) == assetID {
+			assetList = append(assetList[:idx], assetList[idx+1:]...)
+			break
+		}
+	}
+	assetBytes, _ := json.Marshal(assetList)
+	_, err = connection.Query(fmt.Sprintf("patch record %v.models \"%v\" {\"updated\":\"%v\",\"assets\":%v}", config.Config.DBName, realModelID, updatedTime, string(assetBytes)))
+
+	assetObjects, err := connection.Query(fmt.Sprintf("get record %v.assets | filter id = \"%v\"", config.Config.DBName, assetID))
+	if err != nil {
+		return err
+	}
+	if len(assetObjects) == 0 {
+		return errors.New(fmt.Sprintf("Asset not found with ID %v", assetID))
+	}
+	realAssetID := assetObjects[0][".id"].(string)
+	modelList := assetObjects[0]["models"].([]interface{})
+	for idx, val := range modelList {
+		if val.(string) == modelID {
+			modelList = append(modelList[:idx], modelList[idx+1:]...)
+			break
+		}
+	}
+	modelBytes, _ := json.Marshal(modelList)
+	_, err = connection.Query(fmt.Sprintf("patch record %v.assets \"%v\" {\"updated\":\"%v\",\"models\":%v}", config.Config.DBName, realAssetID, updatedTime, string(modelBytes)))
+	return nil
+}
 
 func RegisterModel(newModel Model) error {
 	countObj, _ := connection.Query(fmt.Sprintf("get record %v.models | count", config.Config.DBName))

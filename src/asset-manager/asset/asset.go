@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 	"time"
+	"log"
 
 	"github.com/google/uuid"
 	"github.com/jfcarter2358/ceresdb-go/connection"
@@ -145,6 +146,7 @@ func GetAssets(limit, filter, count string) ([]map[string]interface{}, error) {
 	if count != COUNT_DEFAULT {
 		queryString += " | count"
 	}
+	log.Printf("QUERYSTRING: %v", queryString)
 	data, err := connection.Query(queryString)
 	if err != nil {
 		return nil, err

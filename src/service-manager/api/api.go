@@ -65,11 +65,7 @@ func GetServices(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if len(data) > 0 {
-		c.JSON(http.StatusOK, data)
-		return
-	}
-	c.Status(http.StatusNotFound)
+	c.JSON(http.StatusOK, data)
 }
 
 func PostService(c *gin.Context) {
@@ -213,10 +209,7 @@ func GetSecrets(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if len(data) > 0 {
-		c.JSON(http.StatusOK, data)
-	}
-	c.Status(http.StatusNotFound)
+	c.JSON(http.StatusOK, data)
 }
 
 func PostSecret(c *gin.Context) {

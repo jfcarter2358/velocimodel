@@ -2,8 +2,8 @@
     <div class="w3-container velocimodel-blue w3-round model-title">
         <div class="w3-container velocimodel-blue w3-round model-title">
             <div class="card-title-bar">
-                <input class="w3-input card-title name-field" type="text" value="{{ .asset.name }}">
-                <a href="/ui/asset/{{ .asset.id }}/code" class="icon">
+                <input id="model-name" class="w3-input card-title name-field dark theme-text-light" type="text" value="{{ .asset.name }}">
+                <a href="/ui/model/{{ .asset.id }}/code" class="icon">
                     <i class="fa-solid fa-code w3-large"></i>
                 </a>
                 <div class="icon">
@@ -19,10 +19,11 @@
                 <h4 class="w3-left-align">Metadata</h4>
             </div>
             <div class="asset-card">
-                <div class="w3-left-align">ID: {{ .asset.id }}</div>
-                <div class="w3-left-align">Created: {{ .asset.created }}</div>
-                <div class="w3-left-align">Updated: {{ .asset.updated }}</div>
-                <div class="w3-left-align">Type: {{ .asset.type }}</div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>ID: </strong></span>{{ .asset.id }}</div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Created: </strong></span>{{ .asset.created }}</div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Updated: </strong></span>{{ .asset.updated }}</div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Type: </strong></span>{{ .asset.type }}</div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Metadata</strong></span></div>
                 <div class="w3-code jsHigh notranslate dark theme-base">
                     {{ .metadata_json }}
                 </div>

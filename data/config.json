@@ -1,3 +1,5 @@
 {
-    "basepath": "http://localhost:9000"
+    "basepath": "http://localhost:9000",
+    "db_host": "ceresdb",
+    "db_port": 7437
 }

@@ -21,10 +21,11 @@
                 </div>
             </div>
             <div class="model-card">
-                <div class="w3-left-align">ID: {{ .model.id }}</div>
-                <div class="w3-left-align">Created: {{ .model.created }}</div>
-                <div class="w3-left-align">Updated: {{ .model.updated }}</div>
-                <div class="w3-left-align">Language: {{ .model.language }}</div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>ID: </strong></span>{{ .model.id }}</div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Created: </strong></span>{{ .model.created }}</div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Updated: </strong></span>{{ .model.updated }}</div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Language: </strong></span>{{ .model.language }}</div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Metadata</strong></span></div>
                 <div class="w3-code jsHigh notranslate dark theme-base">
                     {{ .metadata_json }}
                 </div>
@@ -51,45 +52,27 @@
                     <div class="w3-round w3-button velocimodel-green w3-right-align card-header-button" onclick="addAsset()">Add Asset</div>
                 </div>
             </div>
-            <div class="w3-bordered">
-                <div style="padding-left:20px;padding-right:20px;margin:0px;display:block;">
-                    <div class="table-title w3-medium velocimodel-text-blue" style="width:20%;display:inline-block;">
-                        <span class="table-title-text">Name</span>
-                    </div>
-                    <div class="table-title w3-medium velocimodel-text-blue" style="width:20%;display:inline-block;">
-                        <span class="table-title-text">Last Updated</span>
-                    </div>
-                    <div class="table-title w3-medium velocimodel-text-blue" style="width:20%;display:inline-block;">
-                        <span class="table-title-text">Type</span>
-                    </div>
-                    <div class="table-title w3-medium velocimodel-text-blue" style="width:20%;display:inline-block;">
-                        <span class="table-title-text">ID</span>
-                    </div>
-                    <div class="table-link" style="width:20px;float:right;"></div>
-                    <div class="table-link" style="width:20px;float:right;"></div>
-                </div>
+            {{ range .assets }}
+            <button type="button" class="collapsible dark theme-light theme-hover-base">
+                <span style="float:left;">{{ .id }}</span>
+                <a href="/ui/asset/{{ .id }}" style="float:right;margin-right:16px;">
+                    <i class="fa-solid fa-link"></i>
+                </a>
+                <span style="float:right;">{{ .type }}&nbsp;&nbsp;</span>
+            </button>
+            <div class="content">
+                <span><span class="velocimodel-text-blue"><strong>Name: </strong></span>{{ .name }}</span>
                 <br>
-                {{ range .assets }}
-                <div style="display:block;">
-                    <div style="width:20%;display:inline-block;">{{ .name }}</div>
-                    <div style="width:20%;display:inline-block;">{{ .updated }}</div>
-                    <div style="width:20%;display:inline-block;">{{ .type }}</div>
-                    <div class="asset-id" style="width:20%;display:inline-block;">{{ .id }}</div>
-                    <div class="table-link-cell" style="width:20px;float:right;">
-                        <a href="/ui/asset/{{ .id }}" class="table-link-link">
-                            <i class="fa-solid fa-link"></i>
-                        </a>
-                    </div>
-                    <div class="table-link-cell" style="width:20px;float:right;">
-                        <i class="fa-solid fa-trash"></i>
-                    </div>
-                </div>
+                <span><span class="velocimodel-text-blue"><strong>Created: </strong></span>{{ .created }}</span>
                 <br>
-                <div id="asset-{{ .id }}" style="display:block;" class="w3-code jsHigh notranslate dark theme-base" style="width:100%;">
+                <span><span class="velocimodel-text-blue"><strong>Updated: </strong></span>{{ .updated }}</span>
+                <br>
+                <span><span class="velocimodel-text-blue"><strong>Metadata</strong></span></span>
+                <div class="w3-code jsHigh notranslate dark theme-base" style="width:100%;">
                     {{ .metadata_json }}
                 </div>
-                {{ end }}
             </div>
+            {{ end }}
         </div>
         <br>
         <div class="w3-card-4 w3-round w3-border theme-border-light theme-light dark">

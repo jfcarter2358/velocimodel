@@ -16,12 +16,13 @@
                 <h4 class="w3-left-align">Metadata</h4>
             </div>
             <div class="release-card">
-                <div class="w3-left-align">ID: {{ .release.id }}</div>
-                <div class="w3-left-align">Snapshot: <a href="/ui/snapshot/{{ .release.snapshot }}">{{ .release.snapshot }}</a></div>
-                <div class="w3-left-align">Version: {{ .release.version }}</div>
-                <div class="w3-left-align">Created: {{ .release.created }}</div>
-                <div class="w3-left-align">Updated: {{ .release.updated }}</div>
-                <div class="w3-left-align">Language: {{ .release.language }}</div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>ID: </strong></span>{{ .release.id }}</div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Snapshot: </strong></span><a href="/ui/snapshot/{{ .release.snapshot }}">{{ .release.snapshot }}</a></div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Version: </strong></span>{{ .release.version }}</div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Created: </strong></span>{{ .release.created }}</div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Updated: </strong></span>{{ .release.updated }}</div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Language: </strong></span>{{ .release.language }}</div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Metadata</strong></span></div>
                 <div class="w3-code jsHigh notranslate dark theme-base">
                     {{ .metadata_json }}
                 </div>
@@ -47,40 +48,27 @@
                     <h4 class="w3-left-align card-header">Assets</h4>
                 </div>
             </div>
-            <table class="w3-table w3-bordered">
-                <tr>
-                    <th class="table-title w3-medium velocimodel-text-blue">
-                        <span class="table-title-text">Name</span>
-                    </th>
-                    <th class="table-title w3-medium velocimodel-text-blue">
-                        <span class="table-title-text">Last Updated</span>
-                    </th>
-                    <th class="table-title w3-medium velocimodel-text-blue">
-                        <span class="table-title-text">Type</span>
-                    </th>
-                    <th class="table-title w3-medium velocimodel-text-blue">
-                        <span class="table-title-text">ID</span>
-                    </th>
-                    <th class="table-link" style="width:20px";></th>
-                    <th class="table-link" style="width:20px";></th>
-                </tr>
-                {{ range .assets }}
-                    <tr>
-                        <td>{{ .name }}</td>
-                        <td>{{ .updated }}</td>
-                        <td>{{ .type }}</td>
-                        <td class="asset-id">{{ .id }}</td>
-                        <td class="table-link-cell" style="width:20px;">
-                            <a href="/ui/asset/{{ .id }}" class="table-link-link">
-                                <i class="fa-solid fa-link"></i>
-                            </a>
-                        </td>
-                        <td class="table-link-cell" style="width:20px;">
-                            <i class="fa-solid fa-trash"></i>
-                        </td>
-                    </tr>
-                {{ end }}
-            </table>
+            {{ range .assets }}
+            <button type="button" class="collapsible dark theme-light theme-hover-base">
+                <span style="float:left;">{{ .id }}</span>
+                <a href="/ui/asset/{{ .id }}" style="float:right;">
+                    <i class="fa-solid fa-link"></i>
+                </a>
+                <span style="float:right;margin-right:16px;">{{ .type }}</span>
+            </button>
+            <div class="content">
+                <span><span class="velocimodel-text-blue">Name: </span>{{ .name }}</span>
+                <br>
+                <span><span class="velocimodel-text-blue">Created: </span>{{ .created }}</span>
+                <br>
+                <span><span class="velocimodel-text-blue">Updated: </span>{{ .updated }}</span>
+                <br>
+                <span><span class="velocimodel-text-blue">Metadata</span></span>
+                <div class="w3-code jsHigh notranslate dark theme-base" style="width:100%;">
+                    {{ .metadata_json }}
+                </div>
+            </div>
+            {{ end }}
         </div>
         <br>
     </div>

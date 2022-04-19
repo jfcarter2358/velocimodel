@@ -8,7 +8,7 @@ __     __   _            _ __  __           _      _
 
 # About
 
-
+Velocimodel is a comprehensive open-source model operations solution. It allows for the management and versinoing of data science models (in addition to other software projects) and will eventually allow for model automation and deployment.
 
 # To Do
 
@@ -23,12 +23,31 @@ __     __   _            _ __  __           _      _
    - [x] local file upload
    - [ ] local file download
    - [ ] git sync
+   - [ ] git asset creation
+   - [ ] pull config from service-manager
 - [x] model-manager
    - [x] model registry
    - [x] model snapshots
    - [x] model releases
+   - [ ] pull config from service-manager
+   - [ ] model/snapshot/release download
 - [x] api-server
 - [ ] frontend
+   - [x] dashboard
+   - [x] model view
+   - [ ] model creation
+   - [ ] model add asset
+   - [ ] model delete asset
+   - [x] snapshot view
+   - [ ] snapshot creation
+   - [x] release view
+   - [ ] release creation
+   - [x] asset view
+   - [ ] asset creation
+   - [ ] secrets view
+   - [ ] secrets edit
+   - [ ] params view
+   - [ ] params edit
 
 **v1.1.0**
 
@@ -37,6 +56,11 @@ __     __   _            _ __  __           _      _
 - [ ] model runtime
 - [ ] oauth provider
 - [ ] asset-manager S3 integration
+
+**v1.2.0**
+
+- [ ] asset-manager Artifactory integration
+- [ ] asset-manager Azure Blog Store integration
 
 # Contact
 

@@ -8,7 +8,7 @@ __     __   _            _ __  __           _      _
 
 # About
 
-Velocimodel is a comprehensive open-source model operations solution. It allows for the management and versinoing of data science models (in addition to other software projects) and will eventually allow for model automation and deployment.
+Velocimodel is a comprehensive open-source model operations solution. It allows for the management and versioning of data science models (in addition to other software projects) and will eventually allow for model automation and deployment.
 
 # To Do
 
@@ -22,8 +22,9 @@ Velocimodel is a comprehensive open-source model operations solution. It allows 
    - [x] asset registry
    - [x] local file upload
    - [ ] local file download
-   - [ ] git sync
-   - [ ] git asset creation
+   - [ ] automatic git sync
+   - [ ] manual git sync
+   - [x] git asset creation
    - [x] pull config from service-manager
 - [x] model-manager
    - [x] model registry
@@ -35,25 +36,35 @@ Velocimodel is a comprehensive open-source model operations solution. It allows 
 - [ ] frontend
    - [x] dashboard
    - [x] model view
+   - [x] model edit
    - [ ] model creation
    - [ ] model add asset
    - [ ] model delete asset
+   - [ ] model download
+   - [x] model code save
    - [x] snapshot view
+   - [x] snapshot edit
    - [ ] snapshot creation
+   - [ ] snapshot download
+   - [x] snapshot code save
    - [x] release view
    - [ ] release creation
+   - [ ] release download
    - [x] asset view
-   - [ ] asset creation
-   - [ ] secrets view
-   - [ ] secrets edit
-   - [ ] params view
-   - [ ] params edit
+   - [x] asset edit
+   - [ ] asset download
+   - [x] asset code save
+   - [ ] file asset creation
+   - [ ] git asset creation
 
 **v1.1.0**
 
-- [ ] UI param management
-- [ ] UI secret management 
+- [ ] UI param view
+- [ ] UI param edit
+- [ ] UI secret view
+- [ ] UI secret edit
 - [ ] oauth provider
+- [ ] SSH git clone support
 
 **v1.2.0**
 
@@ -71,7 +82,7 @@ Velocimodel is a comprehensive open-source model operations solution. It allows 
 
 **v1.5.0**
 
-- [ ] asset-manager Azure Blog Store integration
+- [ ] asset-manager Azure Blob Store integration
 
 # Contact
 

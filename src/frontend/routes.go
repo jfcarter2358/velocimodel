@@ -18,6 +18,7 @@ func initializeRoutes() {
 	{
 		apiRoutes.GET("/asset", api.GetAssets)
 		apiRoutes.GET("/asset/:id", api.GetAsset)
+		apiRoutes.PUT("/asset/:id", api.UpdateAsset)
 		apiRoutes.GET("/model", api.GetModels)
 		apiRoutes.GET("/model/:id", api.GetModel)
 		apiRoutes.PUT("/model/:id", api.UpdateModel)

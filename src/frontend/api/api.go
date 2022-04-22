@@ -86,6 +86,35 @@ func GetAsset(c *gin.Context) {
 	c.JSON(http.StatusOK, obj)
 }
 
+func UpdateAsset(c *gin.Context) {
+	assetID := c.Param("id")
+	requestURL := fmt.Sprintf("%v/api/asset", config.Config.APIServerURL)
+	var data map[string]interface{}
+	if err := c.ShouldBindJSON(&data); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	data["id"] = assetID
+	json_data, err := json.Marshal(data)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodPut, requestURL, bytes.NewBuffer(json_data))
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	resp, err := client.Do(req)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.Status(resp.StatusCode)
+}
+
 func GetModels(c *gin.Context) {
 	var obj []map[string]interface{}
 

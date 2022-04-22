@@ -1,5 +1,7 @@
 /* theme STYLING */
 
+.dark.theme-text,.dark.theme-text:hover{color:#ECEFF4!important;}
+
 /* neutral colors */
 .dark.theme-dark,.dark.theme-hover-dark:hover{color:#ECEFF4!important;background-color:#333333!important;}
 .dark.theme-base,.dark.theme-hover-base:hover{color:#ECEFF4!important;background-color:#4b4b4b!important;}

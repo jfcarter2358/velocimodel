@@ -22,18 +22,18 @@ function render(data) {
         }
     }
     var table = document.getElementById('snapshots-table');
-    var tableHTMLString = '<tr><th>Snapshot Name</th><th>Last Updated</th><th>Language</th><th>Tags</th><th></th></tr>' +
+var tableHTMLString = '<tr><th class="table-title w3-medium velocimodel-text-blue">Snapshot Name</th><th class="table-title w3-medium velocimodel-text-blue">Last Updated</th><th class="table-title w3-medium velocimodel-text-blue">Language</th><th class="table-title w3-medium velocimodel-text-blue">Tags</th><th><div class="w3-round w3-button velocimodel-green">Create New</div></th></tr>' +
         data.map(function (snapshot) {
             return '<tr>' +
                 '<td>' + snapshot.name + '</td>' +
                 '<td>' + snapshot.updated + '</td>' +
                 '<td>' + snapshot.language + '</td>' +
                 '<td>' + snapshot.tags.map(function (tag) {
-                    return '<span class="w3-tag w3-round velocimodel-blue snapshot-tag">' + tag + '</span>'
+                    return '<span class="w3-tag w3-round velocimodel-green asset-tag">' + tag + '</span>'
                 }).join('') +
                 '</td>' +
-                '<td>' +
-                '<a href="/ui/snapshot/' + snapshot.id + '"><i class="fa-solid fa-link"></i></a>' +
+                '<td class="table-link-cell">' +
+                '<a href="/ui/snapshot/' + snapshot.id + '" class="table-link-link w3-right-align dark theme-text" style="float:right;margin-right:16px;"><i class="fa-solid fa-link"></i></a>' +
                 '</td>' +
                 '</tr>'
         }).join('');

@@ -22,18 +22,18 @@ function render(data) {
         }
     }
     var table = document.getElementById('releases-table');
-    var tableHTMLString = '<tr><th>Release Name</th><th>Last Updated</th><th>Language</th><th>Tags</th><th></th></tr>' +
+    var tableHTMLString = '<tr><th class="table-title w3-medium velocimodel-text-blue">Release Name</th><th class="table-title w3-medium velocimodel-text-blue">Last Updated</th><th class="table-title w3-medium velocimodel-text-blue">Language</th><th class="table-title w3-medium velocimodel-text-blue">Tags</th><th><div class="w3-round w3-button velocimodel-green">Create New</div></th></tr>' +
         data.map(function (release) {
             return '<tr>' +
                 '<td>' + release.name + '</td>' +
                 '<td>' + release.updated + '</td>' +
                 '<td>' + release.language + '</td>' +
                 '<td>' + release.tags.map(function (tag) {
-                    return '<span class="w3-tag w3-round velocimodel-blue release-tag">' + tag + '</span>'
+                    return '<span class="w3-tag w3-round velocimodel-green asset-tag">' + tag + '</span>'
                 }).join('') +
                 '</td>' +
-                '<td>' +
-                '<a href="/ui/release/' + release.id + '"><i class="fa-solid fa-link"></i></a>' +
+                '<td class="table-link-cell">' +
+                '<a href="/ui/release/' + release.id + '" class="table-link-link w3-right-align dark theme-text" style="float:right;margin-right:16px;"><i class="fa-solid fa-link"></i></a>' +
                 '</td>' +
                 '</tr>'
         }).join('');

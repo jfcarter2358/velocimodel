@@ -3,14 +3,16 @@ package api
 import (
 	"asset-manager/asset"
 	"asset-manager/config"
+	"asset-manager/utils"
 	"errors"
 	"fmt"
-	"frontend/utils"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
 
 	"os/exec"
 
@@ -26,6 +28,7 @@ var Healthy = false
 
 type CreateGitObject struct {
 	Repo       string `json:"repo"`
+	Branch     string `json:"branch"`
 	Credential string `json:"credential"`
 }
 
@@ -107,7 +110,7 @@ func PutAsset(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func UploadAsset(c *gin.Context) {
+func CreateFileAsset(c *gin.Context) {
 	file, err := c.FormFile("file")
 
 	// The file cannot be received.
@@ -139,6 +142,7 @@ func UploadAsset(c *gin.Context) {
 		Type:     "file",
 		Tags:     make([]string, 0),
 		Metadata: make(map[string]interface{}),
+		Models:   make([]string, 0),
 	}
 	err = asset.RegisterAsset(assetData)
 	if err != nil {
@@ -154,18 +158,19 @@ func CreateGitAsset(c *gin.Context) {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	file, err := ioutil.TempFile("/tmp", "repo-")
+	dir, err := ioutil.TempDir("/tmp", "repo-")
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	defer os.Remove(file.Name())
+	defer os.Remove(dir)
 
 	gitEmail := ""
 	gitName := ""
 	gitUser := ""
 	gitPass := ""
 
+	// Grab credentials from service-manager
 	if val, ok := config.Params[fmt.Sprintf("git_%v_email", input.Credential)]; ok {
 		gitEmail = val.(string)
 	} else {
@@ -178,30 +183,131 @@ func CreateGitAsset(c *gin.Context) {
 		utils.Error(errors.New(fmt.Sprintf("Invalid git configuration, name does not exist for credential %v", input.Credential)), c, http.StatusInternalServerError)
 		return
 	}
-	if val, ok := config.Params[fmt.Sprintf("git_%v_user", input.Credential)]; ok {
+	if val, ok := config.Secrets[fmt.Sprintf("git_%v_user", input.Credential)]; ok {
 		gitUser = val.(string)
 	} else {
 		utils.Error(errors.New(fmt.Sprintf("Invalid git configuration, user does not exist for credential %v", input.Credential)), c, http.StatusInternalServerError)
 		return
 	}
-	if val, ok := config.Params[fmt.Sprintf("git_%v_pass", input.Credential)]; ok {
+	if val, ok := config.Secrets[fmt.Sprintf("git_%v_pass", input.Credential)]; ok {
 		gitPass = val.(string)
 	} else {
 		utils.Error(errors.New(fmt.Sprintf("Invalid git configuration, password does not exist for credential %v", input.Credential)), c, http.StatusInternalServerError)
 		return
 	}
 
+	// Configure git
 	log.Println("Initializing git configuration")
-	_, err = exec.Command("git", "config", "--global", "user.email", fmt.Sprintf("\"%v\"", gitEmail)).Output()
+	out, err := exec.Command("git", "config", "--global", "user.email", fmt.Sprintf("\"%v\"", gitEmail)).CombinedOutput()
 	if err != nil {
-		log.Println("Error setting email")
-		log.Fatal(err)
+		log.Printf("Git config email: %v", string(out))
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
 	}
-	_, err = exec.Command("git", "config", "--global", "user.name", fmt.Sprintf("\"%v\"", gitName)).Output()
+	out, err = exec.Command("git", "config", "--global", "user.name", fmt.Sprintf("\"%v\"", gitName)).CombinedOutput()
 	if err != nil {
-		log.Println("Error setting name")
-		log.Fatal(err)
+		log.Printf("Git config name: %v", string(out))
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
 	}
 
-	cmd.Close()
+	// Shallow clone the git repo
+	prefix := "https://"
+	if strings.HasPrefix(input.Repo, "http://") {
+		prefix = "http://"
+	} else {
+		if !strings.HasPrefix(input.Repo, "https://") {
+			input.Repo = "https://" + input.Repo
+		}
+	}
+	domain := input.Repo[len(prefix):]
+	out, err = exec.Command("git", "clone", "--depth", "1", "-b", input.Branch, fmt.Sprintf("%v%v:%v@%v", prefix, gitUser, gitPass, domain), dir).CombinedOutput()
+	if err != nil {
+		log.Printf("Git clone: %v", string(out))
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	out, err = exec.Command("git", "-C", dir, "log", "--format=\"%H\"", "-n", "1").CombinedOutput()
+	if err != nil {
+		log.Printf("Git log: %v", string(out))
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	commitID := out
+	out, err = exec.Command("git", "-C", dir, "show", "-s", "--date=format:'%Y-%m-%dT%H:%M:%SZ'", "--format=%cd").CombinedOutput()
+	if err != nil {
+		log.Printf("Git show: %v", string(out))
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	commitTimestamp := out
+
+	// Get the structure of the repo
+	tree := make(map[string]interface{})
+	visit := func(path string, info os.FileInfo, err error) error {
+		keys := strings.Split(path, "/")
+		if len(keys) <= 3 {
+			return nil
+		}
+		keys = keys[3:]
+		if keys[0] == ".git" {
+			return nil
+		}
+		if info.IsDir() {
+			tree = recurseAddTree(tree, keys, "dir")
+		} else {
+			tree = recurseAddTree(tree, keys, "file")
+		}
+		return nil
+	}
+
+	err = filepath.Walk(dir, visit)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+
+	// Create the actual asset
+	currentTime := time.Now().UTC()
+	fileID := uuid.New().String()
+	assetData := asset.Asset{
+		ID:   fileID,
+		URL:  input.Repo,
+		Name: uuid.New().String(),
+		Type: "git",
+		Tags: make([]string, 0),
+		Metadata: map[string]interface{}{
+			"commit":           commitID,
+			"commitTimestamp":  commitTimestamp,
+			"refreshTimestamp": currentTime.Format("2006-01-02T15:04:05Z"),
+			"structure":        tree,
+			"credentials":      input.Credential,
+		},
+		Models: make([]string, 0),
+	}
+	err = asset.RegisterAsset(assetData)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"id": fileID})
+}
+
+func recurseAddTree(tree map[string]interface{}, keys []string, fileType string) map[string]interface{} {
+	if len(keys) == 1 {
+		if fileType == "file" {
+			tree[keys[0]] = "file"
+		} else {
+			if tree[keys[0]] == nil {
+				tree[keys[0]] = make(map[string]interface{})
+			}
+		}
+	} else {
+		if tree[keys[0]] != nil {
+			tree[keys[0]] = recurseAddTree(tree[keys[0]].(map[string]interface{}), keys[1:], fileType)
+		} else {
+			tree[keys[0]] = recurseAddTree(make(map[string]interface{}), keys[1:], fileType)
+		}
+	}
+	return tree
 }

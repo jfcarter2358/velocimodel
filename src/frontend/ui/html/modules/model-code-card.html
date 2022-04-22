@@ -2,10 +2,10 @@
     <div class="w3-container velocimodel-blue w3-round model-title">
         <div class="card-title-bar">
             <h4 class="card-title">{{ .model.name }}</h4>
-            <a href="/ui/model/{{ .model_id }}" class="icon">
+            <a href="/ui/model/{{ .model_id }}" class="icon w3-large" style="margin-top:11px;color:#fff;">
                 <i class="fa-solid fa-trash-undo"></i>
             </a>
-            <i class="fa-solid fa-floppy-disk w3-large icon"></i>
+            <i class="fa-solid fa-floppy-disk w3-large icon pointer-cursor" onclick="saveModel()"></i>
         </div>
     </div>
     <div class="w3-container monaco-pane dark theme-light">

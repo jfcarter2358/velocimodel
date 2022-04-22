@@ -1,24 +1,22 @@
 <div class="w3-card-4 w3-round dark theme-light w3-border theme-border-light">
     <div class="w3-container velocimodel-blue w3-round asset-title">
         <h4>Assets</h4>
-        <input id="search" class="w3-input w3-round search-bar" type="text" name="search" placeholder="Search assets" oninput="getAssets()">
+        <input id="search" class="w3-input w3-round search-bar dark theme-light" type="text" name="search" placeholder="Search Assets" oninput="getAssets()">
     </div>
-    <br/>
     <table class="w3-table w3-bordered dark w3-border theme-border-light" id="assets-table">
         <tr>
             <th class="table-title w3-medium velocimodel-text-blue">
-                Asset Name
+                <span class="table-title-text">Asset Name</span>
             </th>
             <th class="table-title w3-medium velocimodel-text-blue">
-                Last Updated
+                <span class="table-title-text">Last Updated</span>
             </th>
             <th class="table-title w3-medium velocimodel-text-blue">
-                Language
+                <span class="table-title-text">Type</span>
             </th>
             <th class="table-title w3-medium velocimodel-text-blue">
-                Tags
+                <span class="table-title-text">Tags</span>
             </th>
-            <th>
             <th>
                 <div class="w3-round w3-button velocimodel-green">Create New</div>
             </th>
@@ -34,7 +32,7 @@
                     {{ end }}
                 </td>
                 <td class="table-link-cell">
-                    <a href="/ui/asset/{{ .id }}" class="table-link-link w3-right-align" style="float:right;margin-right:16px;">
+                    <a href="/ui/asset/{{ .id }}" class="table-link-link w3-right-align dark theme-text" style="float:right;margin-right:16px;">
                         <i class="fa-solid fa-link"></i>
                     </a>
                 </td>

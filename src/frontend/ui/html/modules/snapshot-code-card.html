@@ -2,10 +2,10 @@
     <div class="w3-container velocimodel-blue w3-round snapshot-title">
         <div class="card-title-bar">
             <h4 class="card-title">{{ .snapshot.name }}</h4>
-            <a href="/ui/snapshot/{{ .snapshot_id }}" class="icon">
+            <a href="/ui/snapshot/{{ .snapshot_id }}" class="icon w3-large" style="margin-top:11px;color:#fff;">
                 <i class="fa-solid fa-trash-undo"></i>
             </a>
-            <i class="fa-solid fa-floppy-disk w3-large icon"></i>
+            <i class="fa-solid fa-floppy-disk w3-large icon pointer-cursor" onclick="saveSnapshot()"></i>
         </div>
     </div>
     <div class="w3-container monaco-pane dark theme-light">

@@ -50,13 +50,19 @@ func main() {
 
 	config.LoadParamsSecrets()
 
-	routerPort := ":" + strconv.Itoa(config.Config.HTTPPort)
-	connection.Initialize(config.Secrets["db_user"].(string), config.Secrets["db_pass"].(string), config.Params["db_host"].(string), int(config.Params["db_port"].(float64)))
+	config.Config.DBHost = config.Params["db_host"].(string)
+	config.Config.DBPort = int(config.Params["db_port"].(float64))
+	config.Config.DBName = config.Params["db_name"].(string)
+	config.Config.DBUsername = config.Secrets["db_user"].(string)
+	config.Config.DBPassword = config.Secrets["db_pass"].(string)
 
-	if err := ceresdb.VerifyDatabase(config.Params["db_name"].(string)); err != nil {
+	routerPort := ":" + strconv.Itoa(config.Config.HTTPPort)
+	connection.Initialize(config.Config.DBUsername, config.Config.DBPassword, config.Config.DBHost, config.Config.DBPort)
+
+	if err := ceresdb.VerifyDatabase(config.Config.DBName); err != nil {
 		panic(err)
 	}
-	if err := ceresdb.VerifyCollections(config.Params["db_name"].(string)); err != nil {
+	if err := ceresdb.VerifyCollections(config.Config.DBName); err != nil {
 		panic(err)
 	}
 

@@ -5,6 +5,34 @@ require.config({ paths: { vs: '../../../static/js/monaco-editor/min/vs' } });
 var editor;
 var model
 
+function saveAsset() {
+    parts = window.location.href.split('/')
+    assetID = parts[parts.length - 2]
+
+    data = JSON.parse(editor.getValue())
+
+    $("#spinner").css("display", "block")
+    $("#page-darken").css("opacity", "1")
+
+    $.ajax({
+        url: "/script/api/asset/" + assetID,
+        type: "PUT",
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+            $("#spinner").css("display", "none")
+            $("#page-darken").css("opacity", "0")
+        },
+        error: function(response) {
+            console.log(response)
+            $("#log-container").html(response.responseJSON['output'])
+            $("#spinner").css("display", "none")
+            $("#page-darken").css("opacity", "0")
+            openModal('error-modal')
+        }
+    });
+}
+
 $(document).ready(
     require(['vs/editor/editor.main'],
         function () {

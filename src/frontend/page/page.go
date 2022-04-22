@@ -88,7 +88,7 @@ func ShowAssetPage(c *gin.Context) {
 }
 
 func ShowAssetsPage(c *gin.Context) {
-	assets, err := action.GetAssetsLimit("10")
+	assets, err := action.GetAssetsAll()
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -200,7 +200,7 @@ func ShowModelPage(c *gin.Context) {
 }
 
 func ShowModelsPage(c *gin.Context) {
-	models, err := action.GetModelsLimit("10")
+	models, err := action.GetModelsAll()
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -285,7 +285,7 @@ func ShowReleasePage(c *gin.Context) {
 }
 
 func ShowReleasesPage(c *gin.Context) {
-	releases, err := action.GetReleasesLimit("10")
+	releases, err := action.GetReleasesAll()
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -381,7 +381,7 @@ func ShowSnapshotPage(c *gin.Context) {
 }
 
 func ShowSnapshotsPage(c *gin.Context) {
-	snapshots, err := action.GetSnapshotsLimit("10")
+	snapshots, err := action.GetSnapshotsAll()
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return

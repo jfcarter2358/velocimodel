@@ -11,7 +11,8 @@
 .sidebar {
     width:300px;
     display:block;
-    left:-300px
+    left:-300px;
+    z-index: 999;
 }
 
 .sidebar-header {

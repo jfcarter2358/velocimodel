@@ -28,22 +28,24 @@ $(document).ready(
 )
 
 function saveModel() {
-    tagData = JSON.parse(document.getElementById('tag-input').value)
+    tagData = []
+    if (document.getElementById('tag-input').value != "") {
+        tagData = JSON.parse(document.getElementById('tag-input').value)
+    }
 
     parts = window.location.href.split('/')
     modelID = parts[parts.length - 1]
 
     modelName = $("#model-name").val();
     tags = []
-    assets = []
     for (var i = 0; i < tagData.length; i++) {
         tags.push(tagData[i]["value"])
     }
-
     assets = []
     $(".asset-id").each((index, elem) => {
         assets.push(elem.innerText);
     });
+    
     data = {
         "name": modelName,
         "tags": tags,

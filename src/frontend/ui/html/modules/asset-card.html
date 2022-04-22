@@ -1,12 +1,12 @@
 <div class="w3-card-4 w3-round dark theme-base w3-border theme-border-light">
-    <div class="w3-container velocimodel-blue w3-round model-title">
-        <div class="w3-container velocimodel-blue w3-round model-title">
+    <div class="w3-container velocimodel-blue w3-round asset-title">
+        <div class="w3-container velocimodel-blue w3-round asset-title">
             <div class="card-title-bar">
-                <input id="model-name" class="w3-input card-title name-field dark theme-text-light" type="text" value="{{ .asset.name }}">
-                <a href="/ui/model/{{ .asset.id }}/code" class="icon">
+                <input id="asset-name" class="w3-input card-title name-field dark theme-text-light" type="text" value="{{ .asset.name }}">
+                <a href="/ui/asset/{{ .asset.id }}/code" class="icon" style="margin-top:10px;color:#fff;">
                     <i class="fa-solid fa-code w3-large"></i>
                 </a>
-                <div class="icon">
+                <div class="icon" style="margin-top:10px;">
                     <i class="fa-solid fa-floppy-disk w3-large pointer-cursor" onclick="saveAsset()"></i>
                 </div>
             </div>
@@ -16,7 +16,9 @@
     <div class="asset-card">
         <div class="w3-card-4 w3-round w3-border theme-border-light theme-light dark">
             <div class="w3-container velocimodel-blue w3-round asset-title">
-                <h4 class="w3-left-align">Metadata</h4>
+                <div class="card-title-bar">
+                    <h4 class="w3-left-align">Metadata</h4>
+                </div>
             </div>
             <div class="asset-card">
                 <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>ID: </strong></span>{{ .asset.id }}</div>
@@ -24,27 +26,25 @@
                 <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Updated: </strong></span>{{ .asset.updated }}</div>
                 <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Type: </strong></span>{{ .asset.type }}</div>
                 <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Metadata</strong></span></div>
-                <div class="w3-code jsHigh notranslate dark theme-base">
-                    {{ .metadata_json }}
-                </div>
+                <pre class="w3-code jsHigh notranslate dark theme-base">{{ .metadata_json }}</pre>
             </div>
         </div>
         <br>
         <div class="w3-card-4 w3-round w3-border theme-border-light theme-light dark">
-            <div class="w3-container velocimodel-blue w3-round model-title">
+            <div class="w3-container velocimodel-blue w3-round asset-title">
                 <div class="card-title-bar">
                     <h4 class="w3-left-align card-header">Tags</h4>
                 </div>
             </div>
             <br>
-            <div class="model-card" id="tags">
+            <div class="asset-card" id="tags">
                 <input id="tag-input" value="{{ .tag_json }}" class="velocimodelTag">
             </div>
             <br>
         </div>
         <br>
         <div class="w3-card-4 w3-round w3-border theme-border-light theme-light dark">
-            <div class="w3-container velocimodel-blue w3-round model-title">
+            <div class="w3-container velocimodel-blue w3-round asset-title">
                 <div class="card-title-bar">
                     <h4 class="w3-left-align card-header">Models</h4>
                 </div>
@@ -72,7 +72,7 @@
                         <td>{{ .language }}</td>
                         <td>{{ .id }}</td>
                         <td class="table-link-cell">
-                            <a href="/ui/model/{{ .id }}" class="table-link-link">
+                            <a href="/ui/model/{{ .id }}" class="table-link-link dark theme-text">
                                 <i class="fa-solid fa-link"></i>
                             </a>
                         </td>

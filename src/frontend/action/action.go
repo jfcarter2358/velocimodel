@@ -42,6 +42,32 @@ func GetAssetByID(assetID string) (map[string]interface{}, error) {
 	return obj[0], nil
 }
 
+func GetAssetsAll() ([]map[string]interface{}, error) {
+	var obj []map[string]interface{}
+	requestURL := fmt.Sprintf("%v/api/asset", config.Config.APIServerURL)
+	resp, err := http.Get(requestURL)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
+		return nil, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+
+	return obj, nil
+}
+
 func GetAssetsByIDList(assetIDs []string) ([]map[string]interface{}, error) {
 	var obj []map[string]interface{}
 	requestURL := fmt.Sprintf("%v/api/asset", config.Config.APIServerURL)
@@ -199,6 +225,32 @@ func GetModelsByIDList(modelIDs []string) ([]map[string]interface{}, error) {
 	return output, nil
 }
 
+func GetModelsAll() ([]map[string]interface{}, error) {
+	var obj []map[string]interface{}
+	requestURL := fmt.Sprintf("%v/api/model", config.Config.APIServerURL)
+	resp, err := http.Get(requestURL)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
+		return nil, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+
+	return obj, nil
+}
+
 func GetModelsLimit(limit string) ([]map[string]interface{}, error) {
 	var obj []map[string]interface{}
 	params := url.Values{}
@@ -286,6 +338,32 @@ func GetReleaseByID(releaseID string) (map[string]interface{}, error) {
 	}
 
 	return obj[0], nil
+}
+
+func GetReleasesAll() ([]map[string]interface{}, error) {
+	var obj []map[string]interface{}
+	requestURL := fmt.Sprintf("%v/api/release", config.Config.APIServerURL)
+	resp, err := http.Get(requestURL)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
+		return nil, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+
+	return obj, nil
 }
 
 func GetReleasesByIDList(releaseIDs []string) ([]map[string]interface{}, error) {
@@ -409,6 +487,32 @@ func GetSnapshotByID(snapshotID string) (map[string]interface{}, error) {
 	}
 
 	return obj[0], nil
+}
+
+func GetSnapshotsAll() ([]map[string]interface{}, error) {
+	var obj []map[string]interface{}
+	requestURL := fmt.Sprintf("%v/api/snapshot", config.Config.APIServerURL)
+	resp, err := http.Get(requestURL)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
+		return nil, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+
+	return obj, nil
 }
 
 func GetSnapshotsByIDList(snapshotIDs []string) ([]map[string]interface{}, error) {

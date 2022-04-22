@@ -13,7 +13,9 @@ WORKDIR /home/asset-manager
 COPY --from=0 /asset-manager-build/asset-manager ./
 
 RUN apk update \
-    && apk add bash
+    && apk add \
+    bash \
+    git
 
 SHELL ["/bin/bash", "-c"]
 

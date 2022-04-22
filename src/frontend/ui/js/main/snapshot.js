@@ -28,7 +28,10 @@ $(document).ready(
 )
 
 function saveSnapshot() {
-    tagData = JSON.parse(document.getElementById('tag-input').value)
+    tagData = []
+    if (document.getElementById('tag-input').value != "") {
+        tagData = JSON.parse(document.getElementById('tag-input').value)
+    }
 
     parts = window.location.href.split('/')
     snapshotID = parts[parts.length - 1]

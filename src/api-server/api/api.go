@@ -380,8 +380,23 @@ func PutAsset(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func UploadAsset(c *gin.Context) {
+func CreateFileAsset(c *gin.Context) {
 	data, err := sendPostFile("asset-manager", "asset", "upload", c)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, data)
+}
+
+func CreateGitAsset(c *gin.Context) {
+	queryParams := c.Request.URL.Query()
+	var input map[string]interface{}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	data, err := sendPost("asset-manager", "asset", "git", queryParams, input)
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return

@@ -51,6 +51,8 @@ func main() {
 
 	config.LoadParamsSecrets()
 
+	log.Printf("PARAMS: %v", config.Params)
+
 	routerPort := ":" + strconv.Itoa(config.Config.HTTPPort)
 	connection.Initialize(config.Config.DBUsername, config.Config.DBPassword, config.Config.DBHost, config.Config.DBPort)
 

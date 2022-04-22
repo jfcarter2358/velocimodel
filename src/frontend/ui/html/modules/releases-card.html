@@ -33,7 +33,11 @@
                     <span class="w3-tag w3-round velocimodel-green release-tag">{{ . }}</span>
                     {{ end }}
                 </td>
-                <td><a href="/ui/release/{{ .id }}"><i class="fa-solid fa-link"></i></a></td>
+                <td class="table-link-cell">
+                    <a href="/ui/release/{{ .id }}" class="table-link-link w3-right-align" style="float:right;margin-right:16px;">
+                        <i class="fa-solid fa-link"></i>
+                    </a>
+                </td>
             </tr>
         {{ end }}
     </table>

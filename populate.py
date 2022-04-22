@@ -1,6 +1,7 @@
 import requests
 from cartils import generators
 import random
+import time
 
 num_models = 4
 num_assets = 3
@@ -31,6 +32,16 @@ languages = [
     "Java",
     "C++"
 ]
+
+# Wait for api-server to become healthy
+status_code = 404
+while status_code != 200:
+    try:
+        r = requests.get('http://localhost:9004/health')
+        status_code = r.status_code
+    except:
+        pass
+    time.sleep(1)
 
 for i in range(0, num_models):
     model_name = generators.name()

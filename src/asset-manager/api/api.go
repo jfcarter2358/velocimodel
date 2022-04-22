@@ -3,9 +3,16 @@ package api
 import (
 	"asset-manager/asset"
 	"asset-manager/config"
+	"errors"
+	"fmt"
+	"frontend/utils"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
+
+	"os/exec"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -16,6 +23,11 @@ const FILTER_DEFAULT = ""
 const COUNT_DEFAULT = "false"
 
 var Healthy = false
+
+type CreateGitObject struct {
+	Repo       string `json:"repo"`
+	Credential string `json:"credential"`
+}
 
 // Health API
 
@@ -33,14 +45,12 @@ func GetHealth(c *gin.Context) {
 func DeleteAsset(c *gin.Context) {
 	var input []string
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := asset.DeleteAsset(input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -61,8 +71,7 @@ func GetAssets(c *gin.Context) {
 	}
 	data, err := asset.GetAssets(limit, filter, count)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.JSON(http.StatusOK, data)
@@ -71,16 +80,14 @@ func GetAssets(c *gin.Context) {
 func PostAsset(c *gin.Context) {
 	var input asset.Asset
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	fileID := uuid.New().String()
 	input.ID = fileID
 	err := asset.RegisterAsset(input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"id": fileID})
@@ -89,14 +96,12 @@ func PostAsset(c *gin.Context) {
 func PutAsset(c *gin.Context) {
 	var input asset.Asset
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	err := asset.UpdateAsset(input)
 	if err != nil {
-		log.Printf("Encountered error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -137,8 +142,66 @@ func UploadAsset(c *gin.Context) {
 	}
 	err = asset.RegisterAsset(assetData)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"id": fileID})
+}
+
+func CreateGitAsset(c *gin.Context) {
+	var input CreateGitObject
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	file, err := ioutil.TempFile("/tmp", "repo-")
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	defer os.Remove(file.Name())
+
+	gitEmail := ""
+	gitName := ""
+	gitUser := ""
+	gitPass := ""
+
+	if val, ok := config.Params[fmt.Sprintf("git_%v_email", input.Credential)]; ok {
+		gitEmail = val.(string)
+	} else {
+		utils.Error(errors.New(fmt.Sprintf("Invalid git configuration, email does not exist for credential %v", input.Credential)), c, http.StatusInternalServerError)
+		return
+	}
+	if val, ok := config.Params[fmt.Sprintf("git_%v_name", input.Credential)]; ok {
+		gitName = val.(string)
+	} else {
+		utils.Error(errors.New(fmt.Sprintf("Invalid git configuration, name does not exist for credential %v", input.Credential)), c, http.StatusInternalServerError)
+		return
+	}
+	if val, ok := config.Params[fmt.Sprintf("git_%v_user", input.Credential)]; ok {
+		gitUser = val.(string)
+	} else {
+		utils.Error(errors.New(fmt.Sprintf("Invalid git configuration, user does not exist for credential %v", input.Credential)), c, http.StatusInternalServerError)
+		return
+	}
+	if val, ok := config.Params[fmt.Sprintf("git_%v_pass", input.Credential)]; ok {
+		gitPass = val.(string)
+	} else {
+		utils.Error(errors.New(fmt.Sprintf("Invalid git configuration, password does not exist for credential %v", input.Credential)), c, http.StatusInternalServerError)
+		return
+	}
+
+	log.Println("Initializing git configuration")
+	_, err = exec.Command("git", "config", "--global", "user.email", fmt.Sprintf("\"%v\"", gitEmail)).Output()
+	if err != nil {
+		log.Println("Error setting email")
+		log.Fatal(err)
+	}
+	_, err = exec.Command("git", "config", "--global", "user.name", fmt.Sprintf("\"%v\"", gitName)).Output()
+	if err != nil {
+		log.Println("Error setting name")
+		log.Fatal(err)
+	}
+
+	cmd.Close()
 }

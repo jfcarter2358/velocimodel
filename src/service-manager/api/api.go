@@ -15,7 +15,7 @@ const LIMIT_DEFAULT = "0"
 const FILTER_DEFAULT = ""
 const COUNT_DEFAULT = "false"
 
-var Healthy = true
+var Healthy = false
 
 // Health API
 

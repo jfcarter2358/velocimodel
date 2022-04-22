@@ -15,7 +15,7 @@ const LIMIT_DEFAULT = "0"
 const FILTER_DEFAULT = ""
 const COUNT_DEFAULT = "false"
 
-func LoadParams() {
+func LoadParams(dbHost, dbName string, dbPort int) {
 	jsonFile, err := os.Open(config.Config.ParamsPath)
 	if err != nil {
 		panic(err)
@@ -27,6 +27,10 @@ func LoadParams() {
 	if err != nil {
 		panic(err)
 	}
+	// Populate with env variable config
+	params["db_host"] = dbHost
+	params["db_port"] = dbPort
+	params["db_name"] = dbName
 	err = UpdateParam(params)
 	if err != nil {
 		panic(err)

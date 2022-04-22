@@ -21,7 +21,7 @@ const LIMIT_DEFAULT = "0"
 const FILTER_DEFAULT = ""
 const COUNT_DEFAULT = "false"
 
-func LoadSecrets() {
+func LoadSecrets(dbUser, dbPass string) {
 	jsonFile, err := os.Open(config.Config.SecretsPath)
 	if err != nil {
 		panic(err)
@@ -33,6 +33,9 @@ func LoadSecrets() {
 	if err != nil {
 		panic(err)
 	}
+	// Populate with env variable config
+	secrets["db_user"] = dbUser
+	secrets["db_pass"] = dbPass
 	err = UpdateSecret(secrets)
 	if err != nil {
 		panic(err)

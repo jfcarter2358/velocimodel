@@ -17,12 +17,7 @@ services:
     ports:
       - "127.0.0.1:9002:9002"
     environment:
-      ASSET_MANAGER_DB_USERNAME: "ceresdb"
-      ASSET_MANAGER_DB_PASSWORD: "ceresdb"
-      ASSET_MANAGER_DB_HOST: "ceresdb"
-      ASSET_MANAGER_DB_NAME: "velocimodel"
       ASSET_MANAGER_DATA_PATH: "/home/asset-manager/data/assets"
-      ASSET_MANAGER_DB_PORT: "7437"
       ASSET_MANAGER_HTTP_PORT: "9002"
       ASSET_MANGER_API_SERVER_URL: "http://api-server:9004"
       ASSET_MANAGER_SLEEP: "5"
@@ -51,11 +46,6 @@ services:
     ports:
       - "127.0.0.1:9003:9003"
     environment:
-      MODEL_MANAGER_DB_USERNAME: "ceresdb"
-      MODEL_MANAGER_DB_PASSWORD: "ceresdb"
-      MODEL_MANAGER_DB_HOST: "ceresdb"
-      MODEL_MANAGER_DB_NAME: "velocimodel"
-      MODEL_MANAGER_DB_PORT: "7437"
       MODEL_MANAGER_HTTP_PORT: "9003"
       MODEL_MANGER_API_SERVER_URL: "http://api-server:9004"
       MODEL_MANAGER_SLEEP: "5"

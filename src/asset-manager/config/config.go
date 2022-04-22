@@ -27,38 +27,24 @@ func LoadConfig() {
 	Params = make(map[string]interface{})
 	Secrets = make(map[string]interface{})
 
-	dbUsername := os.Getenv("ASSET_MANAGER_DB_USERNAME")
-	dbPassword := os.Getenv("ASSET_MANAGER_DB_PASSWORD")
-	dbHost := os.Getenv("ASSET_MANAGER_DB_HOST")
-	dbName := os.Getenv("ASSET_MANAGER_DB_NAME")
-	dbPortString := os.Getenv("ASSET_MANAGER_DB_PORT")
 	apiServerURL := os.Getenv("ASSET_MANGER_API_SERVER_URL")
 	dataPath := os.Getenv("ASSET_MANAGER_DATA_PATH")
-	dbPort, err := strconv.Atoi(dbPortString)
-	if err != nil {
-		panic(err)
-	}
 	httpPortString := os.Getenv("ASSET_MANAGER_HTTP_PORT")
 	httpPort, err := strconv.Atoi(httpPortString)
 	if err != nil {
 		panic(err)
 	}
-	Config.DBUsername = dbUsername
-	Config.DBPassword = dbPassword
-	Config.DBHost = dbHost
-	Config.DBName = dbName
-	Config.DBPort = dbPort
 	Config.HTTPPort = httpPort
 	Config.DataPath = dataPath
 	Config.APIServerURL = apiServerURL
 }
 
 func LoadParamsSecrets() {
-	loadFromServiceManager("/api/param", &Params)
-	loadFromServiceManager("/api/secret", &Secrets)
+	Params = loadFromServiceManager("/api/param")
+	Secrets = loadFromServiceManager("/api/secret")
 }
 
-func loadFromServiceManager(path string, obj *map[string]interface{}) {
+func loadFromServiceManager(path string) map[string]interface{} {
 	tmpObj := make([]map[string]interface{}, 0)
 	resp, err := http.Get(Config.APIServerURL + path)
 	if err != nil {
@@ -74,5 +60,5 @@ func loadFromServiceManager(path string, obj *map[string]interface{}) {
 	if err != nil {
 		panic(err)
 	}
-	obj = &tmpObj[0]
+	return tmpObj[0]
 }

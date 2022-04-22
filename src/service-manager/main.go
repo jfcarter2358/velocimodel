@@ -5,6 +5,7 @@ package main
 import (
 	// "os"
 
+	"service-manager/api"
 	"service-manager/ceresdb"
 	"service-manager/config"
 	"service-manager/param"
@@ -39,8 +40,8 @@ func main() {
 		panic(err)
 	}
 
-	param.LoadParams()
-	secret.LoadSecrets()
+	param.LoadParams(config.Config.DBHost, config.Config.DBName, config.Config.DBPort)
+	secret.LoadSecrets(config.Config.DBUsername, config.Config.DBPassword)
 
 	serviceID := uuid.New().String()
 
@@ -55,6 +56,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	api.Healthy = true
 
 	log.Print("Running with port: " + strconv.Itoa(config.Config.HTTPPort))
 

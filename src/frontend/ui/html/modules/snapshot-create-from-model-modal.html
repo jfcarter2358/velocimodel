@@ -1,13 +1,13 @@
-<div id="add-existing-asset-modal" class="w3-modal">
+<div id="create-from-model-modal" class="w3-modal">
     <div class="w3-modal-content w3-animate-top w3-card-4 w3-round dark theme-light w3-border theme-border-light w3-round">
         <header class="w3-container velocimodel-blue">
-            <span onclick="closeModal('add-existing-asset-modal')" class="w3-button w3-display-topright">&times;</span>
-            <h4>Add Existing Asset</h4>
+            <span onclick="closeModal('create-from-model-modal')" class="w3-button w3-display-topright">&times;</span>
+            <h4>Create Snapshot from Model</h4>
         </header>
         <div class="w3-container">
             <br>
             <div class="dropdown">
-                <button onclick="dropdownSearchToggle()" class="dropbtn velocimodel-blue w3-button w3-round">Select an Asset &#9660;</button>
+                <button onclick="dropdownSearchToggle()" class="dropbtn velocimodel-blue w3-button w3-round">Select a Model &#9660;</button>
                 <div id="dropdown-dropdown" class="dropdown-content">
                     <input type="text" placeholder="Search..." id="dropdown-search" onkeyup="filterFunction()">
                     <table class="w3-table w3-bordered dark w3-border theme-border-light theme-light" id="dropdown-table" style="width:100%;table-layout:fixed;">
@@ -16,14 +16,14 @@
                                 <th class="w3-medium velocimodel-text-blue">Name</th>
                                 <th class="w3-medium velocimodel-text-blue">ID</th>
                                 <th class="w3-medium velocimodel-text-blue">Last Updated</th>
-                                <th class="w3-medium velocimodel-text-blue">Type</th>
+                                <th class="w3-medium velocimodel-text-blue">Language</th>
                             </tr>
-                            {{ range .all_assets }}
-                            <tr onclick="addExistingAsset('{{ .id }}')" class="dropdown-row pointer-cursor">
+                            {{ range .all_models }}
+                            <tr onclick="createSnapshotFromModel('{{ .id }}')" class="dropdown-row pointer-cursor">
                                 <td>{{ .name }}</td>
                                 <td>{{ .id }}</td>
                                 <td>{{ .updated }}</td>
-                                <td>{{ .type }}</td>
+                                <td>{{ .language }}</td>
                             </tr>
                             {{ end }}
                         </tbody>
@@ -32,7 +32,7 @@
             </div>
             <br>
             <br>
-            <button class="w3-button velocimodel-red w3-round w3-right" style="margin-right:8px;" onclick="closeModal('add-existing-asset-modal')">Cancel</button>
+            <button class="w3-button velocimodel-red w3-round w3-right" style="margin-right:8px;" onclick="closeModal('create-from-model-modal')">Cancel</button>
             <br>
             <br>
         </div>

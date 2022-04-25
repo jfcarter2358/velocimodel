@@ -156,7 +156,7 @@ func UpdateAsset(c *gin.Context) {
 
 func CreateFileAsset(c *gin.Context) {
 	var obj map[string]interface{}
-	requestURL := fmt.Sprintf("%v/api/asset/upload", config.Config.APIServerURL)
+	requestURL := fmt.Sprintf("%v/api/asset/file", config.Config.APIServerURL)
 	client := &http.Client{}
 
 	b, w, err := createMultipartFormData(c)
@@ -176,6 +176,38 @@ func CreateFileAsset(c *gin.Context) {
 
 	resp, err := client.Do(req)
 
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	log.Printf("BODY: %v", string(body))
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, obj)
+}
+
+func CreateGitAsset(c *gin.Context) {
+	var input map[string]interface{}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	var obj map[string]interface{}
+	requestURL := fmt.Sprintf("%v/api/asset/git", config.Config.APIServerURL)
+	json_data, err := json.Marshal(input)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	resp, err := http.Post(requestURL, "application/json", bytes.NewBuffer(json_data))
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
@@ -224,14 +256,41 @@ func ModelAddAsset(c *gin.Context) {
 	c.JSON(http.StatusOK, obj)
 }
 
-func CreateGitAsset(c *gin.Context) {
+func ModelDeleteAsset(c *gin.Context) {
+	var input map[string]interface{}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	requestURL := fmt.Sprintf("%v/api/model/asset", config.Config.APIServerURL)
+	json_data, err := json.Marshal(input)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodDelete, requestURL, bytes.NewBuffer(json_data))
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	_, err = client.Do(req)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
+}
+
+func CreateNewModel(c *gin.Context) {
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 	var obj map[string]interface{}
-	requestURL := fmt.Sprintf("%v/api/asset/git", config.Config.APIServerURL)
+	requestURL := fmt.Sprintf("%v/api/model", config.Config.APIServerURL)
 	json_data, err := json.Marshal(input)
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
@@ -404,12 +463,16 @@ func GetRelease(c *gin.Context) {
 
 func CreateRelease(c *gin.Context) {
 	snapshotID := c.Param("id")
+	log.Printf("SNAPSHOT ID: %v", snapshotID)
+
+	var obj map[string]interface{}
 
 	snapshot, err := action.GetSnapshotByID(snapshotID)
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
+	log.Printf("SNAPSHOT: %v", snapshot)
 
 	requestURL := fmt.Sprintf("%v/api/release/snapshot", config.Config.APIServerURL)
 
@@ -423,7 +486,17 @@ func CreateRelease(c *gin.Context) {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	c.Status(resp.StatusCode)
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(resp.StatusCode, obj)
 }
 
 func GetSnapshots(c *gin.Context) {
@@ -487,6 +560,7 @@ func GetSnapshot(c *gin.Context) {
 
 func CreateSnapshot(c *gin.Context) {
 	modelID := c.Param("id")
+	var obj map[string]interface{}
 
 	model, err := action.GetModelByID(modelID)
 	if err != nil {
@@ -506,7 +580,17 @@ func CreateSnapshot(c *gin.Context) {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	c.Status(resp.StatusCode)
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(resp.StatusCode, obj)
 }
 
 func UpdateSnapshot(c *gin.Context) {

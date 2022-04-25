@@ -48,10 +48,19 @@ function saveAsset() {
         },
         error: function(response) {
             console.log(response)
-            $("#log-container").html(response.responseJSON['output'])
+            $("#log-container").text(response.responseJSON['error'])
             $("#spinner").css("display", "none")
             $("#page-darken").css("opacity", "0")
             openModal('error-modal')
         }
     });
+}
+
+function downloadFileAsset(url) {
+    const a = document.createElement('a')
+    a.href = url
+    a.download = url.split('/').pop()
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
 }

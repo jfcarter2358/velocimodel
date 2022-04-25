@@ -66,7 +66,7 @@ function saveModel() {
         },
         error: function(response) {
             console.log(response)
-            $("#log-container").html(response.responseJSON['output'])
+            $("#log-container").text(response.responseJSON['error'])
             $("#spinner").css("display", "none")
             $("#page-darken").css("opacity", "0")
             openModal('error-modal')
@@ -91,7 +91,7 @@ function createSnapshot() {
         },
         error: function(response) {
             console.log(response)
-            $("#log-container").html(response.responseJSON['output'])
+            $("#log-container").text(response.responseJSON['error'])
             $("#spinner").css("display", "none")
             $("#page-darken").css("opacity", "0")
             openModal('error-modal')
@@ -114,10 +114,9 @@ function openGitModal() {
     openModal('add-git-asset-modal')
 }
 
-function addExistingAsset() {
+function addExistingAsset(assetID) {
     parts = window.location.href.split('/')
     modelID = parts[parts.length - 1]
-    assetID = $("#existing-asset-id").val()
     
     data = {
         "model": modelID,
@@ -135,10 +134,45 @@ function addExistingAsset() {
         success: function(response) {
             $("#spinner").css("display", "none")
             $("#page-darken").css("opacity", "0")
+            closeModal('add-existing-asset-modal');
+            window.location.reload();
         },
         error: function(response) {
             console.log(response)
-            $("#log-container").html(response.responseJSON['output'])
+            $("#log-container").text(response.responseJSON['error'])
+            $("#spinner").css("display", "none")
+            $("#page-darken").css("opacity", "0")
+            closeModal('add-existing-asset-modal');
+            openModal('error-modal')
+        }
+    });
+}
+
+function deleteAsset(assetID) {
+    parts = window.location.href.split('/')
+    modelID = parts[parts.length - 1]
+    
+    data = {
+        "model": modelID,
+        "asset": assetID
+    }
+
+    $("#spinner").css("display", "block")
+    $("#page-darken").css("opacity", "1")
+
+    $.ajax({
+        url: "/script/api/model/asset",
+        type: "DELETE",
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+            $("#spinner").css("display", "none")
+            $("#page-darken").css("opacity", "0")
+            window.location.reload();
+        },
+        error: function(response) {
+            console.log(response)
+            $("#log-container").text(response.responseJSON['error'])
             $("#spinner").css("display", "none")
             $("#page-darken").css("opacity", "0")
             openModal('error-modal')
@@ -147,28 +181,130 @@ function addExistingAsset() {
 }
 
 function addGitAsset() {
-    // repo
-    // branch
-    // public
-}
+    parts = window.location.href.split('/')
+    modelID = parts[parts.length - 1]
 
-function addFileAsset() {
-    $('#file-form')
-    .ajaxForm({
-        url : '/script/api/asset/file',
+    data = {
+        "repo": $("#git-asset-repo").val(),
+        "branch": $("#git-asset-branch").val(),
+        "credential": $("#git-asset-credential").val()
+    }
+
+    $("#spinner").css("display", "block")
+    $("#page-darken").css("opacity", "1")
+
+    $.ajax({
+        url: "/script/api/asset/git",
         type: "POST",
-        success : function (response) {
-            $("#spinner").css("display", "none")
-            $("#page-darken").css("opacity", "0")
-            console.log(response)
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+            assetID = response["id"]
+            addAssetData = {
+                "model": modelID,
+                "asset": assetID
+            }
+            $.ajax({
+                url: "/script/api/model/asset",
+                type: "POST",
+                contentType: 'application/json',
+                data: JSON.stringify(addAssetData),
+                success: function(response) {
+                    $("#spinner").css("display", "none")
+                    $("#page-darken").css("opacity", "0")
+                    closeModal('add-git-asset-modal');
+                    window.location.reload();
+                },
+                error: function(response) {
+                    console.log(response)
+                    $("#log-container").text(response.responseJSON['error'])
+                    $("#spinner").css("display", "none")
+                    $("#page-darken").css("opacity", "0")
+                    closeModal('add-git-asset-modal');
+                    openModal('error-modal')
+                }
+            });
         },
         error: function(response) {
             console.log(response)
-            $("#log-container").html(response.responseJSON['output'])
+            $("#log-container").text(response.responseJSON['error'])
             $("#spinner").css("display", "none")
             $("#page-darken").css("opacity", "0")
             openModal('error-modal')
         }
-    })
-;
+    });
+}
+
+function addFileAsset() {
+    parts = window.location.href.split('/')
+    modelID = parts[parts.length - 1]
+
+    $('#file-form').ajaxSubmit({
+        url : '/script/api/asset/file',
+        type: "POST",
+        success : function (response) {
+            assetID = response["id"]
+            addAssetData = {
+                "model": modelID,
+                "asset": assetID
+            }
+            $.ajax({
+                url: "/script/api/model/asset",
+                type: "POST",
+                contentType: 'application/json',
+                data: JSON.stringify(addAssetData),
+                success: function(response) {
+                    $("#spinner").css("display", "none")
+                    $("#page-darken").css("opacity", "0")
+                    closeModal('add-file-asset-modal');
+                    window.location.reload();
+                },
+                error: function(response) {
+                    console.log(response)
+                    $("#log-container").text(response.responseJSON['error'])
+                    $("#spinner").css("display", "none")
+                    $("#page-darken").css("opacity", "0")
+                    closeModal('add-file-asset-modal');
+                    openModal('error-modal')
+                }
+            });
+        },
+        error: function(response) {
+            console.log(response)
+            $("#log-container").text(response.responseJSON['error'])
+            $("#spinner").css("display", "none")
+            $("#page-darken").css("opacity", "0")
+            openModal('error-modal')
+        }
+    });
+}
+
+$(document).ready(
+    function() {
+        $('#file-form').ajaxForm()
+    }
+)
+
+function dropdownSearchToggle() {
+    document.getElementById("dropdown-dropdown").classList.toggle("show");
+}
+
+function filterFunction() {
+    var input, filter, div, table, tbody, trs, tds, i;
+    input = document.getElementById("dropdown-search");
+    filter = input.value.toLowerCase();
+    div = document.getElementById("dropdown-dropdown");
+    table = document.getElementById("dropdown-table");
+    tbody = table.getElementsByTagName("tbody")[0];
+    trs = tbody.getElementsByTagName("tr");
+    for (i = 1; i < trs.length; i++) {
+        tds = trs[i].getElementsByTagName("td");
+        objName = tds[0].innerText.toLowerCase();
+        objID = tds[1].innerText.toLowerCase();
+        if (objName.indexOf(filter) > -1 || objID.indexOf(filter) > -1) {
+            trs[i].style.display = "";
+        } else {
+            trs[i].style.display = "none";
+        }
+    }
 }

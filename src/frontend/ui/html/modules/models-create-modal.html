@@ -1,0 +1,21 @@
+<div id="models-create-modal" class="w3-modal">
+    <div class="w3-modal-content w3-animate-top w3-card-4 w3-round dark theme-light w3-border theme-border-light w3-round">
+        <header class="w3-container velocimodel-blue">
+            <span onclick="closeModal('models-create-modal')" class="w3-button w3-display-topright">&times;</span>
+            <h4>Create New Model</h4>
+        </header>
+        <div class="w3-container">
+            <br>
+            <label>Name</label>
+            <input class="w3-input" type="text" id="models-create-name">
+            <label>Language</label>
+            <input class="w3-input" type="text" id="models-create-language">
+            <br>
+            <br>
+            <button class="w3-button velocimodel-green w3-round w3-right" onclick="createModel()">Create Model</button>
+            <button class="w3-button velocimodel-red w3-round w3-right" style="margin-right:8px;" onclick="closeModal('models-create-modal')">Cancel</button>
+            <br>
+            <br>
+        </div>
+    </div>
+</div>

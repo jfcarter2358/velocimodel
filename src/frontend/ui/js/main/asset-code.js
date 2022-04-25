@@ -25,7 +25,7 @@ function saveAsset() {
         },
         error: function(response) {
             console.log(response)
-            $("#log-container").html(response.responseJSON['output'])
+            $("#log-container").text(response.responseJSON['error'])
             $("#spinner").css("display", "none")
             $("#page-darken").css("opacity", "0")
             openModal('error-modal')

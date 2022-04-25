@@ -56,7 +56,10 @@
                 <a href="/ui/asset/{{ .id }}" style="float:right;margin-right:8px;" class="dark theme-text">
                     <i class="fa-solid fa-link"></i>
                 </a>
-                <span style="float:right;">{{ .type }}&nbsp;&nbsp;</span>
+                <span onclick="deleteAsset('{{ .id }}')" style="float:right;margin-right:8px;">
+                    <i class="fa-solid fa-trash"></i>
+                </span>
+                <span style="float:right;margin-right:8px;">{{ .type }}</span>
             </button>
             <div class="content">
                 <span><span class="velocimodel-text-blue"><strong>Name: </strong></span>{{ .name }}</span>

@@ -1,12 +1,13 @@
 package api
 
 import (
+	"fmt"
+	"log"
 	"model-manager/model"
 	"model-manager/release"
 	"model-manager/snapshot"
 	"model-manager/utils"
 	"net/http"
-	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -132,6 +133,35 @@ func PutModel(c *gin.Context) {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
+	c.Status(http.StatusOK)
+}
+
+func DownloadModel(c *gin.Context) {
+	modelID := c.Param("id")
+
+	models, err := model.GetModels(LIMIT_DEFAULT, fmt.Sprintf("id = \"%v\"", modelID), COUNT_DEFAULT, ORDERASC_DEFAULT, ORDERDSC_DEFAULT)
+
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("MODEL: %v", models[0])
+
+	localPath, filename, err := utils.CollectObjects(models[0])
+
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+
+	c.Header("Content-Description", "File Transfer")
+	c.Header("Content-Transfer-Encoding", "binary")
+	c.Header("Content-Disposition", "attachment; filename="+filename)
+	c.Header("Content-Type", "application/octet-stream")
+
+	c.FileAttachment(localPath, filename)
+
 	c.Status(http.StatusOK)
 }
 

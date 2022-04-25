@@ -1,7 +1,7 @@
 <div class="w3-card-4 w3-round dark theme-light w3-border theme-border-light">
     <div class="w3-container velocimodel-blue w3-round asset-title">
         <h4>Assets</h4>
-        <input id="search" class="w3-input w3-round search-bar dark theme-light" type="text" name="search" placeholder="Search Assets" oninput="getAssets()">
+        <input id="search" class="w3-input w3-round search-bar dark theme-light" type="text" name="search" placeholder="Search Assets" oninput="render()">
     </div>
     <table class="w3-table w3-bordered dark w3-border theme-border-light" id="assets-table">
         <tr>
@@ -18,7 +18,7 @@
                 <span class="table-title-text">Tags</span>
             </th>
             <th>
-                <div class="w3-round w3-button velocimodel-green">Create New</div>
+                <div class="w3-round w3-button velocimodel-green" onclick="openModal('add-asset-modal')">Create New</div>
             </th>
         </tr>
         {{ range .assets }}

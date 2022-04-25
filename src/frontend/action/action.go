@@ -13,6 +13,7 @@ import (
 func GetAssetByID(assetID string) (map[string]interface{}, error) {
 	var obj []map[string]interface{}
 	params := url.Values{}
+	log.Printf("ASSET ID: %v", assetID)
 	params.Add("filter", fmt.Sprintf("id = \"%v\"", assetID))
 	requestURL := fmt.Sprintf("%v/api/asset?%v", config.Config.APIServerURL, params.Encode())
 	resp, err := http.Get(requestURL)
@@ -30,10 +31,12 @@ func GetAssetByID(assetID string) (map[string]interface{}, error) {
 		return nil, err
 	}
 	err = json.Unmarshal([]byte(body), &obj)
+	log.Printf("BODY: %v", string(body))
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
 	}
+	log.Printf("OBJ: %v", obj)
 
 	if len(obj) == 0 {
 		return nil, nil
@@ -94,7 +97,7 @@ func GetAssetsByIDList(assetIDs []string) ([]map[string]interface{}, error) {
 	output := make([]map[string]interface{}, 0)
 
 	for _, val := range obj {
-		if contains(assetIDs, val["id"].(string)) {
+		if Contains(assetIDs, val["id"].(string)) {
 			output = append(output, val)
 		}
 	}
@@ -217,7 +220,7 @@ func GetModelsByIDList(modelIDs []string) ([]map[string]interface{}, error) {
 	output := make([]map[string]interface{}, 0)
 
 	for _, val := range obj {
-		if contains(modelIDs, val["id"].(string)) {
+		if Contains(modelIDs, val["id"].(string)) {
 			output = append(output, val)
 		}
 	}
@@ -392,7 +395,7 @@ func GetReleasesByIDList(releaseIDs []string) ([]map[string]interface{}, error) 
 	output := make([]map[string]interface{}, 0)
 
 	for _, val := range obj {
-		if contains(releaseIDs, val["id"].(string)) {
+		if Contains(releaseIDs, val["id"].(string)) {
 			output = append(output, val)
 		}
 	}
@@ -541,7 +544,7 @@ func GetSnapshotsByIDList(snapshotIDs []string) ([]map[string]interface{}, error
 	output := make([]map[string]interface{}, 0)
 
 	for _, val := range obj {
-		if contains(snapshotIDs, val["id"].(string)) {
+		if Contains(snapshotIDs, val["id"].(string)) {
 			output = append(output, val)
 		}
 	}
@@ -606,7 +609,33 @@ func GetSnapshotsLimitLatest(limit string) ([]map[string]interface{}, error) {
 	return obj, nil
 }
 
-func contains(s []string, e string) bool {
+func GetSecretsAll() ([]map[string]interface{}, error) {
+	var obj []map[string]interface{}
+	requestURL := fmt.Sprintf("%v/api/secret", config.Config.APIServerURL)
+	resp, err := http.Get(requestURL)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
+		return nil, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+
+	return obj, nil
+}
+
+func Contains(s []string, e string) bool {
 	for _, a := range s {
 		if a == e {
 			return true

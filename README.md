@@ -21,7 +21,7 @@ Velocimodel is a comprehensive open-source model operations solution. It allows 
 - [ ] asset-manager
    - [x] asset registry
    - [x] local file upload
-   - [ ] local file download
+   - [x] local file download
    - [ ] automatic git sync
    - [ ] manual git sync
    - [x] git asset creation
@@ -31,31 +31,35 @@ Velocimodel is a comprehensive open-source model operations solution. It allows 
    - [x] model snapshots
    - [x] model releases
    - [x] pull config from service-manager
-   - [ ] model/snapshot/release download
+   - [ ] model download
+   - [ ] snapshot download
+   - [ ] release download
 - [x] api-server
 - [ ] frontend
    - [x] dashboard
    - [x] model view
    - [x] model edit
-   - [ ] model creation
-   - [ ] model add asset
-   - [ ] model delete asset
+   - [x] model creation
+   - [x] model add existing asset
+   - [x] model add new file asset
+   - [x] model add new git asset
+   - [x] model delete asset
    - [ ] model download
    - [x] model code save
    - [x] snapshot view
    - [x] snapshot edit
-   - [ ] snapshot creation
+   - [x] snapshot creation
    - [ ] snapshot download
    - [x] snapshot code save
    - [x] release view
-   - [ ] release creation
+   - [x] release creation
    - [ ] release download
    - [x] asset view
    - [x] asset edit
-   - [ ] asset download
+   - [x] asset download
    - [x] asset code save
-   - [ ] file asset creation
-   - [ ] git asset creation
+   - [x] file asset creation
+   - [x] git asset creation
 
 **v0.2.0**
 
@@ -65,6 +69,8 @@ Velocimodel is a comprehensive open-source model operations solution. It allows 
 - [ ] UI secret edit
 - [ ] oauth provider
 - [ ] SSH git clone support
+- [ ] Automated service health pings
+- [ ] Service status badge
 
 **v0.3.0**
 
@@ -80,11 +86,15 @@ Velocimodel is a comprehensive open-source model operations solution. It allows 
 
 - [ ] asset-manager Artifactory integration
 
-**v1.0.0**
-
-Initial Release
+**v0.6.0**
 
 - [ ] asset-manager Azure Blob Store integration
+
+**v1.0.0**
+
+- Initial Release!
+- [ ] Usage documentation
+- [ ] API documentation
 
 # Contact
 

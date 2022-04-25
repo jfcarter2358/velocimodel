@@ -49,6 +49,9 @@ func GetServicesLoop() {
 }
 
 func sendDelete(serviceName, objectType, path string, queryParams map[string][]string, data interface{}) error {
+	if data == nil {
+		data = make(map[string]interface{})
+	}
 	// try each service of the correct type we want to talk to
 	for _, service := range Services {
 		if service["type"].(string) != serviceName {
@@ -66,27 +69,25 @@ func sendDelete(serviceName, objectType, path string, queryParams map[string][]s
 			}
 			requestURL += params.Encode()
 		}
-		if data != nil {
-			json_data, err := json.Marshal(data)
-			if err != nil {
-				log.Printf("Encountered error: %v", err)
-				return err
-			}
-			client := &http.Client{}
-			req, err := http.NewRequest(http.MethodDelete, requestURL, bytes.NewBuffer(json_data))
-			if err != nil {
-				log.Printf("Encountered error: %v", err)
-				return err
-			}
-			req.Header.Set("Content-Type", "application/json; charset=utf-8")
-			resp, err := client.Do(req)
-			if resp.StatusCode != http.StatusOK {
-				return errors.New(fmt.Sprintf("Request failed with status code %v", resp.StatusCode))
-			}
-			return nil
+		json_data, err := json.Marshal(data)
+		if err != nil {
+			log.Printf("Encountered error: %v", err)
+			return err
 		}
+		client := &http.Client{}
+		req, err := http.NewRequest(http.MethodDelete, requestURL, bytes.NewBuffer(json_data))
+		if err != nil {
+			log.Printf("Encountered error: %v", err)
+			return err
+		}
+		req.Header.Set("Content-Type", "application/json; charset=utf-8")
+		resp, err := client.Do(req)
+		if resp.StatusCode != http.StatusOK {
+			return errors.New(fmt.Sprintf("Request failed with status code %v", resp.StatusCode))
+		}
+		return nil
 	}
-	return errors.New(fmt.Sprintf("No services of type %v responded with status 200", objectType))
+	return errors.New(fmt.Sprintf("No services of type %v responded with status 200", serviceName))
 }
 
 func sendGet(serviceName, objectType, path string, queryParams map[string][]string) ([]map[string]interface{}, error) {
@@ -135,10 +136,43 @@ func sendGet(serviceName, objectType, path string, queryParams map[string][]stri
 		}
 		return obj, nil
 	}
-	return nil, errors.New(fmt.Sprintf("No services of type %v responded with status 200", objectType))
+	return nil, errors.New(fmt.Sprintf("No services of type %v responded with status 200", serviceName))
+}
+
+func sendGetRaw(serviceName, objectType, path string, queryParams map[string][]string) (*http.Response, error) {
+	// try each service of the correct type we want to talk to
+	for _, service := range Services {
+		if service["type"].(string) != serviceName {
+			continue
+		}
+		requestURL := fmt.Sprintf("http://%v:%v/api/%v", service["host"].(string), int(service["port"].(float64)), objectType)
+		if path != "" {
+			requestURL += fmt.Sprintf("/%v", path)
+		}
+		if len(queryParams) > 0 {
+			requestURL += "?"
+			params := url.Values{}
+			for key, val := range queryParams {
+				params.Add(key, val[0])
+			}
+			requestURL += params.Encode()
+		}
+		log.Printf("REQUEST URL: %v", requestURL)
+		resp, err := http.Get(requestURL)
+		log.Println("RESPONSE RETURNED")
+		if err != nil {
+			log.Printf("Encountered error: %v", err)
+			continue
+		}
+		return resp, nil
+	}
+	return nil, errors.New(fmt.Sprintf("No services of type %v responded with status 200", serviceName))
 }
 
 func sendPost(serviceName, objectType, path string, queryParams map[string][]string, data map[string]interface{}) (map[string]interface{}, error) {
+	if data == nil {
+		data = make(map[string]interface{})
+	}
 	// try each service of the correct type we want to talk to
 	for _, service := range Services {
 		if service["type"].(string) != serviceName {
@@ -157,34 +191,32 @@ func sendPost(serviceName, objectType, path string, queryParams map[string][]str
 			}
 			requestURL += params.Encode()
 		}
-		if data != nil {
-			json_data, err := json.Marshal(data)
-			if err != nil {
-				log.Printf("Encountered error: %v", err)
-				return nil, err
-			}
-			resp, err := http.Post(requestURL, "application/json", bytes.NewBuffer(json_data))
-			if err != nil {
-				log.Printf("Encountered error: %v", err)
-				return nil, err
-			}
-			if resp.StatusCode != http.StatusOK {
-				return nil, errors.New(fmt.Sprintf("Request failed with status code %v", resp.StatusCode))
-			}
-			body, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				log.Printf("Encountered error: %v", err)
-				continue
-			}
-			err = json.Unmarshal([]byte(body), &obj)
-			if err != nil {
-				log.Printf("Encountered error: %v", err)
-				continue
-			}
-			return obj, nil
+		json_data, err := json.Marshal(data)
+		if err != nil {
+			log.Printf("Encountered error: %v", err)
+			return nil, err
 		}
+		resp, err := http.Post(requestURL, "application/json", bytes.NewBuffer(json_data))
+		if err != nil {
+			log.Printf("Encountered error: %v", err)
+			return nil, err
+		}
+		if resp.StatusCode != http.StatusOK {
+			return nil, errors.New(fmt.Sprintf("Request failed with status code %v", resp.StatusCode))
+		}
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Printf("Encountered error: %v", err)
+			continue
+		}
+		err = json.Unmarshal([]byte(body), &obj)
+		if err != nil {
+			log.Printf("Encountered error: %v", err)
+			continue
+		}
+		return obj, nil
 	}
-	return nil, errors.New(fmt.Sprintf("No services of type %v responded with status 200", objectType))
+	return nil, errors.New(fmt.Sprintf("No services of type %v responded with status 200", serviceName))
 }
 
 func sendPostFile(serviceName, objectType, path string, c *gin.Context) (map[string]interface{}, error) {
@@ -235,10 +267,13 @@ func sendPostFile(serviceName, objectType, path string, c *gin.Context) (map[str
 		}
 		return obj, nil
 	}
-	return nil, errors.New(fmt.Sprintf("No services of type %v responded with status 200", objectType))
+	return nil, errors.New(fmt.Sprintf("No services of type %v responded with status 200", serviceName))
 }
 
 func sendPut(serviceName, objectType, path string, queryParams map[string][]string, data map[string]interface{}) error {
+	if data == nil {
+		data = make(map[string]interface{})
+	}
 	// try each service of the correct type we want to talk to
 	for _, service := range Services {
 		if service["type"].(string) != serviceName {
@@ -256,27 +291,25 @@ func sendPut(serviceName, objectType, path string, queryParams map[string][]stri
 			}
 			requestURL += params.Encode()
 		}
-		if data != nil {
-			json_data, err := json.Marshal(data)
-			if err != nil {
-				log.Printf("Encountered error: %v", err)
-				return err
-			}
-			client := &http.Client{}
-			req, err := http.NewRequest(http.MethodPut, requestURL, bytes.NewBuffer(json_data))
-			if err != nil {
-				log.Printf("Encountered error: %v", err)
-				return err
-			}
-			req.Header.Set("Content-Type", "application/json; charset=utf-8")
-			resp, err := client.Do(req)
-			if resp.StatusCode != http.StatusOK {
-				return errors.New(fmt.Sprintf("Request failed with status code %v", resp.StatusCode))
-			}
-			return nil
+		json_data, err := json.Marshal(data)
+		if err != nil {
+			log.Printf("Encountered error: %v", err)
+			return err
 		}
+		client := &http.Client{}
+		req, err := http.NewRequest(http.MethodPut, requestURL, bytes.NewBuffer(json_data))
+		if err != nil {
+			log.Printf("Encountered error: %v", err)
+			return err
+		}
+		req.Header.Set("Content-Type", "application/json; charset=utf-8")
+		resp, err := client.Do(req)
+		if resp.StatusCode != http.StatusOK {
+			return errors.New(fmt.Sprintf("Request failed with status code %v", resp.StatusCode))
+		}
+		return nil
 	}
-	return errors.New(fmt.Sprintf("No services of type %v responded with status 200", objectType))
+	return errors.New(fmt.Sprintf("No services of type %v responded with status 200", serviceName))
 }
 
 func createMultipartFormData(c *gin.Context) (bytes.Buffer, *multipart.Writer, error) {
@@ -381,7 +414,7 @@ func PutAsset(c *gin.Context) {
 }
 
 func CreateFileAsset(c *gin.Context) {
-	data, err := sendPostFile("asset-manager", "asset", "upload", c)
+	data, err := sendPostFile("asset-manager", "asset", "file", c)
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
@@ -432,6 +465,34 @@ func DeleteModelAsset(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusOK)
+}
+
+func DownloadFileAsset(c *gin.Context) {
+	assetID := c.Param("id")
+	queryParams := c.Request.URL.Query()
+
+	response, err := sendGetRaw("asset-manager", "asset", "file/"+assetID, queryParams)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+
+	reader := response.Body
+	defer reader.Close()
+	contentLength := response.ContentLength
+	contentType := response.Header.Get("Content-Type")
+
+	extraHeaders := make(map[string]string)
+	for name, values := range response.Header {
+		if name == "Content-Type" {
+			continue
+		}
+		extraHeaders[name] = values[0]
+	}
+
+	delete(extraHeaders, "Content-Type")
+
+	c.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
 }
 
 func GetModels(c *gin.Context) {
@@ -487,6 +548,34 @@ func PutModel(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusOK)
+}
+
+func DownloadModel(c *gin.Context) {
+	modelID := c.Param("id")
+	queryParams := c.Request.URL.Query()
+
+	response, err := sendGetRaw("model-manager", "model", "archive/"+modelID, queryParams)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+
+	reader := response.Body
+	defer reader.Close()
+	contentLength := response.ContentLength
+	contentType := response.Header.Get("Content-Type")
+
+	extraHeaders := make(map[string]string)
+	for name, values := range response.Header {
+		if name == "Content-Type" {
+			continue
+		}
+		extraHeaders[name] = values[0]
+	}
+
+	delete(extraHeaders, "Content-Type")
+
+	c.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
 }
 
 func DeleteParam(c *gin.Context) {

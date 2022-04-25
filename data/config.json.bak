@@ -1,5 +1,6 @@
 {
     "basepath": "http://localhost:9000",
-    "git_personal_email": "foo@bar.com",
-    "git_personal_name": "Foo Bar"
+    "apiserver": "http://localhost:9004",
+    "git_email": "velocimodel@gmail.com",
+    "git_name": "VelociModel"
 }

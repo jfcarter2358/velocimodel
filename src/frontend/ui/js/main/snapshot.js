@@ -60,7 +60,7 @@ function saveSnapshot() {
         },
         error: function(response) {
             console.log(response)
-            $("#log-container").html(response.responseJSON['output'])
+            $("#log-container").text(response.responseJSON['error'])
             $("#spinner").css("display", "none")
             $("#page-darken").css("opacity", "0")
             openModal('error-modal')
@@ -85,7 +85,32 @@ function createRelease() {
         },
         error: function(response) {
             console.log(response)
-            $("#log-container").html(response.responseJSON['output'])
+            $("#log-container").text(response.responseJSON['error'])
+            $("#spinner").css("display", "none")
+            $("#page-darken").css("opacity", "0")
+            openModal('error-modal')
+        }
+    });
+}
+
+function createRelease() {
+    parts = window.location.href.split('/')
+    snapshotID = parts[parts.length - 1]
+
+    $("#spinner").css("display", "block")
+    $("#page-darken").css("opacity", "1")
+
+    $.ajax({
+        url: "/script/api/snapshot/" + snapshotID + "/release",
+        type: "POST",
+        success: function(response) {
+            $("#spinner").css("display", "none")
+            $("#page-darken").css("opacity", "0")
+            window.location.reload();
+        },
+        error: function(response) {
+            console.log(response)
+            $("#log-container").text(response.responseJSON['error'])
             $("#spinner").css("display", "none")
             $("#page-darken").css("opacity", "0")
             openModal('error-modal')

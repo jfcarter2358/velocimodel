@@ -1,29 +1,34 @@
 
 // import material.js
 // import theme.js
+// import modal.js
+
+var models
 
 function getModels() {
     $.ajax({
         url: "/script/api/model",
         type: "GET",
         success: function (result) {
-            render(result);
+            models = result
         }
     });
 }
 
-function render(data) {
+function render() {
     var prefix = $("#search").val();
+    var tempModels = JSON.parse(JSON.stringify(models));
+    prefix = prefix.toLowerCase();
     if (prefix != "") {
-        for (var idx = data.length - 1; idx >= 0; idx--) {
-            if (!data[idx].name.startsWith(prefix)) {
-                data.splice(idx, 1)
+        for (var idx = tempModels.length - 1; idx >= 0; idx--) {
+            if (tempModels[idx].name.toLowerCase().indexOf(prefix) == -1) {
+                tempModels.splice(idx, 1)
             }
         }
     }
     var table = document.getElementById('models-table');
     var tableHTMLString = '<tr><th class="table-title w3-medium velocimodel-text-blue"><span class="table-title-text">Model Name</span></th><th class="table-title w3-medium velocimodel-text-blue"><span class="table-title-text">Last Updated</span></th><th class="table-title w3-medium velocimodel-text-blue"><span class="table-title-text">Language</span></th><th class="table-title w3-medium velocimodel-text-blue"><span class="table-title-text">Tags</span></th><th><div class="w3-round w3-button velocimodel-green">Create New</div></th></tr>' +
-        data.map(function (model) {
+        tempModels.map(function (model) {
             return '<tr>' +
                 '<td>' + model.name + '</td>' +
                 '<td>' + model.updated + '</td>' +
@@ -39,4 +44,50 @@ function render(data) {
         }).join('');
 
     table.innerHTML = tableHTMLString;
+}
+
+$(document).ready(
+    function() {
+        getModels()
+    }
+)
+
+function createModel() {
+    data = {
+        "id": "",
+        "name": $("#models-create-name").val(),
+        "created": "",
+        "updated": "",
+        "type": "raw",
+        "tags": [],
+        "metadata": {},
+        "assets": [],
+        "snapshots": [],
+        "releases": [],
+        "language": $("#models-create-language").val()
+    }
+
+    $("#spinner").css("display", "block")
+    $("#page-darken").css("opacity", "1")
+
+    $.ajax({
+        url: "/script/api/model",
+        type: "POST",
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+            $("#spinner").css("display", "none")
+            $("#page-darken").css("opacity", "0")
+            modelID = response['id']
+            closeModal('models-create-modal');
+            window.location.assign('/ui/model/' + modelID);
+        },
+        error: function(response) {
+            console.log(response)
+            $("#log-container").text(response.responseJSON['error'])
+            $("#spinner").css("display", "none")
+            $("#page-darken").css("opacity", "0")
+            openModal('error-modal')
+        }
+    });
 }

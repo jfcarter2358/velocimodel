@@ -28,20 +28,20 @@
         </div>
         <br>
         <div class="w3-card-4 w3-round w3-border theme-border-light theme-light dark">
-            <div class="w3-container velocimodel-blue w3-round model-title">
+            <div class="w3-container velocimodel-blue w3-round release-title">
                 <div class="card-title-bar">
                     <h4 class="w3-left-align card-header">Tags</h4>
                 </div>
             </div>
             <br>
-            <div class="model-card" id="tags">
+            <div class="release-card" id="tags">
                 <input readonly id="tag-input" value="{{ .tag_json }}" class="velocimodelReadOnlyTag">
             </div>
             <br>
         </div>
         <br>
         <div class="w3-card-4 w3-round w3-border theme-border-light theme-light dark">
-            <div class="w3-container velocimodel-blue w3-round model-title">
+            <div class="w3-container velocimodel-blue w3-round release-title">
                 <div class="card-title-bar">
                     <h4 class="w3-left-align card-header">Assets</h4>
                 </div>
@@ -52,7 +52,7 @@
                 <a href="/ui/asset/{{ .id }}" style="float:right;margin-right:8px;" class="dark theme-text">
                     <i class="fa-solid fa-link"></i>
                 </a>
-                <span style="float:right;">{{ .type }}</span>
+                <span style="float:right;margin-right:8px;">{{ .type }}</span>
             </button>
             <div class="content">
                 <span><span class="velocimodel-text-blue">Name: </span>{{ .name }}</span>

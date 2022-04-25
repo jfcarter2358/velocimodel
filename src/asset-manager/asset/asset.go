@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
 	"time"
-	"log"
 
 	"github.com/google/uuid"
 	"github.com/jfcarter2358/ceresdb-go/connection"

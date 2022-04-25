@@ -121,10 +121,12 @@ func CreateFileAsset(c *gin.Context) {
 		return
 	}
 
+	fileID := uuid.New().String()
+
 	// Retrieve file information
 	extension := filepath.Ext(file.Filename)
 	// Generate random file name for the new uploaded file so it doesn't override the old file with same name
-	newFileName := uuid.New().String() + extension
+	newFileName := fileID + extension
 
 	// The file is received, so let's save it
 	if err := c.SaveUploadedFile(file, filepath.Join(config.Config.DataPath, newFileName)); err != nil {
@@ -134,14 +136,13 @@ func CreateFileAsset(c *gin.Context) {
 		return
 	}
 
-	fileID := uuid.New().String()
 	assetData := asset.Asset{
 		ID:       fileID,
-		URL:      config.Params["basepath"].(string) + "/asset-manager/file/" + fileID,
-		Name:     uuid.New().String(),
+		URL:      config.Params["apiserver"].(string) + "/api/asset/file/" + fileID,
+		Name:     fileID,
 		Type:     "file",
 		Tags:     make([]string, 0),
-		Metadata: make(map[string]interface{}),
+		Metadata: map[string]interface{}{"filename": filepath.Base(file.Filename)},
 		Models:   make([]string, 0),
 	}
 	err = asset.RegisterAsset(assetData)
@@ -171,29 +172,31 @@ func CreateGitAsset(c *gin.Context) {
 	gitPass := ""
 
 	// Grab credentials from service-manager
-	if val, ok := config.Params[fmt.Sprintf("git_%v_email", input.Credential)]; ok {
+	if val, ok := config.Params["git_email"]; ok {
 		gitEmail = val.(string)
 	} else {
 		utils.Error(errors.New(fmt.Sprintf("Invalid git configuration, email does not exist for credential %v", input.Credential)), c, http.StatusInternalServerError)
 		return
 	}
-	if val, ok := config.Params[fmt.Sprintf("git_%v_name", input.Credential)]; ok {
+	if val, ok := config.Params["git_name"]; ok {
 		gitName = val.(string)
 	} else {
 		utils.Error(errors.New(fmt.Sprintf("Invalid git configuration, name does not exist for credential %v", input.Credential)), c, http.StatusInternalServerError)
 		return
 	}
-	if val, ok := config.Secrets[fmt.Sprintf("git_%v_user", input.Credential)]; ok {
-		gitUser = val.(string)
-	} else {
-		utils.Error(errors.New(fmt.Sprintf("Invalid git configuration, user does not exist for credential %v", input.Credential)), c, http.StatusInternalServerError)
-		return
-	}
-	if val, ok := config.Secrets[fmt.Sprintf("git_%v_pass", input.Credential)]; ok {
-		gitPass = val.(string)
-	} else {
-		utils.Error(errors.New(fmt.Sprintf("Invalid git configuration, password does not exist for credential %v", input.Credential)), c, http.StatusInternalServerError)
-		return
+	if input.Credential != "none" {
+		if val, ok := config.Secrets[fmt.Sprintf("git_%v_user", input.Credential)]; ok {
+			gitUser = val.(string)
+		} else {
+			utils.Error(errors.New(fmt.Sprintf("Invalid git configuration, user does not exist for credential %v", input.Credential)), c, http.StatusInternalServerError)
+			return
+		}
+		if val, ok := config.Secrets[fmt.Sprintf("git_%v_pass", input.Credential)]; ok {
+			gitPass = val.(string)
+		} else {
+			utils.Error(errors.New(fmt.Sprintf("Invalid git configuration, password does not exist for credential %v", input.Credential)), c, http.StatusInternalServerError)
+			return
+		}
 	}
 
 	// Configure git
@@ -221,11 +224,20 @@ func CreateGitAsset(c *gin.Context) {
 		}
 	}
 	domain := input.Repo[len(prefix):]
-	out, err = exec.Command("git", "clone", "--depth", "1", "-b", input.Branch, fmt.Sprintf("%v%v:%v@%v", prefix, gitUser, gitPass, domain), dir).CombinedOutput()
-	if err != nil {
-		log.Printf("Git clone: %v", string(out))
-		utils.Error(err, c, http.StatusInternalServerError)
-		return
+	if input.Credential != "none" {
+		out, err = exec.Command("git", "clone", "--depth", "1", "-b", input.Branch, fmt.Sprintf("%v%v:%v@%v", prefix, gitUser, gitPass, domain), dir).CombinedOutput()
+		if err != nil {
+			log.Printf("Git clone: %v", string(out))
+			utils.Error(err, c, http.StatusInternalServerError)
+			return
+		}
+	} else {
+		out, err = exec.Command("git", "clone", "--depth", "1", "-b", input.Branch, fmt.Sprintf("%v%v", prefix, domain), dir).CombinedOutput()
+		if err != nil {
+			log.Printf("Git clone: %v", string(out))
+			utils.Error(err, c, http.StatusInternalServerError)
+			return
+		}
 	}
 	out, err = exec.Command("git", "-C", dir, "log", "--format=\"%H\"", "-n", "1").CombinedOutput()
 	if err != nil {
@@ -278,10 +290,11 @@ func CreateGitAsset(c *gin.Context) {
 		Tags: make([]string, 0),
 		Metadata: map[string]interface{}{
 			"commit":           commitID,
+			"branch":           input.Branch,
 			"commitTimestamp":  commitTimestamp,
 			"refreshTimestamp": currentTime.Format("2006-01-02T15:04:05Z"),
 			"structure":        tree,
-			"credentials":      input.Credential,
+			"credential":       input.Credential,
 		},
 		Models: make([]string, 0),
 	}
@@ -291,6 +304,31 @@ func CreateGitAsset(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"id": fileID})
+}
+
+func DownloadFileAsset(c *gin.Context) {
+	assetID := c.Param("id")
+
+	assets, err := asset.GetAssets(LIMIT_DEFAULT, fmt.Sprintf("id = \"%v\"", assetID), COUNT_DEFAULT)
+
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+
+	filename := assets[0]["metadata"].(map[string]interface{})["filename"].(string)
+	extension := filepath.Ext(filename)
+
+	localPath := filepath.Join(config.Config.DataPath, fmt.Sprintf("%v%v", assetID, extension))
+
+	c.Header("Content-Description", "File Transfer")
+	c.Header("Content-Transfer-Encoding", "binary")
+	c.Header("Content-Disposition", "attachment; filename="+filename)
+	c.Header("Content-Type", "application/octet-stream")
+
+	c.FileAttachment(localPath, filename)
+
+	c.Status(http.StatusOK)
 }
 
 func recurseAddTree(tree map[string]interface{}, keys []string, fileType string) map[string]interface{} {

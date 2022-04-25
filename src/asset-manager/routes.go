@@ -16,6 +16,7 @@ func initializeRoutes() {
 		apiRoutes.POST("/asset", api.PostAsset)
 		apiRoutes.PUT("/asset", api.PutAsset)
 		apiRoutes.POST("/asset/file", api.CreateFileAsset)
+		apiRoutes.GET("/asset/file/:id", api.DownloadFileAsset)
 		apiRoutes.POST("/asset/git", api.CreateGitAsset)
 	}
 }

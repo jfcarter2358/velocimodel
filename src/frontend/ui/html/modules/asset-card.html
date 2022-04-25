@@ -6,6 +6,11 @@
                 <a href="/ui/asset/{{ .asset.id }}/code" class="icon" style="margin-top:10px;color:#fff;">
                     <i class="fa-solid fa-code w3-large"></i>
                 </a>
+                {{ if .is_file_type }}
+                <div class="icon" style="margin-top:10px;">
+                    <i class="fa-solid fa-download w3-large pointer-cursor" onclick="downloadFileAsset('{{ .asset.url }}')"></i>
+                </div>
+                {{ end }}
                 <div class="icon" style="margin-top:10px;">
                     <i class="fa-solid fa-floppy-disk w3-large pointer-cursor" onclick="saveAsset()"></i>
                 </div>
@@ -25,6 +30,7 @@
                 <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Created: </strong></span>{{ .asset.created }}</div>
                 <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Updated: </strong></span>{{ .asset.updated }}</div>
                 <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Type: </strong></span>{{ .asset.type }}</div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>URL: </strong></span>{{ .asset.url }}</div>
                 <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Metadata</strong></span></div>
                 <pre class="w3-code jsHigh notranslate dark theme-base">{{ .metadata_json }}</pre>
             </div>

@@ -17,6 +17,7 @@ func initializeRoutes() {
 		apiRoutes.PUT("/model", api.PutModel)
 		apiRoutes.POST("/model/asset", api.AddAsset)
 		apiRoutes.DELETE("/model/asset", api.DeleteAsset)
+		apiRoutes.GET("/model/archive/:id", api.DownloadModel)
 		// Release
 		// apiRoutes.DELETE("/release", api.DeleteRelease)
 		apiRoutes.GET("/release", api.GetReleases)

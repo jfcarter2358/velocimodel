@@ -70,7 +70,9 @@
 }
 
 .full-page {
-    top: 58px;
+    position: fixed;
+    top: 0px;
+    height: 100%;
 }
 
 .monaco-pane {

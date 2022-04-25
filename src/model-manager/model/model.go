@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"model-manager/config"
 	"model-manager/utils"
 	"reflect"
 	"time"
-	"log"
 
 	"github.com/google/uuid"
 	"github.com/jfcarter2358/ceresdb-go/connection"
@@ -36,7 +36,7 @@ const COUNT_DEFAULT = "false"
 const ORDERASC_DEFAULT = "NA"
 const ORDERDSC_DEFAULT = "NA"
 
-var allowedTypes = []string{GIT_TYPE, RAW_TYPE}
+var allowedTypes = []string{RAW_TYPE}
 
 func AddAsset(modelID, assetID string) error {
 	currentTime := time.Now().UTC()

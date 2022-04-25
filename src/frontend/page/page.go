@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"frontend/action"
 	"net/http"
+	"sort"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -76,6 +78,10 @@ func ShowAssetPage(c *gin.Context) {
 		}
 	}
 
+	isFileType := false
+	if asset["type"].(string) == "file" {
+		isFileType = true
+	}
 	tagJSON, _ := json.Marshal(tagObj)
 	metadataJSON, _ := json.MarshalIndent(asset["metadata"], "", "    ")
 
@@ -83,7 +89,8 @@ func ShowAssetPage(c *gin.Context) {
 		"asset":         asset,
 		"models":        models,
 		"tag_json":      string(tagJSON),
-		"metadata_json": string(metadataJSON)},
+		"metadata_json": string(metadataJSON),
+		"is_file_type":  isFileType},
 		"asset.html")
 }
 
@@ -94,8 +101,26 @@ func ShowAssetsPage(c *gin.Context) {
 		return
 	}
 
+	secrets, err := action.GetSecretsAll()
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	credentials := make([]string, 0)
+	for key := range secrets[0] {
+		if strings.HasPrefix(key, "git_") {
+			parts := strings.Split(key, "_")
+			if !action.Contains(credentials, parts[1]) {
+				credentials = append(credentials, parts[1])
+			}
+		}
+	}
+	sort.Strings(credentials)
+
 	render(c, gin.H{
-		"assets": assets},
+		"assets":      assets,
+		"credentials": credentials},
 		"assets.html")
 }
 
@@ -178,6 +203,37 @@ func ShowModelPage(c *gin.Context) {
 		return
 	}
 
+	secrets, err := action.GetSecretsAll()
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	credentials := make([]string, 0)
+	for key := range secrets[0] {
+		if strings.HasPrefix(key, "git_") {
+			parts := strings.Split(key, "_")
+			if !action.Contains(credentials, parts[1]) {
+				credentials = append(credentials, parts[1])
+			}
+		}
+	}
+	sort.Strings(credentials)
+
+	allAssets, err := action.GetAssetsAll()
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	for idx, val := range allAssets {
+		delete(val, "created")
+		delete(val, "url")
+		delete(val, "tags")
+		delete(val, "metadata")
+		delete(val, "models")
+		allAssets[idx] = val
+	}
+
 	tagObj := make([]map[string]string, len(model["tags"].([]interface{})))
 	for idx, val := range model["tags"].([]interface{}) {
 		tagObj[idx] = map[string]string{
@@ -194,6 +250,8 @@ func ShowModelPage(c *gin.Context) {
 		"assets":        assets,
 		"snapshots":     snapshots,
 		"releases":      releases,
+		"credentials":   credentials,
+		"all_assets":    allAssets,
 		"tag_json":      string(tagJSON),
 		"metadata_json": string(metadataJSON)},
 		"model.html")
@@ -291,8 +349,25 @@ func ShowReleasesPage(c *gin.Context) {
 		return
 	}
 
+	allSnapshots, err := action.GetSnapshotsAll()
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	for idx, val := range allSnapshots {
+		delete(val, "created")
+		delete(val, "type")
+		delete(val, "tags")
+		delete(val, "metadata")
+		delete(val, "assets")
+		delete(val, "language")
+		delete(val, "releases")
+		allSnapshots[idx] = val
+	}
+
 	render(c, gin.H{
-		"releases": releases},
+		"releases":      releases,
+		"all_snapshots": allSnapshots},
 		"releases.html")
 }
 
@@ -387,9 +462,25 @@ func ShowSnapshotsPage(c *gin.Context) {
 		return
 	}
 
-	// Render the models.html page
+	allModels, err := action.GetModelsAll()
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	for idx, val := range allModels {
+		delete(val, "created")
+		delete(val, "type")
+		delete(val, "tags")
+		delete(val, "metadata")
+		delete(val, "assets")
+		delete(val, "snapshots")
+		delete(val, "releases")
+		allModels[idx] = val
+	}
+
 	render(c, gin.H{
-		"snapshots": snapshots},
+		"snapshots":  snapshots,
+		"all_models": allModels},
 		"snapshots.html")
 }
 

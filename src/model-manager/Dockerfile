@@ -13,7 +13,10 @@ WORKDIR /home/model-manager
 COPY --from=0 /model-manager-build/model-manager ./
 
 RUN apk update \
-    && apk add bash
+    && apk add bash \
+    tar \
+    gzip \
+    git
 
 SHELL ["/bin/bash", "-c"]
 

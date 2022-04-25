@@ -1,0 +1,45 @@
+<div id="add-asset-modal" class="w3-modal">
+    <div class="w3-modal-content w3-animate-top w3-card-4 w3-round dark theme-light w3-border theme-border-light w3-round">
+        <header class="w3-container velocimodel-blue">
+            <span onclick="closeModal('add-asset-modal')" class="w3-button w3-display-topright">&times;</span>
+            <h4>Add Asset</h4>
+        </header>
+        <div class="w3-container">
+            <br>
+            <div class="w3-row" style="height:200px;">
+                <div class="w3-col s4 w3-center w3-display-container" style="height:200px;">
+                    <button class="w3-container w3-card w3-button" style="width:90%;height:90%;margin-top:5%;margin-left:5%;" onclick="openExistingModal()">
+                        <div class="w3-display-middle w3-xxxlarge">
+                            <i class="fa-solid fa-circle-plus"></i>
+                            <br>
+                            <h4>Add Existing Asset</h4>
+                        </div>
+                    </button>
+                </div>
+                <div class="w3-col s4 w3-center w3-display-container" style="height:200px;">
+                    <button class="w3-container w3-card w3-button" style="width:90%;height:90%;margin-top:5%;margin-left:5%;" onclick="openFileModal()">
+                        <div class="w3-display-middle">
+                            <i class="fa-solid fa-file w3-xxxlarge"></i>
+                            <br>
+                            <h4>Create New File Asset</h4>
+                        </div>
+                    </button>
+                </div>
+                <div class="w3-col s4 w3-center w3-display-container" style="height:200px;">
+                    <button class="w3-container w3-card w3-button" style="width:90%;height:90%;margin-top:5%;margin-left:5%;" onclick="openGitModal()">
+                        <div class="w3-display-middle">
+                            <i class="fa-brands fa-git-alt w3-xxxlarge"></i>
+                            <br>
+                            <h4>Create New Git Asset</h4>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            <br>
+            <br>
+            <button class="w3-button velocimodel-red w3-round w3-right" onclick="closeModal('add-asset-modal')">Cancel</button>
+            <br>
+            <br>
+        </div>
+    </div>
+</div>

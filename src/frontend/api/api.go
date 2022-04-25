@@ -7,14 +7,53 @@ import (
 	"frontend/action"
 	"frontend/config"
 	"frontend/utils"
+	"io"
 	"io/ioutil"
+	"log"
+	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
 
 var Healthy = false
+
+// Helper functions
+
+func createMultipartFormData(c *gin.Context) (bytes.Buffer, *multipart.Writer, error) {
+	var b bytes.Buffer
+	var err error
+	w := multipart.NewWriter(&b)
+	var fw io.Writer
+	fileHeader, err := c.FormFile("file")
+	file, err := fileHeader.Open()
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return bytes.Buffer{}, nil, err
+	}
+	if fw, err = w.CreateFormFile("file", fileHeader.Filename); err != nil {
+		log.Printf("Encountered error: %v", err)
+		return bytes.Buffer{}, nil, err
+	}
+	if _, err = io.Copy(fw, file); err != nil {
+		log.Printf("Encountered error: %v", err)
+		return bytes.Buffer{}, nil, err
+	}
+	w.Close()
+	return b, w, nil
+}
+
+func mustOpen(f string) *os.File {
+	r, err := os.Open(f)
+	if err != nil {
+		pwd, _ := os.Getwd()
+		fmt.Println("PWD: ", pwd)
+		panic(err)
+	}
+	return r
+}
 
 // Health API
 
@@ -113,6 +152,107 @@ func UpdateAsset(c *gin.Context) {
 		return
 	}
 	c.Status(resp.StatusCode)
+}
+
+func CreateFileAsset(c *gin.Context) {
+	var obj map[string]interface{}
+	requestURL := fmt.Sprintf("%v/api/asset/upload", config.Config.APIServerURL)
+	client := &http.Client{}
+
+	b, w, err := createMultipartFormData(c)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+
+	req, err := http.NewRequest("POST", requestURL, &b)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	// Don't forget to set the content type, this will contain the boundary.
+	req.Header.Set("Content-Type", w.FormDataContentType())
+
+	resp, err := client.Do(req)
+
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, obj)
+}
+
+func ModelAddAsset(c *gin.Context) {
+	var input map[string]interface{}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	var obj map[string]interface{}
+	requestURL := fmt.Sprintf("%v/api/model/asset", config.Config.APIServerURL)
+	json_data, err := json.Marshal(input)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	resp, err := http.Post(requestURL, "application/json", bytes.NewBuffer(json_data))
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, obj)
+}
+
+func CreateGitAsset(c *gin.Context) {
+	var input map[string]interface{}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	var obj map[string]interface{}
+	requestURL := fmt.Sprintf("%v/api/asset/git", config.Config.APIServerURL)
+	json_data, err := json.Marshal(input)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	resp, err := http.Post(requestURL, "application/json", bytes.NewBuffer(json_data))
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, obj)
 }
 
 func GetModels(c *gin.Context) {

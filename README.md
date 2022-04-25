@@ -12,7 +12,7 @@ Velocimodel is a comprehensive open-source model operations solution. It allows 
 
 # To Do
 
-**v1.0.0**
+**v0.1.0**
 
 - [x] service-manager
    - [x] service registry
@@ -57,7 +57,7 @@ Velocimodel is a comprehensive open-source model operations solution. It allows 
    - [ ] file asset creation
    - [ ] git asset creation
 
-**v1.1.0**
+**v0.2.0**
 
 - [ ] UI param view
 - [ ] UI param edit
@@ -66,21 +66,23 @@ Velocimodel is a comprehensive open-source model operations solution. It allows 
 - [ ] oauth provider
 - [ ] SSH git clone support
 
-**v1.2.0**
+**v0.3.0**
 
 - [ ] automation-manager
 - [ ] runtime-manager
 - [ ] model runtime
 
-**v1.3.0**
+**v0.4.0**
 
 - [ ] asset-manager S3 integration
 
-**v1.4.0**
+**v0.5.0**
 
 - [ ] asset-manager Artifactory integration
 
-**v1.5.0**
+**v1.0.0**
+
+Initial Release
 
 - [ ] asset-manager Azure Blob Store integration
 

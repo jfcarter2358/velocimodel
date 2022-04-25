@@ -98,3 +98,77 @@ function createSnapshot() {
         }
     });
 }
+
+function openExistingModal() {
+    closeModal('add-asset-modal')
+    openModal('add-existing-asset-modal')
+}
+
+function openFileModal() {
+    closeModal('add-asset-modal')
+    openModal('add-file-asset-modal')
+}
+
+function openGitModal() {
+    closeModal('add-asset-modal')
+    openModal('add-git-asset-modal')
+}
+
+function addExistingAsset() {
+    parts = window.location.href.split('/')
+    modelID = parts[parts.length - 1]
+    assetID = $("#existing-asset-id").val()
+    
+    data = {
+        "model": modelID,
+        "asset": assetID
+    }
+
+    $("#spinner").css("display", "block")
+    $("#page-darken").css("opacity", "1")
+
+    $.ajax({
+        url: "/script/api/model/asset",
+        type: "POST",
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+            $("#spinner").css("display", "none")
+            $("#page-darken").css("opacity", "0")
+        },
+        error: function(response) {
+            console.log(response)
+            $("#log-container").html(response.responseJSON['output'])
+            $("#spinner").css("display", "none")
+            $("#page-darken").css("opacity", "0")
+            openModal('error-modal')
+        }
+    });
+}
+
+function addGitAsset() {
+    // repo
+    // branch
+    // public
+}
+
+function addFileAsset() {
+    $('#file-form')
+    .ajaxForm({
+        url : '/script/api/asset/file',
+        type: "POST",
+        success : function (response) {
+            $("#spinner").css("display", "none")
+            $("#page-darken").css("opacity", "0")
+            console.log(response)
+        },
+        error: function(response) {
+            console.log(response)
+            $("#log-container").html(response.responseJSON['output'])
+            $("#spinner").css("display", "none")
+            $("#page-darken").css("opacity", "0")
+            openModal('error-modal')
+        }
+    })
+;
+}

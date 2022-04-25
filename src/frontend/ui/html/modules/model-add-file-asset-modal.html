@@ -1,0 +1,20 @@
+<div id="add-file-asset-modal" class="w3-modal">
+    <div class="w3-modal-content w3-animate-top w3-card-4 w3-round dark theme-light w3-border theme-border-light w3-round">
+        <header class="w3-container velocimodel-blue">
+            <span onclick="closeModal('add-file-asset-modal')" class="w3-button w3-display-topright">&times;</span>
+            <h4>Add File Asset</h4>
+        </header>
+        <div class="w3-container">
+            <br>
+            <form action="/script" id="file-form">
+                <input type="file" id="file" name="file">
+            </form>
+            <br>
+            <br>
+            <button class="w3-button velocimodel-red w3-round w3-right" onclick="addFileAsset()">Add Asset</button>
+            <button class="w3-button velocimodel-red w3-round w3-right" onclick="closeModal('add-file-asset-modal')">Cancel</button>
+            <br>
+            <br>
+        </div>
+    </div>
+</div>

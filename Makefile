@@ -7,8 +7,8 @@ help: ## Display this help message.
 build-docker: clean
 	wsc compile
 	cp -r src/frontend/ui/node-modules/monaco-editor src/frontend/ui-dist/static/js/monaco-editor
-	cp -n data/config.json.bak data/config.json
-	cp -n data/secrets.json.bak data/secrets.json
+	cp -n data/config.json.bak data/config.json || true
+	cp -n data/secrets.json.bak data/secrets.json || true
 	docker build -t api-server -f src/api-server/Dockerfile .
 	docker build -t asset-manager -f src/asset-manager/Dockerfile .
 	docker build -t frontend -f src/frontend/Dockerfile .
@@ -25,8 +25,8 @@ build-local: clean  ## Build local binaries of all VelociModel services
 		chmod +x ../../dist/launch-$$service.sh ; \
 		cd ../.. ; \
 	done
-	cp -n data/config.json.bak data/config.json
-	cp -n data/secrets.json.bak data/secrets.json
+	cp -n data/config.json.bak data/config.json || true
+	cp -n data/secrets.json.bak data/secrets.json || true
 	cp -r src/frontend/ui-dist/templates dist/templates
 	cp -r src/frontend/ui-dist/static dist/static
 	cp -r src/frontend/ui/node-modules/monaco-editor dist/static/js/monaco-editor

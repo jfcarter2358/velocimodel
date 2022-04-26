@@ -2,7 +2,7 @@ FROM golang:1.18.0-alpine
 
 WORKDIR /api-server-build
 COPY src/api-server /api-server-build
-RUN env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o api-server
+RUN env GOOS=linux CGO_ENABLED=0 go build -v -o api-server
 
 FROM alpine:latest
 

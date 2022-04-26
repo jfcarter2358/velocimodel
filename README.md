@@ -10,6 +10,28 @@ __     __   _            _ __  __           _      _
 
 Velocimodel is a comprehensive open-source model operations solution. It allows for the management and versioning of data science models (in addition to other software projects) and will eventually allow for model automation and deployment.
 
+# Running Locally
+
+To run VelociModel locally, clone this repo and make sure you have Python3 and docker-compose installed. After pulling down the repo, run
+
+```
+pip install -r requirements.txt
+```
+
+then
+
+```
+make build-docker
+```
+
+To build local versions of the various docker images. Finally, run
+
+```
+make run-docker
+```
+
+to bring up the services and navigate to `http://localhost:9000` to view the UI.
+
 # To Do
 
 **v0.1.0**

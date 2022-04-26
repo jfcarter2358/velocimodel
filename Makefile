@@ -53,11 +53,15 @@ bundle: build-local
 		cd ../.. ; \
 	done
 	
-publish: build-docker
+publish:
+	wsc compile
+	cp -r src/frontend/ui/node-modules/monaco-editor src/frontend/ui-dist/static/js/monaco-editor
+	cp -n data/config.json.bak data/config.json || true
+	cp -n data/secrets.json.bak data/secrets.json || true
+	
 	for service in api-server asset-manager frontend model-manager service-manager; do \
 		version=$$(cat VERSION) ; \
-		docker tag $$service jfcarter2358/$$service:$$version
-		docker push jfcarter2358/$$service:$$version
+		docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t jfcarter2358/velocimodel-$$service:$$version -f src/$$service/Dockerfile --push . ; \
 	done
 
 clean:  ## Remove build and test artifacts

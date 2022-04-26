@@ -2,7 +2,7 @@ FROM golang:1.18.0-alpine
 
 WORKDIR /frontend-build
 COPY src/frontend /frontend-build
-RUN env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o frontend
+RUN env GOOS=linux CGO_ENABLED=0 go build -v -o frontend
 
 FROM alpine:latest
 

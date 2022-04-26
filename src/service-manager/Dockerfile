@@ -2,7 +2,7 @@ FROM golang:1.18.0-alpine
 
 WORKDIR /service-manager-build
 COPY src/service-manager /service-manager-build
-RUN env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o service-manager
+RUN env GOOS=linux CGO_ENABLED=0 go build -v -o service-manager
 
 FROM alpine:latest
 

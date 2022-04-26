@@ -2,7 +2,7 @@ FROM golang:1.18.0-alpine
 
 WORKDIR /model-manager-build
 COPY src/model-manager /model-manager-build
-RUN env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o model-manager
+RUN env GOOS=linux CGO_ENABLED=0 go build -v -o model-manager
 
 FROM alpine:latest
 

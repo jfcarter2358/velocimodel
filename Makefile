@@ -53,7 +53,12 @@ bundle: build-local
 		cd ../.. ; \
 	done
 	
-	
+publish: build-docker
+	for service in api-server asset-manager frontend model-manager service-manager; do \
+		version=$$(cat VERSION) ; \
+		docker tag $$service jfcarter2358/$$service:$$version
+		docker push jfcarter2358/$$service:$$version
+	done
 
 clean:  ## Remove build and test artifacts
 	rm -r dist || true

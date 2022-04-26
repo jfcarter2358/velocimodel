@@ -96,7 +96,7 @@ func main() {
 
 	os.MkdirAll(config.Config.DataPath, 0755)
 
-	values := map[string]interface{}{"host": "asset-manager", "port": config.Config.HTTPPort, "type": "asset-manager"}
+	values := map[string]interface{}{"host": config.Config.HTTPHost, "port": config.Config.HTTPPort, "type": "asset-manager"}
 	json_data, err := json.Marshal(values)
 
 	if err != nil {

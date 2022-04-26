@@ -47,7 +47,7 @@ func main() {
 
 	selfService := service.Service{
 		ID:   serviceID,
-		Host: "service-manager",
+		Host: config.Config.HTTPHost,
 		Port: config.Config.HTTPPort,
 		Type: "service-manager",
 	}

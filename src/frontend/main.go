@@ -45,7 +45,7 @@ func main() {
 
 	routerPort := ":" + strconv.Itoa(config.Config.HTTPPort)
 
-	values := map[string]interface{}{"host": "frontend", "port": config.Config.HTTPPort, "type": "frontend"}
+	values := map[string]interface{}{"host": config.Config.HTTPHost, "port": config.Config.HTTPPort, "type": "frontend"}
 	json_data, err := json.Marshal(values)
 
 	if err != nil {

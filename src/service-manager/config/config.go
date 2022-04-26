@@ -13,6 +13,7 @@ type ConfigObject struct {
 	DBHost        string
 	DBPort        int
 	HTTPPort      int
+	HTTPHost      string
 	ParamsPath    string
 	SecretsPath   string
 	EncryptionKey [32]byte
@@ -26,6 +27,7 @@ func LoadConfig() {
 	dbHost := os.Getenv("SERVICE_MANAGER_DB_HOST")
 	dbName := os.Getenv("SERVICE_MANAGER_DB_NAME")
 	dbPortString := os.Getenv("SERVICE_MANAGER_DB_PORT")
+	httpHost := os.Getenv("SERVICE_MANAGER_HTTP_HOST")
 	paramsPath := os.Getenv("SERVICE_MANAGER_PARAMS_PATH")
 	secretsPath := os.Getenv("SERVICE_MANAGER_SECRETS_PATH")
 	dbPort, err := strconv.Atoi(dbPortString)
@@ -52,6 +54,7 @@ func LoadConfig() {
 	Config.DBHost = dbHost
 	Config.DBName = dbName
 	Config.DBPort = dbPort
+	Config.HTTPHost = httpHost
 	Config.HTTPPort = httpPort
 	Config.ParamsPath = paramsPath
 	Config.SecretsPath = secretsPath

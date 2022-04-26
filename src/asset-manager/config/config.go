@@ -14,6 +14,7 @@ type ConfigObject struct {
 	DBName       string
 	DBHost       string
 	DBPort       int
+	HTTPHost     string
 	HTTPPort     int
 	DataPath     string
 	APIServerURL string
@@ -29,12 +30,14 @@ func LoadConfig() {
 
 	apiServerURL := os.Getenv("ASSET_MANGER_API_SERVER_URL")
 	dataPath := os.Getenv("ASSET_MANAGER_DATA_PATH")
+	httpHost := os.Getenv("ASSET_MANAGER_HTTP_HOST")
 	httpPortString := os.Getenv("ASSET_MANAGER_HTTP_PORT")
 	httpPort, err := strconv.Atoi(httpPortString)
 	if err != nil {
 		panic(err)
 	}
 	Config.HTTPPort = httpPort
+	Config.HTTPHost = httpHost
 	Config.DataPath = dataPath
 	Config.APIServerURL = apiServerURL
 }

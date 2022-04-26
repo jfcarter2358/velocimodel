@@ -14,6 +14,7 @@ type ConfigObject struct {
 	DBName       string
 	DBHost       string
 	DBPort       int
+	HTTPHost     string
 	HTTPPort     int
 	APIServerURL string
 }
@@ -27,12 +28,14 @@ func LoadConfig() {
 	Secrets = make(map[string]interface{})
 
 	apiServerURL := os.Getenv("MODEL_MANGER_API_SERVER_URL")
+	httpHost := os.Getenv("MODEL_MANAGER_HTTP_HOST")
 	httpPortString := os.Getenv("MODEL_MANAGER_HTTP_PORT")
 	httpPort, err := strconv.Atoi(httpPortString)
 	if err != nil {
 		panic(err)
 	}
 	Config.HTTPPort = httpPort
+	Config.HTTPHost = httpHost
 	Config.APIServerURL = apiServerURL
 }
 

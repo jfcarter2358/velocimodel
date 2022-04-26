@@ -66,7 +66,7 @@ func main() {
 		panic(err)
 	}
 
-	values := map[string]interface{}{"host": "model-manager", "port": config.Config.HTTPPort, "type": "model-manager"}
+	values := map[string]interface{}{"host": config.Config.HTTPHost, "port": config.Config.HTTPPort, "type": "model-manager"}
 	json_data, err := json.Marshal(values)
 
 	if err != nil {

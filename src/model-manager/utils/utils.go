@@ -4,7 +4,6 @@ package utils
 
 import (
 	"archive/tar"
-	"bytes"
 	"compress/gzip"
 	"encoding/json"
 	"errors"
@@ -59,14 +58,10 @@ func CollectObjects(object map[string]interface{}) (string, string, error) {
 		return "", "", err
 	}
 
-	log.Printf("TEMPDIR: %v", tempDir)
-
 	assetIDs := make([]string, len(object["assets"].([]interface{})))
 	for idx, val := range object["assets"].([]interface{}) {
 		assetIDs[idx] = val.(string)
 	}
-
-	log.Printf("ASSET IDS: %v", assetIDs)
 
 	var obj []map[string]interface{}
 	requestURL := fmt.Sprintf("%v/api/asset", config.Config.APIServerURL)
@@ -94,12 +89,9 @@ func CollectObjects(object map[string]interface{}) (string, string, error) {
 		}
 	}
 
-	log.Printf("ASSETS: %v", assets)
-
 	for _, asset := range assets {
 		switch asset["type"].(string) {
 		case "git":
-			log.Println("GOT GIT ASSET")
 			err = doGitClone(
 				asset["url"].(string),
 				asset["metadata"].(map[string]interface{})["branch"].(string),
@@ -110,7 +102,6 @@ func CollectObjects(object map[string]interface{}) (string, string, error) {
 				return "", "", err
 			}
 		case "file":
-			log.Println("GOT FILE ASSET")
 			err = doFileDownload(
 				filepath.Join(
 					tempDir,
@@ -123,24 +114,18 @@ func CollectObjects(object map[string]interface{}) (string, string, error) {
 			}
 		}
 	}
-	// tar + gzip
-	var buf bytes.Buffer
-	err = compress(tempDir, &buf)
-
 	filename := fmt.Sprintf("%v.tar.gz", object["id"].(string))
+	dirPath := fmt.Sprintf("./%v", object["id"].(string))
 	localPath := fmt.Sprintf("/tmp/%v", filename)
 
-	log.Printf("FILENAME: %v", filename)
-	log.Printf("LOCALPATH: %v", localPath)
-
-	// write the .tar.gzip
-	fileToWrite, err := os.OpenFile(localPath, os.O_CREATE|os.O_RDWR, os.FileMode(600))
+	cmd := exec.Command("tar", "-czvf", filename, dirPath)
+	cmd.Dir = "/tmp"
+	out, err := cmd.CombinedOutput()
 	if err != nil {
+		log.Printf("tar create: %v", string(out))
 		return "", "", err
 	}
-	if _, err := io.Copy(fileToWrite, &buf); err != nil {
-		return "", "", err
-	}
+
 	return localPath, filename, nil
 }
 
@@ -219,7 +204,9 @@ func doGitClone(repo, branch, credential, tempDir string) error {
 	}
 	domain := repo[len(prefix):]
 	repoNameArr := strings.Split(repo, "/")
-	repoName := repoNameArr[len(repoNameArr)-1]
+	repoNameWithExtension := repoNameArr[len(repoNameArr)-1]
+	repoNameWithExtensionArr := strings.Split(repoNameWithExtension, ".")
+	repoName := repoNameWithExtensionArr[0]
 	if credential != "none" {
 		out, err = exec.Command("git", "clone", "--depth", "1", "-b", branch, fmt.Sprintf("%v%v:%v@%v", prefix, gitUser, gitPass, domain), filepath.Join(tempDir, repoName)).CombinedOutput()
 		if err != nil {

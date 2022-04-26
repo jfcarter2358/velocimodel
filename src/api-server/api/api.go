@@ -157,9 +157,7 @@ func sendGetRaw(serviceName, objectType, path string, queryParams map[string][]s
 			}
 			requestURL += params.Encode()
 		}
-		log.Printf("REQUEST URL: %v", requestURL)
 		resp, err := http.Get(requestURL)
-		log.Println("RESPONSE RETURNED")
 		if err != nil {
 			log.Printf("Encountered error: %v", err)
 			continue
@@ -437,6 +435,21 @@ func CreateGitAsset(c *gin.Context) {
 	c.JSON(http.StatusOK, data)
 }
 
+func SyncGitAsset(c *gin.Context) {
+	queryParams := c.Request.URL.Query()
+	var input map[string]interface{}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	data, err := sendPost("asset-manager", "asset", "git/sync", queryParams, input)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, data)
+}
+
 func DeleteModel(c *gin.Context) {
 	queryParams := c.Request.URL.Query()
 	var input []string
@@ -688,6 +701,34 @@ func PostReleaseSnapshot(c *gin.Context) {
 	c.JSON(http.StatusOK, data)
 }
 
+func DownloadRelease(c *gin.Context) {
+	releaseID := c.Param("id")
+	queryParams := c.Request.URL.Query()
+
+	response, err := sendGetRaw("model-manager", "release", "archive/"+releaseID, queryParams)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+
+	reader := response.Body
+	defer reader.Close()
+	contentLength := response.ContentLength
+	contentType := response.Header.Get("Content-Type")
+
+	extraHeaders := make(map[string]string)
+	for name, values := range response.Header {
+		if name == "Content-Type" {
+			continue
+		}
+		extraHeaders[name] = values[0]
+	}
+
+	delete(extraHeaders, "Content-Type")
+
+	c.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
+}
+
 // func PutRelease(c *gin.Context) {
 // 	queryParams := c.Request.URL.Query()
 // 	var input map[string]interface{}
@@ -866,6 +907,34 @@ func PostSnapshotModel(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, data)
+}
+
+func DownloadSnapshot(c *gin.Context) {
+	snapshotID := c.Param("id")
+	queryParams := c.Request.URL.Query()
+
+	response, err := sendGetRaw("model-manager", "snapshot", "archive/"+snapshotID, queryParams)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+
+	reader := response.Body
+	defer reader.Close()
+	contentLength := response.ContentLength
+	contentType := response.Header.Get("Content-Type")
+
+	extraHeaders := make(map[string]string)
+	for name, values := range response.Header {
+		if name == "Content-Type" {
+			continue
+		}
+		extraHeaders[name] = values[0]
+	}
+
+	delete(extraHeaders, "Content-Type")
+
+	c.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
 }
 
 // func PutSnapshot(c *gin.Context) {

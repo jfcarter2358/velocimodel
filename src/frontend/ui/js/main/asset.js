@@ -38,7 +38,7 @@ function saveAsset() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/script/api/asset/" + assetID,
+        url: "/api/asset/" + assetID,
         type: "PUT",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -63,4 +63,26 @@ function downloadFileAsset(url) {
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
+}
+
+function syncGitAsset(assetID) {
+    $("#spinner").css("display", "block")
+    $("#page-darken").css("opacity", "1")
+
+    $.ajax({
+        url: "/api/asset/git/sync/" + assetID,
+        type: "POST",
+        success: function(response) {
+            $("#spinner").css("display", "none")
+            $("#page-darken").css("opacity", "0")
+            window.location.reload();
+        },
+        error: function(response) {
+            console.log(response)
+            $("#log-container").text(response.responseJSON['error'])
+            $("#spinner").css("display", "none")
+            $("#page-darken").css("opacity", "0")
+            openModal('error-modal')
+        }
+    });
 }

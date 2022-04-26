@@ -13,7 +13,6 @@ import (
 func GetAssetByID(assetID string) (map[string]interface{}, error) {
 	var obj []map[string]interface{}
 	params := url.Values{}
-	log.Printf("ASSET ID: %v", assetID)
 	params.Add("filter", fmt.Sprintf("id = \"%v\"", assetID))
 	requestURL := fmt.Sprintf("%v/api/asset?%v", config.Config.APIServerURL, params.Encode())
 	resp, err := http.Get(requestURL)
@@ -31,12 +30,10 @@ func GetAssetByID(assetID string) (map[string]interface{}, error) {
 		return nil, err
 	}
 	err = json.Unmarshal([]byte(body), &obj)
-	log.Printf("BODY: %v", string(body))
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
 	}
-	log.Printf("OBJ: %v", obj)
 
 	if len(obj) == 0 {
 		return nil, nil

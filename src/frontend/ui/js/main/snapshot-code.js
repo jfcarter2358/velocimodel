@@ -15,7 +15,7 @@ function saveSnapshot() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/script/api/snapshot/" + snapshotID,
+        url: "/api/snapshot/" + snapshotID,
         type: "PUT",
         contentType: 'application/json',
         data: JSON.stringify(data),

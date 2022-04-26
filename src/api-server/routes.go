@@ -18,6 +18,7 @@ func initializeRoutes() {
 		apiRoutes.POST("/asset/file", api.CreateFileAsset)
 		apiRoutes.GET("/asset/file/:id", api.DownloadFileAsset)
 		apiRoutes.POST("/asset/git", api.CreateGitAsset)
+		apiRoutes.POST("/asset/git/sync", api.SyncGitAsset)
 
 		// Model
 		apiRoutes.DELETE("/model", api.DeleteModel)
@@ -39,6 +40,7 @@ func initializeRoutes() {
 		apiRoutes.GET("/release", api.GetReleases)
 		apiRoutes.POST("/release", api.PostRelease)
 		apiRoutes.POST("/release/snapshot", api.PostReleaseSnapshot)
+		apiRoutes.GET("/release/archive/:id", api.DownloadRelease)
 		// apiRoutes.PUT("/release", api.PutRelease)
 
 		// Secret
@@ -58,6 +60,7 @@ func initializeRoutes() {
 		apiRoutes.GET("/snapshot", api.GetSnapshots)
 		apiRoutes.POST("/snapshot", api.PostSnapshot)
 		apiRoutes.POST("/snapshot/model", api.PostSnapshotModel)
+		apiRoutes.GET("/snapshot/archive/:id", api.DownloadSnapshot)
 		// apiRoutes.PUT("/snapshot", api.PutSnapshot)
 	}
 }

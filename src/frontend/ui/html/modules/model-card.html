@@ -3,9 +3,12 @@
         <div class="w3-container velocimodel-blue w3-round model-title">
             <div class="card-title-bar">
                 <input id="model-name" class="w3-input card-title name-field dark theme-text-light" type="text" value="{{ .model.name }}">
-                <a href="/ui/model/{{ .model.id }}/code" class="icon" style="margin-top:10px;color:#fff;">
+                <a href="/ui/model/{{ .model.id }}/code" class="icon" style="margin-top:10px;">
                     <i class="fa-solid fa-code w3-large"></i>
                 </a>
+                <div class="icon" style="margin-top:10px;">
+                    <i class="fa-solid fa-download w3-large pointer-cursor" onclick="downloadModel('/api/model/archive/{{ .model.id }}')"></i>
+                </div>
                 <div class="icon" style="margin-top:10px;">
                     <i class="fa-solid fa-floppy-disk w3-large pointer-cursor" onclick="saveModel()"></i>
                 </div>
@@ -54,11 +57,16 @@
             <button type="button" class="collapsible dark theme-light theme-hover-base w3-border-bottom theme-border-base">
                 <span style="float:left;">{{ .id }}</span>
                 <a href="/ui/asset/{{ .id }}" style="float:right;margin-right:8px;" class="dark theme-text">
-                    <i class="fa-solid fa-link"></i>
+                    <i class="fa-solid fa-link pointer-cursor"></i>
                 </a>
                 <span onclick="deleteAsset('{{ .id }}')" style="float:right;margin-right:8px;">
-                    <i class="fa-solid fa-trash"></i>
+                    <i class="fa-solid fa-trash pointer-cursor"></i>
                 </span>
+                {{ if eq .type "git" }}
+                <span onclick="syncGitAsset('{{ .id }}')" style="float:right;margin-right:8px;">
+                    <i class="fa-solid fa-arrows-rotate pointer-cursor"></i>
+                </span>
+                {{ end }}
                 <span style="float:right;margin-right:8px;">{{ .type }}</span>
             </button>
             <div class="content">

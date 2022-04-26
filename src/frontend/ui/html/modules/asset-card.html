@@ -6,9 +6,14 @@
                 <a href="/ui/asset/{{ .asset.id }}/code" class="icon" style="margin-top:10px;color:#fff;">
                     <i class="fa-solid fa-code w3-large"></i>
                 </a>
-                {{ if .is_file_type }}
+                {{ if eq .asset.type "file" }}
                 <div class="icon" style="margin-top:10px;">
-                    <i class="fa-solid fa-download w3-large pointer-cursor" onclick="downloadFileAsset('{{ .asset.url }}')"></i>
+                    <i class="fa-solid fa-download w3-large pointer-cursor" onclick="downloadFileAsset('/api/asset/file/{{ .asset.id }}')"></i>
+                </div>
+                {{ end }}
+                {{ if eq .asset.type "git" }}
+                <div class="icon" style="margin-top:10px;">
+                    <i class="fa-solid fa-arrows-rotate w3-large pointer-cursor" onclick="syncGitAsset('{{ .asset.id }}')"></i>
                 </div>
                 {{ end }}
                 <div class="icon" style="margin-top:10px;">

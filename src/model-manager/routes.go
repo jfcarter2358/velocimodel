@@ -23,11 +23,13 @@ func initializeRoutes() {
 		apiRoutes.GET("/release", api.GetReleases)
 		apiRoutes.POST("/release", api.PostRelease)
 		apiRoutes.POST("/release/snapshot", api.CreateRelease)
+		apiRoutes.GET("/release/archive/:id", api.DownloadRelease)
 		// Snapshot
 		// apiRoutes.DELETE("/snapshot", api.DeleteSnapshot)
 		apiRoutes.GET("/snapshot", api.GetSnapshots)
 		apiRoutes.POST("/snapshot", api.PostSnapshot)
 		// apiRoutes.PUT("/snapshot", api.PutSnapshot)
 		apiRoutes.POST("/snapshot/model", api.CreateSnapshot)
+		apiRoutes.GET("/snapshot/archive/:id", api.DownloadSnapshot)
 	}
 }

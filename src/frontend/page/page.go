@@ -78,10 +78,6 @@ func ShowAssetPage(c *gin.Context) {
 		}
 	}
 
-	isFileType := false
-	if asset["type"].(string) == "file" {
-		isFileType = true
-	}
 	tagJSON, _ := json.Marshal(tagObj)
 	metadataJSON, _ := json.MarshalIndent(asset["metadata"], "", "    ")
 
@@ -89,8 +85,7 @@ func ShowAssetPage(c *gin.Context) {
 		"asset":         asset,
 		"models":        models,
 		"tag_json":      string(tagJSON),
-		"metadata_json": string(metadataJSON),
-		"is_file_type":  isFileType},
+		"metadata_json": string(metadataJSON)},
 		"asset.html")
 }
 

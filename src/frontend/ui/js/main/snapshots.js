@@ -6,7 +6,7 @@ var snapshots
 
 function getSnapshots() {
     $.ajax({
-        url: "/script/api/snapshot",
+        url: "/api/snapshot",
         type: "GET",
         success: function (result) {
             snapshots = result
@@ -81,7 +81,7 @@ function createSnapshotFromModel(modelID) {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/script/api/model/" + modelID + "/snapshot",
+        url: "/api/model/" + modelID + "/snapshot",
         type: "POST",
         success: function(response) {
             $("#spinner").css("display", "none")

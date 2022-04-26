@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"log"
 	"model-manager/model"
 	"model-manager/release"
 	"model-manager/snapshot"
@@ -40,7 +39,6 @@ func AddAsset(c *gin.Context) {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	log.Println("Adding asset")
 	err := model.AddAsset(input["model"], input["asset"])
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
@@ -146,8 +144,6 @@ func DownloadModel(c *gin.Context) {
 		return
 	}
 
-	log.Printf("MODEL: %v", models[0])
-
 	localPath, filename, err := utils.CollectObjects(models[0])
 
 	if err != nil {
@@ -232,6 +228,33 @@ func PostRelease(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"id": fileID})
 }
 
+func DownloadRelease(c *gin.Context) {
+	releaseID := c.Param("id")
+
+	releases, err := release.GetReleases(LIMIT_DEFAULT, fmt.Sprintf("id = \"%v\"", releaseID), COUNT_DEFAULT)
+
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+
+	localPath, filename, err := utils.CollectObjects(releases[0])
+
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+
+	c.Header("Content-Description", "File Transfer")
+	c.Header("Content-Transfer-Encoding", "binary")
+	c.Header("Content-Disposition", "attachment; filename="+filename)
+	c.Header("Content-Type", "application/octet-stream")
+
+	c.FileAttachment(localPath, filename)
+
+	c.Status(http.StatusOK)
+}
+
 // Snapshot API
 
 func CreateSnapshot(c *gin.Context) {
@@ -310,5 +333,32 @@ func PutSnapshot(c *gin.Context) {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
+	c.Status(http.StatusOK)
+}
+
+func DownloadSnapshot(c *gin.Context) {
+	snapshotID := c.Param("id")
+
+	snapshots, err := snapshot.GetSnapshots(LIMIT_DEFAULT, fmt.Sprintf("id = \"%v\"", snapshotID), COUNT_DEFAULT)
+
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+
+	localPath, filename, err := utils.CollectObjects(snapshots[0])
+
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+
+	c.Header("Content-Description", "File Transfer")
+	c.Header("Content-Transfer-Encoding", "binary")
+	c.Header("Content-Disposition", "attachment; filename="+filename)
+	c.Header("Content-Type", "application/octet-stream")
+
+	c.FileAttachment(localPath, filename)
+
 	c.Status(http.StatusOK)
 }

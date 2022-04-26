@@ -181,7 +181,6 @@ func CreateFileAsset(c *gin.Context) {
 		return
 	}
 	body, err := ioutil.ReadAll(resp.Body)
-	log.Printf("BODY: %v", string(body))
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
@@ -281,6 +280,60 @@ func ModelDeleteAsset(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{})
+}
+
+func DownloadAsset(c *gin.Context) {
+	assetID := c.Param("id")
+
+	requestURL := fmt.Sprintf("%v/api/asset/file/%v", config.Config.APIServerURL, assetID)
+	response, err := http.Get(requestURL)
+
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+	}
+
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+
+	reader := response.Body
+	defer reader.Close()
+	contentLength := response.ContentLength
+	contentType := response.Header.Get("Content-Type")
+
+	extraHeaders := make(map[string]string)
+	for name, values := range response.Header {
+		if name == "Content-Type" {
+			continue
+		}
+		extraHeaders[name] = values[0]
+	}
+
+	delete(extraHeaders, "Content-Type")
+
+	c.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
+}
+
+func SyncGitAsset(c *gin.Context) {
+	assetID := c.Param("id")
+	asset, err := action.GetAssetByID(assetID)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	requestURL := fmt.Sprintf("%v/api/asset/git/sync", config.Config.APIServerURL)
+	json_data, err := json.Marshal(asset)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	resp, err := http.Post(requestURL, "application/json", bytes.NewBuffer(json_data))
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(resp.StatusCode, gin.H{})
 }
 
 func CreateNewModel(c *gin.Context) {
@@ -402,6 +455,39 @@ func UpdateModel(c *gin.Context) {
 	c.Status(resp.StatusCode)
 }
 
+func DownloadModel(c *gin.Context) {
+	modelID := c.Param("id")
+
+	requestURL := fmt.Sprintf("%v/api/model/archive/%v", config.Config.APIServerURL, modelID)
+	response, err := http.Get(requestURL)
+
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+	}
+
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+
+	reader := response.Body
+	defer reader.Close()
+	contentLength := response.ContentLength
+	contentType := response.Header.Get("Content-Type")
+
+	extraHeaders := make(map[string]string)
+	for name, values := range response.Header {
+		if name == "Content-Type" {
+			continue
+		}
+		extraHeaders[name] = values[0]
+	}
+
+	delete(extraHeaders, "Content-Type")
+
+	c.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
+}
+
 func GetReleases(c *gin.Context) {
 	var obj []map[string]interface{}
 
@@ -463,7 +549,6 @@ func GetRelease(c *gin.Context) {
 
 func CreateRelease(c *gin.Context) {
 	snapshotID := c.Param("id")
-	log.Printf("SNAPSHOT ID: %v", snapshotID)
 
 	var obj map[string]interface{}
 
@@ -472,7 +557,6 @@ func CreateRelease(c *gin.Context) {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	log.Printf("SNAPSHOT: %v", snapshot)
 
 	requestURL := fmt.Sprintf("%v/api/release/snapshot", config.Config.APIServerURL)
 
@@ -497,6 +581,39 @@ func CreateRelease(c *gin.Context) {
 		return
 	}
 	c.JSON(resp.StatusCode, obj)
+}
+
+func DownloadRelease(c *gin.Context) {
+	releaseID := c.Param("id")
+
+	requestURL := fmt.Sprintf("%v/api/release/archive/%v", config.Config.APIServerURL, releaseID)
+	response, err := http.Get(requestURL)
+
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+	}
+
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+
+	reader := response.Body
+	defer reader.Close()
+	contentLength := response.ContentLength
+	contentType := response.Header.Get("Content-Type")
+
+	extraHeaders := make(map[string]string)
+	for name, values := range response.Header {
+		if name == "Content-Type" {
+			continue
+		}
+		extraHeaders[name] = values[0]
+	}
+
+	delete(extraHeaders, "Content-Type")
+
+	c.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
 }
 
 func GetSnapshots(c *gin.Context) {
@@ -620,4 +737,37 @@ func UpdateSnapshot(c *gin.Context) {
 		return
 	}
 	c.Status(resp.StatusCode)
+}
+
+func DownloadSnapshot(c *gin.Context) {
+	snapshotID := c.Param("id")
+
+	requestURL := fmt.Sprintf("%v/api/snapshot/archive/%v", config.Config.APIServerURL, snapshotID)
+	response, err := http.Get(requestURL)
+
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+	}
+
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+
+	reader := response.Body
+	defer reader.Close()
+	contentLength := response.ContentLength
+	contentType := response.Header.Get("Content-Type")
+
+	extraHeaders := make(map[string]string)
+	for name, values := range response.Header {
+		if name == "Content-Type" {
+			continue
+		}
+		extraHeaders[name] = values[0]
+	}
+
+	delete(extraHeaders, "Content-Type")
+
+	c.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
 }

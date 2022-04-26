@@ -7,7 +7,7 @@ var models
 
 function getModels() {
     $.ajax({
-        url: "/script/api/model",
+        url: "/api/model",
         type: "GET",
         success: function (result) {
             models = result
@@ -71,7 +71,7 @@ function createModel() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/script/api/model",
+        url: "/api/model",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(data),

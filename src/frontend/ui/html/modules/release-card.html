@@ -3,9 +3,12 @@
         <div class="w3-container velocimodel-blue w3-round release-title">
             <div class="card-title-bar">
                 <input readonly id="release-name" class="w3-input card-title name-field dark theme-text-light" type="text" value="{{ .release.name }}">
-                <a href="/ui/release/{{ .release.id }}/code" class="icon" style="margin-top:10px;color:#fff;">
+                <a href="/ui/release/{{ .release.id }}/code" class="icon" style="margin-top:10px;">
                     <i class="fa-solid fa-code w3-large"></i>
                 </a>
+                <div class="icon" style="margin-top:10px;">
+                    <i class="fa-solid fa-download w3-large pointer-cursor" onclick="downloadRelease('/api/release/archive/{{ .release.id }}')"></i>
+                </div>
             </div>
         </div>
     </div>
@@ -50,7 +53,7 @@
             <button type="button" class="collapsible dark theme-light theme-hover-base w3-border-bottom theme-border-base">
                 <span style="float:left;">{{ .id }}</span>
                 <a href="/ui/asset/{{ .id }}" style="float:right;margin-right:8px;" class="dark theme-text">
-                    <i class="fa-solid fa-link"></i>
+                    <i class="fa-solid fa-link pointer-cursor"></i>
                 </a>
                 <span style="float:right;margin-right:8px;">{{ .type }}</span>
             </button>

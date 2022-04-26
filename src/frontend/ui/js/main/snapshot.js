@@ -50,7 +50,7 @@ function saveSnapshot() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/script/api/snapshot/" + snapshotID,
+        url: "/api/snapshot/" + snapshotID,
         type: "PUT",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -76,7 +76,7 @@ function createRelease() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/script/api/snapshot/" + snapshotID + "/release",
+        url: "/api/snapshot/" + snapshotID + "/release",
         type: "POST",
         success: function(response) {
             $("#spinner").css("display", "none")
@@ -101,7 +101,7 @@ function createRelease() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/script/api/snapshot/" + snapshotID + "/release",
+        url: "/api/snapshot/" + snapshotID + "/release",
         type: "POST",
         success: function(response) {
             $("#spinner").css("display", "none")
@@ -116,4 +116,13 @@ function createRelease() {
             openModal('error-modal')
         }
     });
+}
+
+function downloadSnapshot(url) {
+    const a = document.createElement('a')
+    a.href = url
+    a.download = url.split('/').pop()
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
 }

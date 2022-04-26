@@ -1,6 +1,7 @@
 {
     "basepath": "http://localhost:9000",
-    "apiserver": "http://localhost:9004",
+    "apiserver": "http://api-server:9004",
     "git_email": "velocimodel@gmail.com",
-    "git_name": "VelociModel"
+    "git_name": "VelociModel",
+    "asset_cron_string": "@every 5m"
 }

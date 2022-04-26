@@ -7,7 +7,7 @@ var assets
 
 function getAssets() {
     $.ajax({
-        url: "/script/api/asset",
+        url: "/api/asset",
         type: "GET",
         success: function (result) {
             assets = result
@@ -76,7 +76,7 @@ function addGitAsset() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/script/api/asset/git",
+        url: "/api/asset/git",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -102,7 +102,7 @@ function addFileAsset() {
     modelID = parts[parts.length - 1]
 
     $('#file-form').ajaxSubmit({
-        url : '/script/api/asset/file',
+        url : '/api/asset/file',
         type: "POST",
         success : function (response) {
             $("#spinner").css("display", "none")

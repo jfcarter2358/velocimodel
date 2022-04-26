@@ -18,5 +18,6 @@ func initializeRoutes() {
 		apiRoutes.POST("/asset/file", api.CreateFileAsset)
 		apiRoutes.GET("/asset/file/:id", api.DownloadFileAsset)
 		apiRoutes.POST("/asset/git", api.CreateGitAsset)
+		apiRoutes.POST("/asset/git/sync", api.SyncGitAsset)
 	}
 }

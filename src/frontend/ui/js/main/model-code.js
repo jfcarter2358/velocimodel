@@ -15,7 +15,7 @@ function saveModel() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/script/api/model/" + modelID,
+        url: "/api/model/" + modelID,
         type: "PUT",
         contentType: 'application/json',
         data: JSON.stringify(data),

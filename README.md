@@ -18,12 +18,12 @@ Velocimodel is a comprehensive open-source model operations solution. It allows 
    - [x] service registry
    - [x] config storage
    - [x] secret storage
-- [ ] asset-manager
+- [x] asset-manager
    - [x] asset registry
    - [x] local file upload
    - [x] local file download
-   - [ ] automatic git sync
-   - [ ] manual git sync
+   - [x] automatic git sync
+   - [x] manual git sync
    - [x] git asset creation
    - [x] pull config from service-manager
 - [x] model-manager
@@ -31,11 +31,11 @@ Velocimodel is a comprehensive open-source model operations solution. It allows 
    - [x] model snapshots
    - [x] model releases
    - [x] pull config from service-manager
-   - [ ] model download
-   - [ ] snapshot download
-   - [ ] release download
+   - [x] model download
+   - [x] snapshot download
+   - [x] release download
 - [x] api-server
-- [ ] frontend
+- [x] frontend
    - [x] dashboard
    - [x] model view
    - [x] model edit
@@ -44,16 +44,16 @@ Velocimodel is a comprehensive open-source model operations solution. It allows 
    - [x] model add new file asset
    - [x] model add new git asset
    - [x] model delete asset
-   - [ ] model download
+   - [x] model download
    - [x] model code save
    - [x] snapshot view
    - [x] snapshot edit
    - [x] snapshot creation
-   - [ ] snapshot download
+   - [x] snapshot download
    - [x] snapshot code save
    - [x] release view
    - [x] release creation
-   - [ ] release download
+   - [x] release download
    - [x] asset view
    - [x] asset edit
    - [x] asset download
@@ -63,32 +63,39 @@ Velocimodel is a comprehensive open-source model operations solution. It allows 
 
 **v0.2.0**
 
-- [ ] UI param view
-- [ ] UI param edit
-- [ ] UI secret view
-- [ ] UI secret edit
-- [ ] oauth provider
-- [ ] SSH git clone support
-- [ ] Automated service health pings
-- [ ] Service status badge
+- [ ] frontend
+   - [ ] param view
+   - [ ] param edit
+   - [ ] secret view
+   - [ ] secret edit
+   - [ ] Service status badge
+- [ ] auth-manager
+- [ ] asset-manager
+   - [ ] SSH git clone support
+- [ ] service-manager
+   - [ ] Automated service health pings
+
 
 **v0.3.0**
 
 - [ ] automation-manager
 - [ ] runtime-manager
-- [ ] model runtime
+- [ ] model-runtime
 
 **v0.4.0**
 
-- [ ] asset-manager S3 integration
+- [ ] asset-manager
+   - [ ] S3 integration
 
 **v0.5.0**
 
-- [ ] asset-manager Artifactory integration
+- [ ] asset-manager
+   - [ ] Artifactory integration
 
 **v0.6.0**
 
-- [ ] asset-manager Azure Blob Store integration
+- [ ] asset-manager
+   - [ ] Azure Blob Store integration
 
 **v1.0.0**
 

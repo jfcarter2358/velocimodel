@@ -6,7 +6,7 @@ var releases
 
 function getReleases() {
     $.ajax({
-        url: "/script/api/release",
+        url: "/api/release",
         type: "GET",
         success: function (result) {
             releases = result
@@ -81,7 +81,7 @@ function createReleaseFromSnapshot(snapshotID) {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/script/api/snapshot/" + snapshotID + "/release",
+        url: "/api/snapshot/" + snapshotID + "/release",
         type: "POST",
         success: function(response) {
             $("#spinner").css("display", "none")

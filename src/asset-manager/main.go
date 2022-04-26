@@ -6,11 +6,13 @@ import (
 	// "os"
 
 	"asset-manager/api"
+	"asset-manager/asset"
 	"asset-manager/ceresdb"
 	"asset-manager/config"
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -18,12 +20,37 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jfcarter2358/ceresdb-go/connection"
+	"github.com/robfig/cron"
 
 	"github.com/sirupsen/logrus"
 	ginlogrus "github.com/toorop/gin-logrus"
 )
 
+var c cron.Cron
 var router *gin.Engine
+
+func checkAssetSync() {
+	assets, err := asset.GetAssets("0", "", "false")
+	if err != nil {
+		log.Printf("Git sync error: %v", err)
+		return
+	}
+	for _, assetMap := range assets {
+		jsonbody, err := json.Marshal(assetMap)
+		if err != nil {
+			log.Printf("Git sync error: %v", err)
+			return
+		}
+
+		input := asset.Asset{}
+		if err := json.Unmarshal(jsonbody, &input); err != nil {
+			log.Printf("Git sync error: %v", err)
+			return
+		}
+
+		asset.DoGitSync(input)
+	}
+}
 
 func main() {
 	// Set Gin to production mode
@@ -89,6 +116,10 @@ func main() {
 	// Set the router as the default one provided by Gin
 	router = gin.Default()
 	router.Use(ginlogrus.Logger(log), gin.Recovery())
+
+	c := cron.New()
+	c.AddFunc(config.Params["asset_cron_string"].(string), checkAssetSync)
+	c.Start()
 
 	// Initialize the routes
 	initializeRoutes()

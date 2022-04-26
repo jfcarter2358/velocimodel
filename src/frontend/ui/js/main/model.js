@@ -4,6 +4,18 @@
 
 var tagify
 
+document.addEventListener("DOMContentLoaded", function (event) {
+    var scrollpos = sessionStorage.getItem('velocimodelscrollpos');
+    if (scrollpos) {
+        window.scrollTo(0, scrollpos);
+        sessionStorage.removeItem('velocimodelscrollpos');
+    }
+});
+
+window.addEventListener("beforeunload", function (e) {
+    sessionStorage.setItem('velocimodelscrollpos', window.scrollY);
+});
+
 $(document).ready(
     function() {
         var input = document.getElementById('tag-input'),
@@ -56,7 +68,7 @@ function saveModel() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/script/api/model/" + modelID,
+        url: "/api/model/" + modelID,
         type: "PUT",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -82,7 +94,7 @@ function createSnapshot() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/script/api/model/" + modelID + "/snapshot",
+        url: "/api/model/" + modelID + "/snapshot",
         type: "POST",
         success: function(response) {
             $("#spinner").css("display", "none")
@@ -127,7 +139,7 @@ function addExistingAsset(assetID) {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/script/api/model/asset",
+        url: "/api/model/asset",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -161,7 +173,7 @@ function deleteAsset(assetID) {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/script/api/model/asset",
+        url: "/api/model/asset",
         type: "DELETE",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -194,7 +206,7 @@ function addGitAsset() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/script/api/asset/git",
+        url: "/api/asset/git",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -205,7 +217,7 @@ function addGitAsset() {
                 "asset": assetID
             }
             $.ajax({
-                url: "/script/api/model/asset",
+                url: "/api/model/asset",
                 type: "POST",
                 contentType: 'application/json',
                 data: JSON.stringify(addAssetData),
@@ -240,7 +252,7 @@ function addFileAsset() {
     modelID = parts[parts.length - 1]
 
     $('#file-form').ajaxSubmit({
-        url : '/script/api/asset/file',
+        url : '/api/asset/file',
         type: "POST",
         success : function (response) {
             assetID = response["id"]
@@ -249,7 +261,7 @@ function addFileAsset() {
                 "asset": assetID
             }
             $.ajax({
-                url: "/script/api/model/asset",
+                url: "/api/model/asset",
                 type: "POST",
                 contentType: 'application/json',
                 data: JSON.stringify(addAssetData),
@@ -307,4 +319,35 @@ function filterFunction() {
             trs[i].style.display = "none";
         }
     }
+}
+
+function downloadModel(url) {
+    const a = document.createElement('a')
+    a.href = url
+    a.download = url.split('/').pop()
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+}
+
+function syncGitAsset(assetID) {
+    $("#spinner").css("display", "block")
+    $("#page-darken").css("opacity", "1")
+
+    $.ajax({
+        url: "/api/asset/git/sync/" + assetID,
+        type: "POST",
+        success: function(response) {
+            $("#spinner").css("display", "none")
+            $("#page-darken").css("opacity", "0")
+            window.location.reload();
+        },
+        error: function(response) {
+            console.log(response)
+            $("#log-container").text(response.responseJSON['error'])
+            $("#spinner").css("display", "none")
+            $("#page-darken").css("opacity", "0")
+            openModal('error-modal')
+        }
+    });
 }

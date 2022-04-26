@@ -15,7 +15,7 @@ function saveAsset() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/script/api/asset/" + assetID,
+        url: "/api/asset/" + assetID,
         type: "PUT",
         contentType: 'application/json',
         data: JSON.stringify(data),

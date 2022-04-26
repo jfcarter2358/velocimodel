@@ -1,6 +1,7 @@
 package api
 
 import (
+	"asset-manager/action"
 	"asset-manager/asset"
 	"asset-manager/config"
 	"asset-manager/utils"
@@ -245,14 +246,14 @@ func CreateGitAsset(c *gin.Context) {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	commitID := out
+	commitID := out[1 : len(out)-2]
 	out, err = exec.Command("git", "-C", dir, "show", "-s", "--date=format:'%Y-%m-%dT%H:%M:%SZ'", "--format=%cd").CombinedOutput()
 	if err != nil {
 		log.Printf("Git show: %v", string(out))
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
-	commitTimestamp := out
+	commitTimestamp := out[1 : len(out)-2]
 
 	// Get the structure of the repo
 	tree := make(map[string]interface{})
@@ -266,9 +267,9 @@ func CreateGitAsset(c *gin.Context) {
 			return nil
 		}
 		if info.IsDir() {
-			tree = recurseAddTree(tree, keys, "dir")
+			tree = action.RecurseAddTree(tree, keys, "dir")
 		} else {
-			tree = recurseAddTree(tree, keys, "file")
+			tree = action.RecurseAddTree(tree, keys, "file")
 		}
 		return nil
 	}
@@ -285,13 +286,13 @@ func CreateGitAsset(c *gin.Context) {
 	assetData := asset.Asset{
 		ID:   fileID,
 		URL:  input.Repo,
-		Name: uuid.New().String(),
+		Name: fileID,
 		Type: "git",
 		Tags: make([]string, 0),
 		Metadata: map[string]interface{}{
-			"commit":           commitID,
+			"commit":           string(commitID),
 			"branch":           input.Branch,
-			"commitTimestamp":  commitTimestamp,
+			"commitTimestamp":  string(commitTimestamp),
 			"refreshTimestamp": currentTime.Format("2006-01-02T15:04:05Z"),
 			"structure":        tree,
 			"credential":       input.Credential,
@@ -304,6 +305,19 @@ func CreateGitAsset(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"id": fileID})
+}
+
+func SyncGitAsset(c *gin.Context) {
+	var input asset.Asset
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	if err := asset.DoGitSync(input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
 }
 
 func DownloadFileAsset(c *gin.Context) {
@@ -329,23 +343,4 @@ func DownloadFileAsset(c *gin.Context) {
 	c.FileAttachment(localPath, filename)
 
 	c.Status(http.StatusOK)
-}
-
-func recurseAddTree(tree map[string]interface{}, keys []string, fileType string) map[string]interface{} {
-	if len(keys) == 1 {
-		if fileType == "file" {
-			tree[keys[0]] = "file"
-		} else {
-			if tree[keys[0]] == nil {
-				tree[keys[0]] = make(map[string]interface{})
-			}
-		}
-	} else {
-		if tree[keys[0]] != nil {
-			tree[keys[0]] = recurseAddTree(tree[keys[0]].(map[string]interface{}), keys[1:], fileType)
-		} else {
-			tree[keys[0]] = recurseAddTree(make(map[string]interface{}), keys[1:], fileType)
-		}
-	}
-	return tree
 }

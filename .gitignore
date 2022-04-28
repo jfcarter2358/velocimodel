@@ -5,5 +5,5 @@
 /src/frontend/ui-dist
 /release
 /test.sh
-/data/secrets.json
-/data/config.json
+/data/service-manager/secrets.json
+/data/service-manager/config.json

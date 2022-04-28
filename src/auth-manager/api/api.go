@@ -103,7 +103,6 @@ func HashAndSalt(pwd []byte) string {
 func UserInfo(c *gin.Context) {
 	if len(c.Request.Header["Authorization"]) > 0 {
 		if val, ok := c.Request.Header["Authorization"]; ok {
-			log.Printf("VAL: %v", val)
 			authToken := strings.Split(val[0], " ")[1]
 
 			// Parse and verify jwt access token

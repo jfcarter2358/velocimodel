@@ -2,12 +2,15 @@ package action
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"frontend/config"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+
+	"github.com/gin-gonic/gin"
 )
 
 func GetAssetByID(assetID string) (map[string]interface{}, error) {
@@ -639,4 +642,34 @@ func Contains(s []string, e string) bool {
 		}
 	}
 	return false
+}
+
+func GetUserData(c *gin.Context) (map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
+	client := http.Client{}
+	requestURL := "http://auth-manager:9005/oauth/userinfo"
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, errors.New(fmt.Sprintf("Status code was :%v, not 200", res.StatusCode))
+	}
+	var obj map[string]interface{}
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		return nil, err
+	}
+	return obj, nil
 }

@@ -118,7 +118,6 @@ func main() {
 
 	router = gin.Default()
 	router.LoadHTMLGlob("html/*.html")
-	router.Use(middleware.SetUserStatus())
 	router.Use(middleware.CORSMiddleware())
 
 	user.CreateNewUser("Admin", "Admin", config.Config.Admin.Username, config.Config.Admin.Password, "admin@admin.com", []string{"read", "write", "admin"}, []string{"admin"})

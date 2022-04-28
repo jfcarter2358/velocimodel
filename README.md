@@ -90,6 +90,9 @@ to bring up the services and navigate to `http://localhost:9000` to view the UI.
    - [ ] param edit
    - [ ] secret view
    - [ ] secret edit
+   - [ ] user edit view
+   - [ ] user create view
+   - [ ] user delete view
    - [ ] Service status badge
 - [ ] auth-manager
 - [ ] asset-manager

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -40,7 +39,6 @@ func LoginGetHandler(c *gin.Context) {
 }
 
 func AuthGetHandler(c *gin.Context) {
-	log.Printf("AUTH QUERY PARAMS: %v", c.Request.URL.Query())
 	store, err := session.Start(nil, c.Writer, c.Request)
 	if err != nil {
 		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
@@ -54,6 +52,14 @@ func AuthGetHandler(c *gin.Context) {
 	}
 
 	render(c, gin.H{}, "auth.html")
+}
+
+func Handler401(c *gin.Context) {
+	render(c, gin.H{}, "401.html")
+}
+
+func Handler404(c *gin.Context) {
+	render(c, gin.H{}, "404.html")
 }
 
 func LocalLoginHandler(c *gin.Context) {

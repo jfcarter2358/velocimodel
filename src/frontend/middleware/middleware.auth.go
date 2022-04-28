@@ -24,7 +24,7 @@ func EnsureLoggedIn() gin.HandlerFunc {
 		log.Printf("ERROR: %v", err)
 		if err != nil {
 			log.Println("ACCESS TOKEN DOES NOT EXIST")
-			c.Redirect(307, "/ui/login")
+			c.Redirect(307, "/auth/login")
 			return
 		}
 		client := http.Client{}
@@ -37,12 +37,12 @@ func EnsureLoggedIn() gin.HandlerFunc {
 		res, err := client.Do(req)
 		if err != nil {
 			log.Printf("Error on checking userinfo: %v", err)
-			c.Redirect(307, "/ui/login")
+			c.Redirect(307, "/auth/login")
 			return
 		}
 		if res.StatusCode != http.StatusOK {
 			log.Printf("Token is invalid: %v", err)
-			c.Redirect(307, "/ui/login")
+			c.Redirect(307, "/auth/login")
 			return
 		}
 	}

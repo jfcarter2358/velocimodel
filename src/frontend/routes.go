@@ -7,6 +7,9 @@ import (
 	"frontend/auth"
 	"frontend/middleware"
 	"frontend/page"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func initializeRoutes() {
@@ -15,6 +18,10 @@ func initializeRoutes() {
 	router.Static("/static/js", "./static/js")
 
 	router.GET("/", page.RedirectIndexPage)
+
+	router.NoRoute(func(c *gin.Context) {
+		c.HTML(http.StatusNotFound, "404.html", gin.H{})
+	})
 
 	apiRoutes := router.Group("/api")
 	{
@@ -46,7 +53,6 @@ func initializeRoutes() {
 	uiRoutes := router.Group("/ui")
 	{
 		uiRoutes.GET("/assets", middleware.EnsureLoggedIn(), page.ShowAssetsPage)
-		uiRoutes.GET("/login", auth.HandleLogin)
 		uiRoutes.GET("/asset/:id", middleware.EnsureLoggedIn(), page.ShowAssetPage)
 		uiRoutes.GET("/asset/:id/code", middleware.EnsureLoggedIn(), page.ShowAssetCodePage)
 		uiRoutes.GET("/dashboard", middleware.EnsureLoggedIn(), page.ShowDashboardPage)
@@ -64,5 +70,7 @@ func initializeRoutes() {
 	authRoutes := router.Group("/auth")
 	{
 		authRoutes.GET("/redirect", auth.HandleRedirect)
+		authRoutes.GET("/login", auth.HandleLogin)
+		authRoutes.GET("/logout", auth.HandleLogout)
 	}
 }

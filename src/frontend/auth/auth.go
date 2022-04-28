@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"errors"
-	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -66,8 +65,13 @@ func HandleLogin(c *gin.Context) {
 		oauth2.SetAuthURLParam("code_challenge", genCodeChallengeS256(CODE_CHALLENGE)),
 		oauth2.SetAuthURLParam("code_challenge_method", "S256"),
 	)
-	log.Printf("REDIRECT URL LOGIN: %v", url)
 	c.Redirect(http.StatusFound, url)
+}
+
+func HandleLogout(c *gin.Context) {
+	c.SetCookie("access_token", "", 0, "/", "localhost", true, false)
+	c.SetCookie("refresh_token", "", 0, "/", "localhost", true, false)
+	c.Redirect(http.StatusFound, "/auth/login")
 }
 
 func genCodeChallengeS256(s string) string {

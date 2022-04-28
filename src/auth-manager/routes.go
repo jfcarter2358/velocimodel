@@ -136,6 +136,10 @@ func initializeRoutes() {
 		c.Data(http.StatusOK, "application/json", jsonData)
 	})
 
+	router.NoRoute(func(c *gin.Context) {
+		c.HTML(http.StatusNotFound, "404.html", gin.H{})
+	})
+
 	uRoutes := router.Group("/u")
 	{
 		uRoutes.GET("/login", middleware.EnsureNotLoggedIn(), handlers.LocalLoginHandler)
@@ -150,15 +154,17 @@ func initializeRoutes() {
 		uiRoutes.GET("/delete", middleware.EnsureLoggedIn(), middleware.EnsureGroupAllowed("admin"), handlers.DeleteHandler)
 		uiRoutes.GET("/edit", middleware.EnsureLoggedIn(), handlers.EditIndexHandler)
 		uiRoutes.GET("/edit/*id", middleware.EnsureLoggedIn(), middleware.EnsureGroupAllowed("admin"), handlers.EditHandler)
+		uiRoutes.GET("/401", handlers.Handler401)
+		uiRoutes.GET("/404", handlers.Handler404)
 	}
 
 	apiRoutes := router.Group("/api")
 	{
-		apiRoutes.GET("/user", middleware.EnsureLoggedInAbort(), api.UserGetAllHandler)
-		apiRoutes.GET("/user/:id", middleware.EnsureLoggedInAbort(), api.UserGetByIdHandler)
-		apiRoutes.DELETE("/user/:id", middleware.EnsureLoggedInAbort(), api.UserDeleteHandler)
-		apiRoutes.POST("/user/:id", middleware.EnsureLoggedInAbort(), api.UserUpdateHandler)
-		apiRoutes.POST("/user", middleware.EnsureLoggedInAbort(), api.UserCreateHandler)
+		apiRoutes.GET("/user", middleware.EnsureLoggedIn(), api.UserGetAllHandler)
+		apiRoutes.GET("/user/:id", middleware.EnsureLoggedIn(), api.UserGetByIdHandler)
+		apiRoutes.DELETE("/user/:id", middleware.EnsureLoggedIn(), api.UserDeleteHandler)
+		apiRoutes.POST("/user/:id", middleware.EnsureLoggedIn(), api.UserUpdateHandler)
+		apiRoutes.POST("/user", middleware.EnsureLoggedIn(), api.UserCreateHandler)
 	}
 
 	oauthRoutes := router.Group("/oauth")

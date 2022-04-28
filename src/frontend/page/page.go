@@ -38,11 +38,30 @@ func ShowDashboardPage(c *gin.Context) {
 		return
 	}
 
+	userData, err := action.GetUserData(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	isAdminRole := false
+	roles := strings.Split(userData["roles"].(string), ",")
+	if StringSliceContains(roles, "admin") {
+		isAdminRole = true
+	}
+	isAdminGroup := false
+	groups := strings.Split(userData["groups"].(string), ",")
+	if StringSliceContains(groups, "admin") {
+		isAdminGroup = true
+	}
+
 	render(c, gin.H{
-		"assets":    assets,
-		"models":    models,
-		"releases":  releases,
-		"snapshots": snapshots},
+		"assets":         assets,
+		"models":         models,
+		"releases":       releases,
+		"snapshots":      snapshots,
+		"user_data":      userData,
+		"is_admin_role":  isAdminRole,
+		"is_admin_group": isAdminGroup},
 		"dashboard.html")
 }
 
@@ -81,11 +100,30 @@ func ShowAssetPage(c *gin.Context) {
 	tagJSON, _ := json.Marshal(tagObj)
 	metadataJSON, _ := json.MarshalIndent(asset["metadata"], "", "    ")
 
+	userData, err := action.GetUserData(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	isAdminRole := false
+	roles := strings.Split(userData["roles"].(string), ",")
+	if StringSliceContains(roles, "admin") {
+		isAdminRole = true
+	}
+	isAdminGroup := false
+	groups := strings.Split(userData["groups"].(string), ",")
+	if StringSliceContains(groups, "admin") {
+		isAdminGroup = true
+	}
+
 	render(c, gin.H{
-		"asset":         asset,
-		"models":        models,
-		"tag_json":      string(tagJSON),
-		"metadata_json": string(metadataJSON)},
+		"asset":          asset,
+		"models":         models,
+		"tag_json":       string(tagJSON),
+		"metadata_json":  string(metadataJSON),
+		"user_data":      userData,
+		"is_admin_role":  isAdminRole,
+		"is_admin_group": isAdminGroup},
 		"asset.html")
 }
 
@@ -113,9 +151,28 @@ func ShowAssetsPage(c *gin.Context) {
 	}
 	sort.Strings(credentials)
 
+	userData, err := action.GetUserData(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	isAdminRole := false
+	roles := strings.Split(userData["roles"].(string), ",")
+	if StringSliceContains(roles, "admin") {
+		isAdminRole = true
+	}
+	isAdminGroup := false
+	groups := strings.Split(userData["groups"].(string), ",")
+	if StringSliceContains(groups, "admin") {
+		isAdminGroup = true
+	}
+
 	render(c, gin.H{
-		"assets":      assets,
-		"credentials": credentials},
+		"assets":         assets,
+		"credentials":    credentials,
+		"user_data":      userData,
+		"is_admin_role":  isAdminRole,
+		"is_admin_group": isAdminGroup},
 		"assets.html")
 }
 
@@ -142,10 +199,29 @@ func ShowAssetCodePage(c *gin.Context) {
 
 	jsonString, _ := json.Marshal(asset)
 
+	userData, err := action.GetUserData(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	isAdminRole := false
+	roles := strings.Split(userData["roles"].(string), ",")
+	if StringSliceContains(roles, "admin") {
+		isAdminRole = true
+	}
+	isAdminGroup := false
+	groups := strings.Split(userData["groups"].(string), ",")
+	if StringSliceContains(groups, "admin") {
+		isAdminGroup = true
+	}
+
 	render(c, gin.H{
-		"asset_id":   assetID,
-		"asset_json": string(jsonString),
-		"asset":      asset},
+		"asset_id":       assetID,
+		"asset_json":     string(jsonString),
+		"asset":          asset,
+		"user_data":      userData,
+		"is_admin_role":  isAdminRole,
+		"is_admin_group": isAdminGroup},
 		"asset-code.html")
 }
 
@@ -240,15 +316,34 @@ func ShowModelPage(c *gin.Context) {
 	tagJSON, _ := json.Marshal(tagObj)
 	metadataJSON, _ := json.MarshalIndent(model["metadata"], "", "    ")
 
+	userData, err := action.GetUserData(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	isAdminRole := false
+	roles := strings.Split(userData["roles"].(string), ",")
+	if StringSliceContains(roles, "admin") {
+		isAdminRole = true
+	}
+	isAdminGroup := false
+	groups := strings.Split(userData["groups"].(string), ",")
+	if StringSliceContains(groups, "admin") {
+		isAdminGroup = true
+	}
+
 	render(c, gin.H{
-		"model":         model,
-		"assets":        assets,
-		"snapshots":     snapshots,
-		"releases":      releases,
-		"credentials":   credentials,
-		"all_assets":    allAssets,
-		"tag_json":      string(tagJSON),
-		"metadata_json": string(metadataJSON)},
+		"model":          model,
+		"assets":         assets,
+		"snapshots":      snapshots,
+		"releases":       releases,
+		"credentials":    credentials,
+		"all_assets":     allAssets,
+		"tag_json":       string(tagJSON),
+		"metadata_json":  string(metadataJSON),
+		"user_data":      userData,
+		"is_admin_role":  isAdminRole,
+		"is_admin_group": isAdminGroup},
 		"model.html")
 }
 
@@ -259,8 +354,27 @@ func ShowModelsPage(c *gin.Context) {
 		return
 	}
 
+	userData, err := action.GetUserData(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	isAdminRole := false
+	roles := strings.Split(userData["roles"].(string), ",")
+	if StringSliceContains(roles, "admin") {
+		isAdminRole = true
+	}
+	isAdminGroup := false
+	groups := strings.Split(userData["groups"].(string), ",")
+	if StringSliceContains(groups, "admin") {
+		isAdminGroup = true
+	}
+
 	render(c, gin.H{
-		"models": models},
+		"models":         models,
+		"user_data":      userData,
+		"is_admin_role":  isAdminRole,
+		"is_admin_group": isAdminGroup},
 		"models.html")
 }
 
@@ -287,10 +401,29 @@ func ShowModelCodePage(c *gin.Context) {
 
 	jsonString, _ := json.Marshal(model)
 
+	userData, err := action.GetUserData(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	isAdminRole := false
+	roles := strings.Split(userData["roles"].(string), ",")
+	if StringSliceContains(roles, "admin") {
+		isAdminRole = true
+	}
+	isAdminGroup := false
+	groups := strings.Split(userData["groups"].(string), ",")
+	if StringSliceContains(groups, "admin") {
+		isAdminGroup = true
+	}
+
 	render(c, gin.H{
-		"model_id":   modelID,
-		"model_json": string(jsonString),
-		"model":      model},
+		"model_id":       modelID,
+		"model_json":     string(jsonString),
+		"model":          model,
+		"user_data":      userData,
+		"is_admin_role":  isAdminRole,
+		"is_admin_group": isAdminGroup},
 		"model-code.html")
 }
 
@@ -329,11 +462,30 @@ func ShowReleasePage(c *gin.Context) {
 	tagJSON, _ := json.Marshal(tagObj)
 	metadataJSON, _ := json.MarshalIndent(release["metadata"], "", "    ")
 
+	userData, err := action.GetUserData(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	isAdminRole := false
+	roles := strings.Split(userData["roles"].(string), ",")
+	if StringSliceContains(roles, "admin") {
+		isAdminRole = true
+	}
+	isAdminGroup := false
+	groups := strings.Split(userData["groups"].(string), ",")
+	if StringSliceContains(groups, "admin") {
+		isAdminGroup = true
+	}
+
 	render(c, gin.H{
-		"release":       release,
-		"assets":        assets,
-		"tag_json":      string(tagJSON),
-		"metadata_json": string(metadataJSON)},
+		"release":        release,
+		"assets":         assets,
+		"tag_json":       string(tagJSON),
+		"metadata_json":  string(metadataJSON),
+		"user_data":      userData,
+		"is_admin_role":  isAdminRole,
+		"is_admin_group": isAdminGroup},
 		"release.html")
 }
 
@@ -360,9 +512,28 @@ func ShowReleasesPage(c *gin.Context) {
 		allSnapshots[idx] = val
 	}
 
+	userData, err := action.GetUserData(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	isAdminRole := false
+	roles := strings.Split(userData["roles"].(string), ",")
+	if StringSliceContains(roles, "admin") {
+		isAdminRole = true
+	}
+	isAdminGroup := false
+	groups := strings.Split(userData["groups"].(string), ",")
+	if StringSliceContains(groups, "admin") {
+		isAdminGroup = true
+	}
+
 	render(c, gin.H{
-		"releases":      releases,
-		"all_snapshots": allSnapshots},
+		"releases":       releases,
+		"all_snapshots":  allSnapshots,
+		"user_data":      userData,
+		"is_admin_role":  isAdminRole,
+		"is_admin_group": isAdminGroup},
 		"releases.html")
 }
 
@@ -389,10 +560,29 @@ func ShowReleaseCodePage(c *gin.Context) {
 
 	jsonString, _ := json.Marshal(release)
 
+	userData, err := action.GetUserData(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	isAdminRole := false
+	roles := strings.Split(userData["roles"].(string), ",")
+	if StringSliceContains(roles, "admin") {
+		isAdminRole = true
+	}
+	isAdminGroup := false
+	groups := strings.Split(userData["groups"].(string), ",")
+	if StringSliceContains(groups, "admin") {
+		isAdminGroup = true
+	}
+
 	render(c, gin.H{
-		"release_id":   releaseID,
-		"release_json": string(jsonString),
-		"release":      release},
+		"release_id":     releaseID,
+		"release_json":   string(jsonString),
+		"release":        release,
+		"user_data":      userData,
+		"is_admin_role":  isAdminRole,
+		"is_admin_group": isAdminGroup},
 		"release-code.html")
 }
 
@@ -441,12 +631,31 @@ func ShowSnapshotPage(c *gin.Context) {
 	tagJSON, _ := json.Marshal(tagObj)
 	metadataJSON, _ := json.MarshalIndent(snapshot["metadata"], "", "    ")
 
+	userData, err := action.GetUserData(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	isAdminRole := false
+	roles := strings.Split(userData["roles"].(string), ",")
+	if StringSliceContains(roles, "admin") {
+		isAdminRole = true
+	}
+	isAdminGroup := false
+	groups := strings.Split(userData["groups"].(string), ",")
+	if StringSliceContains(groups, "admin") {
+		isAdminGroup = true
+	}
+
 	render(c, gin.H{
-		"snapshot":      snapshot,
-		"assets":        assets,
-		"releases":      releases,
-		"tag_json":      string(tagJSON),
-		"metadata_json": string(metadataJSON)},
+		"snapshot":       snapshot,
+		"assets":         assets,
+		"releases":       releases,
+		"tag_json":       string(tagJSON),
+		"metadata_json":  string(metadataJSON),
+		"user_data":      userData,
+		"is_admin_role":  isAdminRole,
+		"is_admin_group": isAdminGroup},
 		"snapshot.html")
 }
 
@@ -473,9 +682,28 @@ func ShowSnapshotsPage(c *gin.Context) {
 		allModels[idx] = val
 	}
 
+	userData, err := action.GetUserData(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	isAdminRole := false
+	roles := strings.Split(userData["roles"].(string), ",")
+	if StringSliceContains(roles, "admin") {
+		isAdminRole = true
+	}
+	isAdminGroup := false
+	groups := strings.Split(userData["groups"].(string), ",")
+	if StringSliceContains(groups, "admin") {
+		isAdminGroup = true
+	}
+
 	render(c, gin.H{
-		"snapshots":  snapshots,
-		"all_models": allModels},
+		"snapshots":      snapshots,
+		"all_models":     allModels,
+		"user_data":      userData,
+		"is_admin_role":  isAdminRole,
+		"is_admin_group": isAdminGroup},
 		"snapshots.html")
 }
 
@@ -502,11 +730,30 @@ func ShowSnapshotCodePage(c *gin.Context) {
 
 	jsonString, _ := json.Marshal(snapshot)
 
+	userData, err := action.GetUserData(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	isAdminRole := false
+	roles := strings.Split(userData["roles"].(string), ",")
+	if StringSliceContains(roles, "admin") {
+		isAdminRole = true
+	}
+	isAdminGroup := false
+	groups := strings.Split(userData["groups"].(string), ",")
+	if StringSliceContains(groups, "admin") {
+		isAdminGroup = true
+	}
+
 	// Render the models.html page
 	render(c, gin.H{
-		"snapshot_id":   snapshotID,
-		"snapshot_json": string(jsonString),
-		"snapshot":      snapshot},
+		"snapshot_id":    snapshotID,
+		"snapshot_json":  string(jsonString),
+		"snapshot":       snapshot,
+		"user_data":      userData,
+		"is_admin_role":  isAdminRole,
+		"is_admin_group": isAdminGroup},
 		"snapshot-code.html")
 }
 
@@ -526,4 +773,13 @@ func render(c *gin.Context, data gin.H, templateName string) {
 		// Respond with HTML
 		c.HTML(http.StatusOK, templateName, data)
 	}
+}
+
+func StringSliceContains(list []string, item string) bool {
+	for _, v := range list {
+		if v == item {
+			return true
+		}
+	}
+	return false
 }

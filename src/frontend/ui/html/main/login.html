@@ -1,0 +1,47 @@
+<!doctype html>
+<html style="height:100%;min-height:100%;">
+
+<head>
+	<!-- import head.html -->
+	<!-- add custom css -->
+	<link rel="stylesheet" type="text/css" href="/static/css/login.css">
+</head>
+
+<body class="dark theme-base">
+	<div class="modal-content animate w3-border w3-border-black w3-card w3-round">
+		<div class="w3-container velocimodel-blue w3-round">
+			<div class="w3-center">
+				<h1 class="header-text"><b>VelociModel</b></h1>
+			</div>
+		</div>
+		<br>
+		<form class="w3-container" action="/auth/login" id="login_form" method="POST">
+			<div class="form-group">
+				<label for="username" class="label-text">Username</label>
+				<input type="text" class="form-control w3-round" id="username" name="username" placeholder="Username">
+			</div>
+			<div class="form-group">
+				<label for="password" class="label-text">Password</label>
+				<input type="password" class="form-control w3-round" id="password" name="password"
+					placeholder="Password">
+			</div>
+			<br>
+			<p class="w3-text-red">
+				{{ if .ErrorTitle}}
+				{{.ErrorTitle}}: {{.ErrorMessage}}
+				{{end}}
+			</p>
+			<br>
+			<div>
+				<button type="submit"
+					class="w3-button velocimodel-blue w3-round diagonal-shadow-grey"><b>Login</b></button>
+			</div>
+		</form>
+		<br>
+		<div class="w3-container velocimodel-blue w3-round">
+			<p style="float: left;" class="footer-text w3-text-white"><b>&copy; 2021 VelociModel</b></p>
+			<p style="float: right;" class="footer-text w3-text-white"><b>v0.1.0</b></p>
+		</div>
+	</div>
+
+</html>

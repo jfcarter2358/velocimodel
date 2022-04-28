@@ -1,0 +1,25 @@
+{
+    "http_port": 9005,
+    "http_host": "auth-manager",
+    "db_port": 7437,
+    "db_host": "ceresdb",
+    "db_username": "ceresdb",
+    "db_password": "ceresdb",
+    "db_name": "velocimodel",
+    "api_server_url": "http://api-server:9004",
+    "clients": [
+        {
+            "client_id": "velocimodel-frontend",
+            "client_secret": "abc123DEFghijklmnop4567rstuvwxyzZYXWUT8910SRQPOnmlijhoauthplaygroundapplication",
+            "redirect_url": "http://localhost:9000/auth/redirect"
+        }
+    ],
+    "ldap": {
+        "enabled": false
+    },
+    "admin": {
+        "username": "admin",
+        "password": "admin"
+    },
+    "url": "http://localhost:9005"
+}

@@ -1,0 +1,62 @@
+/* shadows */
+.moc-shadow {box-shadow:0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);}
+.moc-vertical-shadow {box-shadow: 0px 2px #444444;}
+.moc-horizontal-shadow {box-shadow: 2px 0px #444444;}
+.moc-diagonal-shadow {box-shadow: 2px 2px #444444;}
+.moc-vertical-shadow-grey {box-shadow: 0px 2px #aaaaaa;}
+.moc-horizontal-shadow-grey {box-shadow: 2px 0px #aaaaaa;}
+.moc-diagonal-shadow-grey {box-shadow: 2px 2px #aaaaaa;}
+
+/* primary brand colors */
+.moc-green,.moc-hover-green:hover{color:#fff!important;background-color:#10B26C!important}
+.moc-pastel-green,.moc-hover-pastel-green:hover{color:#000!important;background-color:#c1ead6!important}
+.moc-light-green,.moc-hover-light-green:hover{color:#000!important;background-color:#6ecc6e!important}
+.moc-dark-green,.moc-hover-dark-green:hover{color:#fff!important;background-color:#03331e!important}
+
+/* secondary brand colors */
+.moc-blue-green,.moc-hover-blue-green:hover{color:#fff!important;background-color:#075f68!important}
+.moc-orange,.moc-hover-orange:hover{color:#000!important;background-color:#f9b341!important}
+.moc-light-blue,.moc-hover-light-blue:hover{color:#000!important;background-color:#68c3d8!important}
+.moc-blue,.moc-hover-blue:hover{color:#fff!important;background-color:#2d6cd3!important}
+.moc-yellow,.moc-hover-yellow:hover{color:#000!important;background-color:#e5c645!important}
+.moc-forest-green,.moc-hover-forest-green:hover{color:#fff!important;background-color:#478400!important}
+.moc-red,.moc-hover-red:hover{color:#000!important;background-color:#ea5c5c!important}
+.moc-olive-green,.moc-hover-olive-green:hover{color:#000!important;background-color:#a2b290!important}
+
+.moc-grey,.moc-hover-grey:hover{color:#000!important;background-color:#aaaaaa!important}
+
+/* primary brand color text */
+.moc-text-green,.moc-hover-text-green:hover{color:#10B26C!important}
+.moc-text-pastel-green,.moc-hover-text-pastel-green:hover{color:#c1ead6!important}
+.moc-text-light-green,.moc-hover-text-light-green:hover{color:#6ecc6e!important}
+.moc-text-dark-green,.moc-hover-text-dark-green:hover{color:#03331e!important}
+
+/* secondary brand color text */
+.moc-text-blue-green,.moc-hover-text-blue-green:hover{color:#075f68!important}
+.moc-text-orange,.moc-hover-text-orange:hover{color:#f9b341!important}
+.moc-text-light-blue,.moc-hover-text-light-blue:hover{color:#68c3d8!important}
+.moc-text-blue,.moc-hover-text-blue:hover{color:#2d6cd3!important}
+.moc-text-yellow,.moc-hover-text-yellow:hover{color:#e5c645!important}
+.moc-text-forest-green,.moc-hover-text-forest-green:hover{color:#478400!important}
+.moc-text-red,.moc-hover-text-red:hover{color:#ea5c5c!important}
+.moc-text-olive-green,.moc-hover-text-olive-green:hover{color:#a2b290!important}
+
+.moc-text-grey,.moc-hover-text-grey:hover{color:#aaaaaa!important}
+
+/* primary brand color border */
+.moc-border-green,.moc-hover-border-green:hover{border-color:#10B26C!important}
+.moc-border-pastel-green,.moc-hover-border-pastel-green:hover{border-color:#c1ead6!important}
+.moc-border-light-green,.moc-hover-border-light-green:hover{border-color:#6ecc6e!important}
+.moc-border-dark-green,.moc-hover-border-dark-green:hover{border-color:#03331e!important}
+
+/* secondary brand color border */
+.moc-border-blue-green,.moc-hover-border-blue-green:hover{border-color:#075f68!important}
+.moc-border-orange,.moc-hover-border-orange:hover{border-color:#f9b341!important}
+.moc-border-light-blue,.moc-hover-border-light-blue:hover{border-color:#68c3d8!important}
+.moc-border-blue,.moc-hover-border-blue:hover{border-color:#2d6cd3!important}
+.moc-border-yellow,.moc-hover-border-yellow:hover{border-color:#e5c645!important}
+.moc-border-forest-green,.moc-hover-border-forest-green:hover{border-color:#478400!important}
+.moc-border-red,.moc-hover-border-red:hover{border-color:#ea5c5c!important}
+.moc-border-olive-green,.moc-hover-border-olive-green:hover{border-color:#a2b290!important}
+
+.moc-border-grey,.moc-hover-border-grey:hover{border-color:#aaaaaa!important}

@@ -510,6 +510,10 @@ func ShowSnapshotCodePage(c *gin.Context) {
 		"snapshot-code.html")
 }
 
+func ShowLoginPage(c *gin.Context) {
+	render(c, gin.H{}, "login.html")
+}
+
 func render(c *gin.Context, data gin.H, templateName string) {
 	switch c.Request.Header.Get("Accept") {
 	case "application/json":

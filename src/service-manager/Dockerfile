@@ -18,7 +18,7 @@ RUN apk update \
 SHELL ["/bin/bash", "-c"]
 
 RUN mkdir /home/service-manager/data
-COPY data /home/service-manager/data
+COPY data/service-manager /home/service-manager/data
 
 ADD src/service-manager/start-service-manager.sh /home/service-manager/start-service-manager.sh
 RUN chmod u+x /home/service-manager/start-service-manager.sh

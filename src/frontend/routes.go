@@ -4,6 +4,8 @@ package main
 
 import (
 	"frontend/api"
+	"frontend/auth"
+	"frontend/middleware"
 	"frontend/page"
 )
 
@@ -43,18 +45,24 @@ func initializeRoutes() {
 
 	uiRoutes := router.Group("/ui")
 	{
-		uiRoutes.GET("/assets", page.ShowAssetsPage)
-		uiRoutes.GET("/asset/:id", page.ShowAssetPage)
-		uiRoutes.GET("/asset/:id/code", page.ShowAssetCodePage)
-		uiRoutes.GET("/dashboard", page.ShowDashboardPage)
-		uiRoutes.GET("/models", page.ShowModelsPage)
-		uiRoutes.GET("/model/:id", page.ShowModelPage)
-		uiRoutes.GET("/model/:id/code", page.ShowModelCodePage)
-		uiRoutes.GET("/releases", page.ShowReleasesPage)
-		uiRoutes.GET("/release/:id", page.ShowReleasePage)
-		uiRoutes.GET("/release/:id/code", page.ShowReleaseCodePage)
-		uiRoutes.GET("/snapshots", page.ShowSnapshotsPage)
-		uiRoutes.GET("/snapshot/:id", page.ShowSnapshotPage)
-		uiRoutes.GET("/snapshot/:id/code", page.ShowSnapshotCodePage)
+		uiRoutes.GET("/assets", middleware.EnsureLoggedIn(), page.ShowAssetsPage)
+		uiRoutes.GET("/login", auth.HandleLogin)
+		uiRoutes.GET("/asset/:id", middleware.EnsureLoggedIn(), page.ShowAssetPage)
+		uiRoutes.GET("/asset/:id/code", middleware.EnsureLoggedIn(), page.ShowAssetCodePage)
+		uiRoutes.GET("/dashboard", middleware.EnsureLoggedIn(), page.ShowDashboardPage)
+		uiRoutes.GET("/models", middleware.EnsureLoggedIn(), page.ShowModelsPage)
+		uiRoutes.GET("/model/:id", middleware.EnsureLoggedIn(), page.ShowModelPage)
+		uiRoutes.GET("/model/:id/code", middleware.EnsureLoggedIn(), page.ShowModelCodePage)
+		uiRoutes.GET("/releases", middleware.EnsureLoggedIn(), page.ShowReleasesPage)
+		uiRoutes.GET("/release/:id", middleware.EnsureLoggedIn(), page.ShowReleasePage)
+		uiRoutes.GET("/release/:id/code", middleware.EnsureLoggedIn(), page.ShowReleaseCodePage)
+		uiRoutes.GET("/snapshots", middleware.EnsureLoggedIn(), page.ShowSnapshotsPage)
+		uiRoutes.GET("/snapshot/:id", middleware.EnsureLoggedIn(), page.ShowSnapshotPage)
+		uiRoutes.GET("/snapshot/:id/code", middleware.EnsureLoggedIn(), page.ShowSnapshotCodePage)
+	}
+
+	authRoutes := router.Group("/auth")
+	{
+		authRoutes.GET("/redirect", auth.HandleRedirect)
 	}
 }

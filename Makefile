@@ -7,10 +7,11 @@ help: ## Display this help message.
 build-docker: clean
 	wsc compile
 	cp -r src/frontend/ui/node-modules/monaco-editor src/frontend/ui-dist/static/js/monaco-editor
-	cp -n data/config.json.bak data/config.json || true
-	cp -n data/secrets.json.bak data/secrets.json || true
+	cp -n data/service-manager/config.json.bak data/service-manager/config.json || true
+	cp -n data/service-manager/secrets.json.bak data/service-manager/secrets.json || true
 	docker build -t api-server -f src/api-server/Dockerfile .
 	docker build -t asset-manager -f src/asset-manager/Dockerfile .
+	docker build -t auth-manager -f src/auth-manager/Dockerfile .
 	docker build -t frontend -f src/frontend/Dockerfile .
 	docker build -t model-manager -f src/model-manager/Dockerfile .
 	docker build -t service-manager -f src/service-manager/Dockerfile .
@@ -18,34 +19,29 @@ build-docker: clean
 build-local: clean  ## Build local binaries of all VelociModel services
 	wsc compile
 	mkdir dist
-	for service in api-server asset-manager frontend model-manager service-manager; do \
+	for service in api-server asset-manager auth-manager frontend model-manager service-manager; do \
 		cd src/$$service && env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o $$service ; \
-		mv $$service ../../dist/$$service ; \
-		cp launch.sh ../../dist/launch-$$service.sh ; \
-		chmod +x ../../dist/launch-$$service.sh ; \
+		mkdir ../../dist/$$service ; \
+		mv $$service ../../dist/$$service/$$service ; \
+		cp launch.sh ../../dist/$$service/launch-$$service.sh ; \
+		chmod +x ../../dist/$$service/launch-$$service.sh ; \
 		cd ../.. ; \
 	done
-	cp -n data/config.json.bak data/config.json || true
-	cp -n data/secrets.json.bak data/secrets.json || true
+	cp -n data/service-manager/config.json.bak data/service-manager/config.json || true
+	cp -n data/service-manager/secrets.json.bak data/service-manager/secrets.json || true
 	cp -r src/frontend/ui-dist/templates dist/templates
 	cp -r src/frontend/ui-dist/static dist/static
 	cp -r src/frontend/ui/node-modules/monaco-editor dist/static/js/monaco-editor
-	cp -r data dist/data
+	cp -r data/service-manager dist/service-manager/data
+	cp -r data/auth-manager dist/auth-manager/data
 
 bundle: build-local
-	for service in api-server asset-manager frontend model-manager service-manager; do \
-		mkdir dist/$$service-$$(cat VERSION) ; \
+	for service in api-server asset-manager auth-manager frontend model-manager service-manager; do \
+		version=$$(cat VERSION) ; \
 		mv dist/$$service dist/$$service-$$(cat VERSION) ; \
-		mv dist/launch-$$service.sh dist/$$service-$$(cat VERSION) ; \
 	done
-	mkdir dist/api-server-$$(cat VERSION)/templates
-	mkdir dist/api-server-$$(cat VERSION)/static
-	mkdir dist/service-manager-$$(cat VERSION)/data
-	mv dist/templates dist/api-server-$$(cat VERSION)
-	mv dist/static dist/api-server-$$(cat VERSION)
-	mv dist/data dist/service-manager-$$(cat VERSION)
 	mkdir -p release
-	for service in api-server asset-manager frontend model-manager service-manager; do \
+	for service in api-server asset-manager auth-manager frontend model-manager service-manager; do \
 		version=$$(cat VERSION) ; \
 		cd dist/$$service-$$version ; \
 		tar -czvf $$service-$$version.tar.gz * ; \
@@ -56,10 +52,10 @@ bundle: build-local
 publish:
 	wsc compile
 	cp -r src/frontend/ui/node-modules/monaco-editor src/frontend/ui-dist/static/js/monaco-editor
-	cp -n data/config.json.bak data/config.json || true
-	cp -n data/secrets.json.bak data/secrets.json || true
+	cp -n data/service-manager/config.json.bak data/service-manager/config.json || true
+	cp -n data/service-manager/secrets.json.bak data/service-manager/secrets.json || true
 	
-	for service in api-server asset-manager frontend model-manager service-manager; do \
+	for service in api-server asset-manager auth-manager frontend model-manager service-manager; do \
 		version=$$(cat VERSION) ; \
 		docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t jfcarter2358/velocimodel-$$service:$$version -f src/$$service/Dockerfile --push . ; \
 	done

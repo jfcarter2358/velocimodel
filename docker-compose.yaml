@@ -26,6 +26,16 @@ services:
     depends_on:
       - "api-server"
     tty: true
+  auth-manager:
+    image: "auth-manager"
+    ports:
+      - "127.0.0.1:9005:9005"
+    environment:
+      AUTH_MANAGER_CONFIG_PATH: "/home/auth-manager/data/config.json"
+      AUTH_MANAGER_SLEEP: "5"
+    depends_on:
+      - "api-server"
+    tty: true
   ceresdb:
     image: "ceresdb"
     ports:
@@ -35,12 +45,14 @@ services:
   frontend:
     image: "frontend"
     ports:
-      - "127.0.0.1:9000:9000"
+      - "0.0.0.0:9000:9000"
     environment:
       FRONTEND_HTTP_HOST: "frontend"
       FRONTEND_HTTP_PORT: "9000"
       FRONTEND_API_SERVER_URL: "http://api-server:9004"
       FRONTEND_SLEEP: "5"
+      FRONTEND_OAUTH_CLIENT_ID: "velocimodel-frontend"
+      FRONTEND_OAUTH_CLIENT_SECRET: "abc123DEFghijklmnop4567rstuvwxyzZYXWUT8910SRQPOnmlijhoauthplaygroundapplication"
     depends_on:
       - "api-server"
     tty: true

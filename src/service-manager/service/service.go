@@ -20,6 +20,7 @@ type Service struct {
 
 const API_SERVER_TYPE = "api-server"
 const ASSET_MANAGER_TYPE = "asset-manager"
+const AUTH_MANAGER_TYPE = "auth-manager"
 const FRONTEND_TYPE = "frontend"
 const MODEL_MANAGER_TYPE = "model-manager"
 const SERVICE_MANAGER_TYPE = "service-manager"
@@ -27,24 +28,24 @@ const LIMIT_DEFAULT = "0"
 const FILTER_DEFAULT = ""
 const COUNT_DEFAULT = "false"
 
-var allowedTypes = []string{API_SERVER_TYPE, ASSET_MANAGER_TYPE, FRONTEND_TYPE, MODEL_MANAGER_TYPE, SERVICE_MANAGER_TYPE}
+var AllowedTypes = []string{API_SERVER_TYPE, ASSET_MANAGER_TYPE, AUTH_MANAGER_TYPE, FRONTEND_TYPE, MODEL_MANAGER_TYPE, SERVICE_MANAGER_TYPE}
 
 func RegisterService(newService Service) error {
 	if newService.ID == "" {
 		newService.ID = uuid.New().String()
 	}
-	if !utils.Contains(allowedTypes, newService.Type) {
+	if !utils.Contains(AllowedTypes, newService.Type) {
 		err := errors.New(fmt.Sprintf("Service type of %v does not exist", newService.Type))
 		return err
 	}
 	queryData, _ := json.Marshal(&newService)
-	queryString := fmt.Sprintf("post record %v.services %v", config.Config.DBName, string(queryData))
+	queryString := fmt.Sprintf("post record %v.services %v", config.Config.DB.Name, string(queryData))
 	_, err := connection.Query(queryString)
 	return err
 }
 
 func DeleteService(serviceIDs []string) error {
-	queryString := fmt.Sprintf("get record %v.services", config.Config.DBName)
+	queryString := fmt.Sprintf("get record %v.services", config.Config.DB.Name)
 	currentData, err := connection.Query(queryString)
 	if err != nil {
 		return err
@@ -56,7 +57,7 @@ func DeleteService(serviceIDs []string) error {
 		}
 	}
 	queryData, _ := json.Marshal(&ids)
-	queryString = fmt.Sprintf("delete record %v.services %v", config.Config.DBName, string(queryData))
+	queryString = fmt.Sprintf("delete record %v.services %v", config.Config.DB.Name, string(queryData))
 	_, err = connection.Query(queryString)
 	return err
 }
@@ -66,18 +67,18 @@ func UpdateService(newService Service) error {
 		err := errors.New("'id' field is required to update a service")
 		return err
 	}
-	if !utils.Contains(allowedTypes, newService.Type) {
+	if !utils.Contains(AllowedTypes, newService.Type) {
 		err := errors.New(fmt.Sprintf("Service type of %v does not exist", newService.Type))
 		return err
 	}
 	queryData, _ := json.Marshal(&newService)
-	queryString := fmt.Sprintf("post record %v.assets %v", config.Config.DBName, string(queryData))
+	queryString := fmt.Sprintf("post record %v.assets %v", config.Config.DB.Name, string(queryData))
 	_, err := connection.Query(queryString)
 	return err
 }
 
 func GetServices(limit, filter, count string) ([]map[string]interface{}, error) {
-	queryString := fmt.Sprintf("get record %v.services", config.Config.DBName)
+	queryString := fmt.Sprintf("get record %v.services", config.Config.DB.Name)
 	if filter != FILTER_DEFAULT {
 		queryString += fmt.Sprintf(" | filter %v", filter)
 	}

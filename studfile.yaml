@@ -1,0 +1,167 @@
+.variables:
+  all_services:
+    - api-server
+    - asset-manager
+    - auth-manager
+    - frontend
+    - model-manager
+    - service-manager
+  platforms:
+    - linux/amd64
+    - linux/arm64
+    - linux/arm/v7
+  docker_org: jfcarter2358
+build-docker:
+  help: Build docker images of VelociModel services
+  options:
+    - name: -s,--services
+      help: Services to build docker images of
+      default: all
+      nargs: +
+  cmd: |
+    if 'all' in services:
+      services = all_services
+    
+    stud clean
+
+    if 'frontend' in services:
+      wsc compile
+      cp -r src/frontend/ui/node-modules/monaco-editor src/frontend/ui-dist/static/js/monaco-editor
+  
+    if 'service-manager' in services:
+      cp -n data/service-manager/params.json.bak data/service-manager/params.json || true
+      cp -n data/service-manager/secrets.json.bak data/service-manager/secrets.json || true
+
+    for service in services:
+      docker build -t {service} -f src/{service}/Dockerfile .
+build-local:
+  help: Build local binaries of all VelociModel services
+  options:
+    - name: -s,--services
+      help: Services to build docker images of
+      default: all
+      nargs: +
+  cmd: |
+    if 'all' in services:
+      services = all_services
+
+    stud clean
+    mkdir dist
+
+    for service in services:
+      cd src/{service}
+      env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o {service}
+      mkdir ../../dist/{service}
+      mv {service} ../../dist/{service}/{service}
+      cp launch.sh ../../dist/{service}/launch-{service}.sh
+      chmod +x ../../dist/{service}/launch-{service}.sh
+      cd ../..
+
+    if 'service-manager' in services:
+      cp -n data/service-manager/params.json.bak data/service-manager/params.json || true
+      cp -n data/service-manager/secrets.json.bak data/service-manager/secrets.json || true
+      cp -r data/service-manager dist/service-manager/data
+
+    if 'frontend' in services:
+      wsc compile
+      cp -r src/frontend/ui-dist/templates dist/templates
+      cp -r src/frontend/ui-dist/static dist/static
+      cp -r src/frontend/ui/node-modules/monaco-editor dist/static/js/monaco-editor
+
+    if 'auth-manager' in services:
+      cp -r data/auth-manager dist/auth-manager/data
+
+    print('Done!')
+bundle:
+  help: Bundle binary builds for use as release artifacts
+  options:
+    - name: -s,--services
+      help: Services to build docker images of
+      default: all
+      nargs: +
+  cmd: |
+    if 'all' in services:
+      services = all_services
+    
+    services_string = ' '.join(services)
+    stud build-local -s {services_string}
+    version = $(cat VERSION)
+
+    for service in services:
+      mv dist/{service} dist/{service}-{version}
+
+    mkdir -p release
+
+    for service in services:
+      cd dist/{service}-{version}
+      tar -czvf {service}-{version}.tar.gz *
+      cp {service}-{version}.tar.gz ../../release
+      cd ../..
+
+    print('Done!')
+clean:
+  help: Remove build and test artifacts
+  cmd: |
+    rm -r dist || true
+    rm -r release || true
+    rm -r src/frontend/ui-dist || true
+docs:
+  help: Generate VelociModel documentation
+  cmd: |
+    cd docs
+    make html
+
+    print('Done!')
+publish:
+  help: Publish release docker images to Docker Hub
+  options:
+    - name: -s,--services
+      help: Services to build docker images of
+      default: all
+      nargs: +
+  cmd: |
+    if 'all' in services:
+      services = all_services
+
+    if 'frontend' in services:
+      wsc compile
+      cp -r src/frontend/ui/node-modules/monaco-editor src/frontend/ui-dist/static/js/monaco-editor
+  
+    if 'service-manager' in services:
+      cp -n data/service-manager/params.json.bak data/service-manager/params.json || true
+      cp -n data/service-manager/secrets.json.bak data/service-manager/secrets.json || true
+
+    platform_string = ','.join(platforms)
+    version = ?(cat VERSION).strip()
+
+    for service in services:
+      print(f"Running build command: docker buildx build --platform {platform_string} -t {docker_org}/velocimodel-{service}:{version} -f src/{service}/Dockerfile --push .")
+      docker buildx build --platform {platform_string} -t {docker_org}/velocimodel-{service}:{version} -f src/{service}/Dockerfile --push .
+
+    print('Done!')
+run-docker:
+  help: Deploy local images of VelociModel via docker-compose
+  cmd: |
+    docker-compose rm -f
+    docker-compose up
+tidy:
+  help: Update Go dependencies for VelociModel services
+  options:
+    - name: -s,--services
+      help: Services to build docker images of
+      default: all
+      nargs: +
+  cmd: |
+    if 'all' in services:
+      services = all_services
+
+    cd src/{services[0]}
+    go mod tidy
+    go mod vendor
+    for service in services[1:]:
+      cd ../{service}
+      go mod tidy
+      go mod vendor
+    cd ../..
+
+    print('Done!')

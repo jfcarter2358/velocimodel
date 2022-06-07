@@ -3,6 +3,8 @@ package generates
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -16,12 +18,11 @@ import (
 
 // JWTAccessClaims jwt claims
 type JWTAccessClaims struct {
-	GivenName  string `json:"given_name"`
-	FamilyName string `json:"family_name"`
-	Email      string `json:"email"`
-	Groups     string `json:"groups"`
-	Roles      string `json:"roles"`
-	MemberOf   string `json:"memberOf"`
+	GivenName  string   `json:"given_name"`
+	FamilyName string   `json:"family_name"`
+	Email      string   `json:"email"`
+	Groups     []string `json:"groups"`
+	Roles      []string `json:"roles"`
 	jwt.StandardClaims
 }
 
@@ -51,55 +52,108 @@ type JWTAccessGenerate struct {
 
 // Token based on the UUID generated token
 func (a *JWTAccessGenerate) Token(ctx context.Context, data *oauth2.GenerateBasic, isGenRefresh bool) (string, string, error) {
-	usr, err := user.GetUserByID(data.UserID)
-	claims := &JWTAccessClaims{
-		GivenName:  usr.GivenName,
-		FamilyName: usr.FamilyName,
-		Roles:      usr.Roles,
-		Groups:     usr.Groups,
-		MemberOf:   usr.Groups,
-		Email:      usr.Email,
-		StandardClaims: jwt.StandardClaims{
-			Audience:  data.Client.GetID(),
-			Subject:   data.UserID,
-			ExpiresAt: data.TokenInfo.GetAccessCreateAt().Add(data.TokenInfo.GetAccessExpiresIn()).Unix(),
-		},
-	}
+	if data.UserID == "" {
+		log.Printf("Client authentication flow")
+		claims := &JWTAccessClaims{
+			Roles:  []string{"read", "write", "admin"},
+			Groups: []string{"admin"},
+			StandardClaims: jwt.StandardClaims{
+				Audience:  data.Client.GetID(),
+				Subject:   data.UserID,
+				ExpiresAt: data.TokenInfo.GetAccessCreateAt().Add(data.TokenInfo.GetAccessExpiresIn()).Unix(),
+			},
+		}
 
-	token := jwt.NewWithClaims(a.SignedMethod, claims)
-	if a.SignedKeyID != "" {
-		token.Header["kid"] = a.SignedKeyID
-	}
-	var key interface{}
-	if a.isEs() {
-		v, err := jwt.ParseECPrivateKeyFromPEM(a.SignedKey)
+		token := jwt.NewWithClaims(a.SignedMethod, claims)
+		if a.SignedKeyID != "" {
+			token.Header["kid"] = a.SignedKeyID
+		}
+		var key interface{}
+		if a.isEs() {
+			v, err := jwt.ParseECPrivateKeyFromPEM(a.SignedKey)
+			if err != nil {
+				return "", "", err
+			}
+			key = v
+		} else if a.isRsOrPS() {
+			v, err := jwt.ParseRSAPrivateKeyFromPEM(a.SignedKey)
+			if err != nil {
+				return "", "", err
+			}
+			key = v
+		} else if a.isHs() {
+			key = a.SignedKey
+		} else {
+			return "", "", errors.New("unsupported sign method")
+		}
+		access, err := token.SignedString(key)
 		if err != nil {
 			return "", "", err
 		}
-		key = v
-	} else if a.isRsOrPS() {
-		v, err := jwt.ParseRSAPrivateKeyFromPEM(a.SignedKey)
-		if err != nil {
-			return "", "", err
+		refresh := ""
+		if isGenRefresh {
+			t := uuid.NewSHA1(uuid.Must(uuid.NewRandom()), []byte(access)).String()
+			refresh = base64.URLEncoding.EncodeToString([]byte(t))
+			refresh = strings.ToUpper(strings.TrimRight(refresh, "="))
 		}
-		key = v
-	} else if a.isHs() {
-		key = a.SignedKey
+
+		return access, refresh, nil
 	} else {
-		return "", "", errors.New("unsupported sign method")
-	}
-	access, err := token.SignedString(key)
-	if err != nil {
-		return "", "", err
-	}
-	refresh := ""
-	if isGenRefresh {
-		t := uuid.NewSHA1(uuid.Must(uuid.NewRandom()), []byte(access)).String()
-		refresh = base64.URLEncoding.EncodeToString([]byte(t))
-		refresh = strings.ToUpper(strings.TrimRight(refresh, "="))
-	}
+		users, err := user.GetUsers("0", fmt.Sprintf("id = \"%v\"", data.UserID), "false", "NA", "NA")
+		if err != nil {
+			return "", "", err
+		}
+		if len(users) == 0 {
+			return "", "", errors.New(fmt.Sprintf("User with id %v was not found", data.UserID))
+		}
+		claims := &JWTAccessClaims{
+			GivenName:  users[0].GivenName,
+			FamilyName: users[0].FamilyName,
+			Roles:      users[0].Roles,
+			Groups:     users[0].Groups,
+			Email:      users[0].Email,
+			StandardClaims: jwt.StandardClaims{
+				Audience:  data.Client.GetID(),
+				Subject:   data.UserID,
+				ExpiresAt: data.TokenInfo.GetAccessCreateAt().Add(data.TokenInfo.GetAccessExpiresIn()).Unix(),
+			},
+		}
 
-	return access, refresh, nil
+		token := jwt.NewWithClaims(a.SignedMethod, claims)
+		if a.SignedKeyID != "" {
+			token.Header["kid"] = a.SignedKeyID
+		}
+		var key interface{}
+		if a.isEs() {
+			v, err := jwt.ParseECPrivateKeyFromPEM(a.SignedKey)
+			if err != nil {
+				return "", "", err
+			}
+			key = v
+		} else if a.isRsOrPS() {
+			v, err := jwt.ParseRSAPrivateKeyFromPEM(a.SignedKey)
+			if err != nil {
+				return "", "", err
+			}
+			key = v
+		} else if a.isHs() {
+			key = a.SignedKey
+		} else {
+			return "", "", errors.New("unsupported sign method")
+		}
+		access, err := token.SignedString(key)
+		if err != nil {
+			return "", "", err
+		}
+		refresh := ""
+		if isGenRefresh {
+			t := uuid.NewSHA1(uuid.Must(uuid.NewRandom()), []byte(access)).String()
+			refresh = base64.URLEncoding.EncodeToString([]byte(t))
+			refresh = strings.ToUpper(strings.TrimRight(refresh, "="))
+		}
+
+		return access, refresh, nil
+	}
 }
 
 func (a *JWTAccessGenerate) isEs() bool {

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"frontend/api"
+	"frontend/auth"
 	"frontend/config"
 	"net/http"
 	"strconv"
@@ -23,9 +24,16 @@ func main() {
 	// Set Gin to production mode
 	gin.SetMode(gin.ReleaseMode)
 
+	// logrus.SetFormatter(&logrus.JSONFormatter{
+	// 	FieldMap: logrus.FieldMap{
+	// 		logrus.FieldKeyTime: "@timestamp",
+	// 		logrus.FieldKeyMsg:  "message",
+	// 	},
+	// })
 	log := logrus.New()
 
 	config.LoadConfig()
+	auth.LoadOauthConfig()
 
 	// Wait for api-server to become available
 	statusCode := http.StatusServiceUnavailable
@@ -52,7 +60,15 @@ func main() {
 		panic(err)
 	}
 
-	_, err = http.Post(fmt.Sprintf("%v/api/service", config.Config.APIServerURL), "application/json", bytes.NewBuffer(json_data))
+	requestURL = fmt.Sprintf("%v/api/service", config.Config.APIServerURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodPost, requestURL, bytes.NewBuffer(json_data))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", config.Config.JoinToken))
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	_, err = client.Do(req)
 
 	if err != nil {
 		panic(err)

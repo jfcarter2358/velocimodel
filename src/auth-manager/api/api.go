@@ -3,6 +3,7 @@ package api
 import (
 	"auth-manager/generates"
 	"auth-manager/user"
+	"auth-manager/utils"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,132 +11,142 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
+	"github.com/google/uuid"
 )
 
 var PrivKey = []byte("velocimodelsign")
 
-// get all users
-func UserGetAllHandler(c *gin.Context) {
-	users := user.GetAllUsers()
-	c.JSON(http.StatusOK, gin.H{"users": users})
+const LIMIT_DEFAULT = "0"
+const FILTER_DEFAULT = ""
+const COUNT_DEFAULT = "false"
+const ORDERASC_DEFAULT = "NA"
+const ORDERDSC_DEFAULT = "NA"
+
+var Healthy = false
+
+// Health API
+
+func GetHealth(c *gin.Context) {
+	if !Healthy {
+		c.Status(http.StatusServiceUnavailable)
+		return
+	}
+	c.Status(http.StatusOK)
 }
 
-// get user by id
-func UserGetByIdHandler(c *gin.Context) {
-	userID := c.Param("id")
-	userData, err := user.GetUserByID(userID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// User API
+
+func DeleteUser(c *gin.Context) {
+	var input []string
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
 	}
-	c.JSON(http.StatusOK, gin.H{"user": userData})
+	err := user.DeleteUser(input)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.Status(http.StatusOK)
 }
 
-// create user
-func UserCreateHandler(c *gin.Context) {
-	username := c.PostForm("username")
-	password := c.PostForm("password")
-	givenName := c.PostForm("given_name")
-	familyName := c.PostForm("family_name")
-	email := c.PostForm("email")
-	roles := c.PostForm("roles")
-	groups := c.PostForm("groups")
-	_, err := user.CreateNewUser(givenName, familyName, username, password, email, strings.Split(roles, ","), strings.Split(groups, ","))
-	if err != nil {
-		log.Println("Unable to create user")
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+func GetUsers(c *gin.Context) {
+	filter := FILTER_DEFAULT
+	limit := LIMIT_DEFAULT
+	count := COUNT_DEFAULT
+	orderasc := ORDERASC_DEFAULT
+	orderdsc := ORDERDSC_DEFAULT
+	if val, ok := c.GetQuery("filter"); ok {
+		filter = val
 	}
-	c.Redirect(302, "/ui/edit")
+	if val, ok := c.GetQuery("limit"); ok {
+		limit = val
+	}
+	if val, ok := c.GetQuery("count"); ok {
+		count = val
+	}
+	if val, ok := c.GetQuery("orderasc"); ok {
+		orderasc = val
+	}
+	if val, ok := c.GetQuery("orderdsc"); ok {
+		orderdsc = val
+	}
+	data, err := user.GetUsers(limit, filter, count, orderasc, orderdsc)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, data)
 }
 
-// update user
-func UserUpdateHandler(c *gin.Context) {
-	userID := c.Param("id")
-	username := c.PostForm("username")
-	password := c.PostForm("password")
-	givenName := c.PostForm("given_name")
-	familyName := c.PostForm("family_name")
-	email := c.PostForm("email")
-	roles := c.PostForm("roles")
-	groups := c.PostForm("groups")
-
-	usr, err := user.GetUserByID(userID)
-
-	if password != usr.Password {
-		usr.Password = HashAndSalt([]byte(password))
+func PostUser(c *gin.Context) {
+	var input user.User
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
 	}
-
-	usr.Username = username
-	usr.GivenName = givenName
-	usr.FamilyName = familyName
-	usr.Email = email
-	usr.Roles = roles
-	usr.Groups = groups
-
-	err = user.UpdateUserContents(userID, *usr)
+	fileID := uuid.New().String()
+	input.ID = fileID
+	err := user.RegisterUser(input)
 	if err != nil {
-		log.Println("Unable to update user")
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
 	}
-	c.Redirect(302, "/ui/edit")
+	c.JSON(http.StatusOK, gin.H{"id": fileID})
 }
 
-// delete user
-func UserDeleteHandler(c *gin.Context) {
-	id := c.Param("id")
-	err := user.DeleteUserByID(id)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+func PutUser(c *gin.Context) {
+	var input user.User
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
 	}
-}
-
-// helper function
-func HashAndSalt(pwd []byte) string {
-	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
+	err := user.UpdateUser(input)
 	if err != nil {
-		log.Println(err)
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
 	}
-	return string(hash)
+	c.Status(http.StatusOK)
 }
 
 func UserInfo(c *gin.Context) {
 	if len(c.Request.Header["Authorization"]) > 0 {
 		if val, ok := c.Request.Header["Authorization"]; ok {
-			authToken := strings.Split(val[0], " ")[1]
+			if len(val) > 0 {
+				authToken := strings.Split(val[0], " ")[1]
 
-			// Parse and verify jwt access token
-			token, err := jwt.ParseWithClaims(authToken, &generates.JWTAccessClaims{}, func(t *jwt.Token) (interface{}, error) {
-				if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-					return nil, fmt.Errorf("parse error")
+				// Parse and verify jwt access token
+				token, err := jwt.ParseWithClaims(authToken, &generates.JWTAccessClaims{}, func(t *jwt.Token) (interface{}, error) {
+					if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+						return nil, fmt.Errorf("parse error")
+					}
+					return PrivKey, nil
+				})
+				if err != nil {
+					log.Println(err)
+					c.AbortWithStatus(500)
+					return
 				}
-				return PrivKey, nil
-			})
-			if err != nil {
-				log.Println(err)
-				c.AbortWithStatus(500)
+
+				claims, ok := token.Claims.(*generates.JWTAccessClaims)
+				if !ok || !token.Valid {
+					log.Println("invalid token")
+					c.AbortWithStatus(500)
+					return
+				}
+
+				c.JSON(http.StatusOK, gin.H{
+					"given_name":  claims.GivenName,
+					"family_name": claims.FamilyName,
+					"email":       claims.Email,
+					"groups":      claims.Groups,
+					"roles":       claims.Roles,
+					"exp":         claims.ExpiresAt,
+					"sub":         claims.Subject,
+					"aud":         claims.Audience,
+				})
 				return
 			}
-
-			claims, ok := token.Claims.(*generates.JWTAccessClaims)
-			if !ok || !token.Valid {
-				log.Println("invalid token")
-				c.AbortWithStatus(500)
-				return
-			}
-
-			c.JSON(http.StatusOK, gin.H{
-				"given_name":  claims.GivenName,
-				"family_name": claims.FamilyName,
-				"email":       claims.Email,
-				"groups":      claims.Groups,
-				"roles":       claims.Roles,
-				"exp":         claims.ExpiresAt,
-				"sub":         claims.Subject,
-				"aud":         claims.Audience,
-			})
-			return
 		}
 	}
 	c.AbortWithStatus(500)

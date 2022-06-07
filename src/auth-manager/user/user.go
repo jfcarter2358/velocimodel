@@ -4,15 +4,16 @@ package user
 
 import (
 	"auth-manager/config"
+	"auth-manager/utils"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
-	"sort"
+	"reflect"
 	"strconv"
-	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -21,217 +22,178 @@ import (
 )
 
 type User struct {
-	Username             string `json:"username"`
-	Password             string `json:"password"`
-	GivenName            string `json:"given_name"`
-	FamilyName           string `json:"family_name"`
-	ID                   string `json:"id"`
-	Roles                string `json:"roles"`
-	Groups               string `json:"groups"`
-	Email                string `json:"email"`
-	ResetToken           string `json:"reset_token"`
-	ResetTokenCreateDate string `json:"reset_token_create_date"`
+	Username             string   `json:"username"`
+	Password             string   `json:"password"`
+	GivenName            string   `json:"given_name"`
+	FamilyName           string   `json:"family_name"`
+	ID                   string   `json:"id"`
+	Roles                []string `json:"roles"`
+	Groups               []string `json:"groups"`
+	Email                string   `json:"email"`
+	ResetToken           string   `json:"reset_token"`
+	ResetTokenCreateDate string   `json:"reset_token_create_date"`
+	Created              string   `json:"created"`
+	Updated              string   `json:"updated"`
 }
 
-var PageLength = 10
+const LIMIT_DEFAULT = "0"
+const FILTER_DEFAULT = ""
+const COUNT_DEFAULT = "false"
+const ORDERASC_DEFAULT = "NA"
+const ORDERDSC_DEFAULT = "NA"
 
-func GetUserCount() int {
-	countObj, _ := connection.Query(fmt.Sprintf("get record %v.users | count", config.Config.DBName))
-	count := int(countObj[0]["count"].(float64))
-	return count
-}
-
-func GetGroupsForID(id string) string {
-	queryString := fmt.Sprintf("get record %v.users | filter id = \"%v\"", config.Config.DBName, id)
-	data, err := connection.Query(queryString)
-	if err != nil {
-		return ""
+func RegisterUser(newUser User) error {
+	if newUser.ID == "" {
+		newUser.ID = uuid.New().String()
 	}
-	if len(data) == 0 {
-		return ""
-	}
-	groups := data[0]["groups"].(string)
-	return groups
-}
-
-func GetRolesForID(id string) string {
-	queryString := fmt.Sprintf("get record %v.users | filter id = \"%v\"", config.Config.DBName, id)
-	data, err := connection.Query(queryString)
-	if err != nil {
-		return ""
-	}
-	if len(data) == 0 {
-		return ""
-	}
-	roles := data[0]["roles"].(string)
-	return roles
-}
-
-func GetUserByIndex(start, end int) []User {
-	users := GetAllUsers()
-	sort.Slice(users, func(i, j int) bool {
-		return users[i].Username < users[j].Username
-	})
-	if end > len(users) {
-		end = len(users)
-	}
-	return users[start:end]
-}
-
-// Return a list of all the compasses
-func GetAllUsers() []User {
-	var users []User
-	queryString := fmt.Sprintf("get record %v.users", config.Config.DBName)
-	data, _ := connection.Query(queryString)
-	dataBytes, _ := json.Marshal(data)
-	_ = json.Unmarshal(dataBytes, &users)
-	return users
-}
-
-// Delete a user based on the ID supplied
-func DeleteUserByID(id string) error {
-	queryString := fmt.Sprintf("get record %v.users | filter id = \"%v\" | delete record %v.users -", config.Config.DBName, id, config.Config.DBName)
+	newUser.Password = HashAndSalt([]byte(newUser.Password))
+	currentTime := time.Now().UTC()
+	newUser.Created = currentTime.Format("2006-01-02T15:04:05Z")
+	newUser.Updated = currentTime.Format("2006-01-02T15:04:05Z")
+	queryData, _ := json.Marshal(&newUser)
+	queryString := fmt.Sprintf("post record %v.users %v", config.Config.DB.Name, string(queryData))
 	_, err := connection.Query(queryString)
+	return err
+}
+
+func DeleteUser(userIDs []string) error {
+	queryString := fmt.Sprintf("get record %v.users", config.Config.DB.Name)
+	currentData, err := connection.Query(queryString)
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-// Fetch a user based on the ID supplied
-func GetUserByID(id string) (*User, error) {
-	var user User
-	queryString := fmt.Sprintf("get record %v.users | filter id = \"%v\"", config.Config.DBName, id)
-	data, err := connection.Query(queryString)
-	if err != nil {
-		return nil, err
+	ids := make([]string, 0)
+	for _, datum := range currentData {
+		if utils.Contains(userIDs, datum["id"].(string)) {
+			ids = append(ids, datum[".id"].(string))
+		}
 	}
-	if len(data) == 0 {
-		return nil, errors.New("User not found")
-	}
-	dataBytes, _ := json.Marshal(data[0])
-	_ = json.Unmarshal(dataBytes, &user)
-	return &user, nil
-}
-
-// Fetch a user based on the email supplied
-func GetUserByEmail(email string) (*User, error) {
-	var user User
-	queryString := fmt.Sprintf("get record %v.users | filter email = \"%v\"", config.Config.DBName, email)
-	data, err := connection.Query(queryString)
-	if err != nil {
-		return nil, err
-	}
-	if len(data) == 0 {
-		return nil, errors.New("User not found")
-	}
-	dataBytes, _ := json.Marshal(data[0])
-	_ = json.Unmarshal(dataBytes, &user)
-	return &user, nil
-}
-
-// Fetch a user based on the username supplied
-func GetUserByUsername(username string) (*User, error) {
-	var user User
-	queryString := fmt.Sprintf("get record %v.users | filter username = \"%v\"", config.Config.DBName, username)
-	data, err := connection.Query(queryString)
-	if err != nil {
-		return nil, err
-	}
-	if len(data) == 0 {
-		return nil, errors.New("User not found")
-	}
-	dataBytes, _ := json.Marshal(data[0])
-	_ = json.Unmarshal(dataBytes, &user)
-	return &user, nil
-}
-
-// Fetch a user based on the reset token supplied
-func GetUserByResetToken(resetToken string) (*User, error) {
-	var user User
-	queryString := fmt.Sprintf("get record %v.users | filter reset_token = \"%v\"", config.Config.DBName, resetToken)
-	data, err := connection.Query(queryString)
-	if err != nil {
-		return nil, err
-	}
-	if len(data) == 0 {
-		return nil, errors.New("User not found")
-	}
-	dataBytes, _ := json.Marshal(data[0])
-	_ = json.Unmarshal(dataBytes, &user)
-	return &user, nil
-}
-
-// Create a new user with the data provided
-func CreateNewUser(givenName, familyName, username, password, email string, roles, groups []string) (*User, error) {
-	id := uuid.New().String()
-	user := User{ID: id, Username: username, Password: HashAndSalt([]byte(password)), GivenName: givenName, FamilyName: familyName, Email: email, Roles: strings.Join(roles[:], ","), Groups: strings.Join(groups[:], ",")}
-	userBytes, _ := json.Marshal(user)
-	queryString := fmt.Sprintf("post record %v.users %v", config.Config.DBName, string(userBytes))
-	_, err := connection.Query(queryString)
-	if err != nil {
-		return nil, err
-	}
-	return &user, nil
-}
-
-// Update an existsing user with the data provided
-func UpdateUserContents(id string, updateInput User) error {
-	userBytes, _ := json.Marshal(updateInput)
-	var userInterface map[string]interface{}
-	json.Unmarshal(userBytes, &userInterface)
-	queryString := fmt.Sprintf("get record %v.users | filter id = \"%v\"", config.Config.DBName, id)
-	data, err := connection.Query(queryString)
-	if err != nil {
-		return err
-	}
-	if len(data) == 0 {
-		return errors.New("User does not exist!")
-	}
-	userInterface[".id"] = data[0][".id"]
-	userBytesFull, _ := json.Marshal(userInterface)
-
-	queryString = fmt.Sprintf("put record %v.users %v", config.Config.DBName, string(userBytesFull))
+	queryData, _ := json.Marshal(&ids)
+	queryString = fmt.Sprintf("delete record %v.users %v", config.Config.DB.Name, string(queryData))
 	_, err = connection.Query(queryString)
+	return err
+}
+
+func UpdateUser(newUser User) error {
+	if newUser.ID == "" {
+		err := errors.New("'id' field is required to update an user")
+		return err
+	}
+	queryString := fmt.Sprintf("get record %v.users", config.Config.DB.Name)
+	currentData, err := connection.Query(queryString)
 	if err != nil {
 		return err
 	}
-	return nil
+	for _, datum := range currentData {
+		if datum["id"].(string) == newUser.ID {
+			if newUser.Username != "" {
+				if newUser.Username != datum["username"].(string) {
+					datum["username"] = newUser.Username
+				}
+			}
+			if newUser.Password != "" {
+				if newUser.Password != datum["password"].(string) {
+					datum["password"] = HashAndSalt([]byte(newUser.Password))
+				}
+			}
+			if newUser.GivenName != "" {
+				if newUser.GivenName != datum["given_name"].(string) {
+					datum["given_name"] = newUser.GivenName
+				}
+			}
+			if newUser.FamilyName != "" {
+				if newUser.FamilyName != datum["family_name"].(string) {
+					datum["family_name"] = newUser.FamilyName
+				}
+			}
+			if newUser.Roles != nil {
+				tmpRoles := make([]string, len(datum["roles"].([]interface{})))
+				for idx, val := range datum["roles"].([]interface{}) {
+					tmpRoles[idx] = val.(string)
+				}
+				if !reflect.DeepEqual(newUser.Roles, tmpRoles) {
+					datum["roles"] = newUser.Roles
+				}
+			}
+			if newUser.Groups != nil {
+				tmpGroups := make([]string, len(datum["groups"].([]interface{})))
+				for idx, val := range datum["groups"].([]interface{}) {
+					tmpGroups[idx] = val.(string)
+				}
+				if !reflect.DeepEqual(newUser.Groups, tmpGroups) {
+					datum["groups"] = newUser.Groups
+				}
+			}
+			currentTime := time.Now().UTC()
+			datum["updated"] = currentTime.Format("2006-01-02T15:04:05Z")
+			queryData, _ := json.Marshal(&datum)
+			queryString := fmt.Sprintf("put record %v.users %v", config.Config.DB.Name, string(queryData))
+			_, err := connection.Query(queryString)
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+	err = RegisterUser(newUser)
+	return err
+}
+
+func GetUsers(limit, filter, count, orderasc, orderdsc string) ([]User, error) {
+	queryString := fmt.Sprintf("get record %v.users", config.Config.DB.Name)
+	if filter != FILTER_DEFAULT {
+		queryString += fmt.Sprintf(" | filter %v", filter)
+	}
+	if limit != LIMIT_DEFAULT {
+		queryString += fmt.Sprintf(" | limit %v", limit)
+	}
+	if count != COUNT_DEFAULT {
+		queryString += " | count"
+	}
+	if orderdsc != ORDERDSC_DEFAULT {
+		queryString += fmt.Sprintf(" | orderdsc %v", orderdsc)
+	}
+	if count != COUNT_DEFAULT {
+		queryString += " | count"
+	}
+	data, err := connection.Query(queryString)
+	if err != nil {
+		return nil, err
+	}
+	marshalled, _ := json.Marshal(data)
+	var output []User
+	json.Unmarshal(marshalled, &output)
+	return output, nil
 }
 
 func IsUserPartOfGroup(id, group string) bool {
-	userList := GetAllUsers()
-	for _, u := range userList {
-		if u.ID == id {
-			for _, g := range strings.Split(u.Groups, ",") {
-				if g == group {
-					return true
-				}
-			}
-		}
+	users, err := GetUsers(LIMIT_DEFAULT, fmt.Sprintf("id = \"%v\"", id), COUNT_DEFAULT, ORDERASC_DEFAULT, ORDERDSC_DEFAULT)
+	if err != nil || len(users) == 0 {
+		return false
 	}
-	return false
+	return utils.Contains(users[0].Groups, group)
 }
 
 func IsUserValid(username, password string) (bool, string) {
-	userList := GetAllUsers()
-	for _, u := range userList {
-		if u.Username == username {
-			err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
-			if err != nil {
-				log.Println(err)
-				return false, ""
-			}
-			return true, u.ID
-		}
+	users, err := GetUsers(LIMIT_DEFAULT, fmt.Sprintf("username = \"%v\"", username), COUNT_DEFAULT, ORDERASC_DEFAULT, ORDERDSC_DEFAULT)
+	if err != nil || len(users) == 0 {
+		return false, ""
 	}
-	return false, ""
+	err = bcrypt.CompareHashAndPassword([]byte(users[0].Password), []byte(password))
+	if err != nil {
+		log.Println(err)
+		return false, ""
+	}
+	return true, users[0].ID
 }
 
 // Check if the supplied username is available
 func IsUsernameAvailable(username string) bool {
-	userList := GetAllUsers()
-	for _, u := range userList {
+	users, err := GetUsers(LIMIT_DEFAULT, FILTER_DEFAULT, COUNT_DEFAULT, ORDERASC_DEFAULT, ORDERDSC_DEFAULT)
+	if err != nil {
+		return false
+	}
+	for _, u := range users {
 		if u.Username == username {
 			return false
 		}

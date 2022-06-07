@@ -53,8 +53,15 @@ func main() {
 		panic(err)
 	}
 
-	_, err = http.Post(fmt.Sprintf("%v/api/service", config.Config.ServiceManagerURL), "application/json", bytes.NewBuffer(json_data))
-
+	requestURL = fmt.Sprintf("%v/api/service", config.Config.ServiceManagerURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodPost, requestURL, bytes.NewBuffer(json_data))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", config.Config.JoinToken))
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	_, err = client.Do(req)
 	if err != nil {
 		panic(err)
 	}

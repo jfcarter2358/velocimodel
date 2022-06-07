@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"model-manager/config"
 	"model-manager/utils"
 	"reflect"
@@ -41,8 +40,7 @@ var allowedTypes = []string{RAW_TYPE}
 func AddAsset(modelID, assetID string) error {
 	currentTime := time.Now().UTC()
 	updatedTime := currentTime.Format("2006-01-02T15:04:05Z")
-	log.Printf("get record %v.models | filter id = \"%v\"", config.Config.DBName, modelID)
-	modelObjects, err := connection.Query(fmt.Sprintf("get record %v.models | filter id = \"%v\"", config.Config.DBName, modelID))
+	modelObjects, err := connection.Query(fmt.Sprintf("get record %v.models | filter id = \"%v\"", config.Config.DB.Name, modelID))
 	if err != nil {
 		return err
 	}
@@ -53,11 +51,9 @@ func AddAsset(modelID, assetID string) error {
 	assetList := modelObjects[0]["assets"].([]interface{})
 	assetList = append(assetList, assetID)
 	assetBytes, _ := json.Marshal(assetList)
-	log.Printf("patch record %v.models \"%v\" {\"updated\":\"%v\",\"assets\":%v}", config.Config.DBName, realModelID, updatedTime, string(assetBytes))
-	_, err = connection.Query(fmt.Sprintf("patch record %v.models \"%v\" {\"updated\":\"%v\",\"assets\":%v}", config.Config.DBName, realModelID, updatedTime, string(assetBytes)))
+	_, err = connection.Query(fmt.Sprintf("patch record %v.models \"%v\" {\"updated\":\"%v\",\"assets\":%v}", config.Config.DB.Name, realModelID, updatedTime, string(assetBytes)))
 
-	log.Printf("get record %v.assets | filter id = \"%v\"", config.Config.DBName, assetID)
-	assetObjects, err := connection.Query(fmt.Sprintf("get record %v.assets | filter id = \"%v\"", config.Config.DBName, assetID))
+	assetObjects, err := connection.Query(fmt.Sprintf("get record %v.assets | filter id = \"%v\"", config.Config.DB.Name, assetID))
 	if err != nil {
 		return err
 	}
@@ -68,15 +64,14 @@ func AddAsset(modelID, assetID string) error {
 	modelList := assetObjects[0]["models"].([]interface{})
 	modelList = append(modelList, modelID)
 	modelBytes, _ := json.Marshal(modelList)
-	log.Printf("patch record %v.assets \"%v\" {\"updated\":\"%v\",\"models\":%v}", config.Config.DBName, realAssetID, updatedTime, string(modelBytes))
-	_, err = connection.Query(fmt.Sprintf("patch record %v.assets \"%v\" {\"updated\":\"%v\",\"models\":%v}", config.Config.DBName, realAssetID, updatedTime, string(modelBytes)))
+	_, err = connection.Query(fmt.Sprintf("patch record %v.assets \"%v\" {\"updated\":\"%v\",\"models\":%v}", config.Config.DB.Name, realAssetID, updatedTime, string(modelBytes)))
 	return nil
 }
 
 func DeleteAsset(modelID, assetID string) error {
 	currentTime := time.Now().UTC()
 	updatedTime := currentTime.Format("2006-01-02T15:04:05Z")
-	modelObjects, err := connection.Query(fmt.Sprintf("get record %v.models | filter id = \"%v\"", config.Config.DBName, modelID))
+	modelObjects, err := connection.Query(fmt.Sprintf("get record %v.models | filter id = \"%v\"", config.Config.DB.Name, modelID))
 	if err != nil {
 		return err
 	}
@@ -92,9 +87,9 @@ func DeleteAsset(modelID, assetID string) error {
 		}
 	}
 	assetBytes, _ := json.Marshal(assetList)
-	_, err = connection.Query(fmt.Sprintf("patch record %v.models \"%v\" {\"updated\":\"%v\",\"assets\":%v}", config.Config.DBName, realModelID, updatedTime, string(assetBytes)))
+	_, err = connection.Query(fmt.Sprintf("patch record %v.models \"%v\" {\"updated\":\"%v\",\"assets\":%v}", config.Config.DB.Name, realModelID, updatedTime, string(assetBytes)))
 
-	assetObjects, err := connection.Query(fmt.Sprintf("get record %v.assets | filter id = \"%v\"", config.Config.DBName, assetID))
+	assetObjects, err := connection.Query(fmt.Sprintf("get record %v.assets | filter id = \"%v\"", config.Config.DB.Name, assetID))
 	if err != nil {
 		return err
 	}
@@ -110,12 +105,12 @@ func DeleteAsset(modelID, assetID string) error {
 		}
 	}
 	modelBytes, _ := json.Marshal(modelList)
-	_, err = connection.Query(fmt.Sprintf("patch record %v.assets \"%v\" {\"updated\":\"%v\",\"models\":%v}", config.Config.DBName, realAssetID, updatedTime, string(modelBytes)))
+	_, err = connection.Query(fmt.Sprintf("patch record %v.assets \"%v\" {\"updated\":\"%v\",\"models\":%v}", config.Config.DB.Name, realAssetID, updatedTime, string(modelBytes)))
 	return nil
 }
 
 func RegisterModel(newModel Model) error {
-	countObj, _ := connection.Query(fmt.Sprintf("get record %v.models | count", config.Config.DBName))
+	countObj, _ := connection.Query(fmt.Sprintf("get record %v.models | count", config.Config.DB.Name))
 	startCount := int(countObj[0]["count"].(float64))
 	endCount := startCount
 	if newModel.ID == "" {
@@ -130,19 +125,19 @@ func RegisterModel(newModel Model) error {
 	newModel.Updated = currentTime.Format("2006-01-02T15:04:05Z")
 	queryData, _ := json.Marshal(&newModel)
 	for endCount == startCount {
-		queryString := fmt.Sprintf("post record %v.models %v", config.Config.DBName, string(queryData))
+		queryString := fmt.Sprintf("post record %v.models %v", config.Config.DB.Name, string(queryData))
 		_, err := connection.Query(queryString)
 		if err != nil {
 			return err
 		}
-		countObj, _ := connection.Query(fmt.Sprintf("get record %v.models | count", config.Config.DBName))
+		countObj, _ := connection.Query(fmt.Sprintf("get record %v.models | count", config.Config.DB.Name))
 		endCount = int(countObj[0]["count"].(float64))
 	}
 	return nil
 }
 
 func DeleteModel(modelIDs []string) error {
-	queryString := fmt.Sprintf("get record %v.models", config.Config.DBName)
+	queryString := fmt.Sprintf("get record %v.models", config.Config.DB.Name)
 	currentData, err := connection.Query(queryString)
 	if err != nil {
 		return err
@@ -154,7 +149,7 @@ func DeleteModel(modelIDs []string) error {
 		}
 	}
 	queryData, _ := json.Marshal(&ids)
-	queryString = fmt.Sprintf("delete record %v.models %v", config.Config.DBName, string(queryData))
+	queryString = fmt.Sprintf("delete record %v.models %v", config.Config.DB.Name, string(queryData))
 	_, err = connection.Query(queryString)
 	return err
 }
@@ -164,7 +159,7 @@ func UpdateModel(newModel Model) error {
 		err := errors.New("'id' field is required to update an model")
 		return err
 	}
-	queryString := fmt.Sprintf("get record %v.models", config.Config.DBName)
+	queryString := fmt.Sprintf("get record %v.models", config.Config.DB.Name)
 	currentData, err := connection.Query(queryString)
 	if err != nil {
 		return err
@@ -220,7 +215,7 @@ func UpdateModel(newModel Model) error {
 			currentTime := time.Now().UTC()
 			datum["updated"] = currentTime.Format("2006-01-02T15:04:05Z")
 			queryData, _ := json.Marshal(&datum)
-			queryString := fmt.Sprintf("put record %v.models %v", config.Config.DBName, string(queryData))
+			queryString := fmt.Sprintf("put record %v.models %v", config.Config.DB.Name, string(queryData))
 			_, err := connection.Query(queryString)
 			if err != nil {
 				return err
@@ -232,8 +227,8 @@ func UpdateModel(newModel Model) error {
 	return err
 }
 
-func GetModels(limit, filter, count, orderasc, orderdsc string) ([]map[string]interface{}, error) {
-	queryString := fmt.Sprintf("get record %v.models", config.Config.DBName)
+func GetModels(limit, filter, count, orderasc, orderdsc string) ([]Model, error) {
+	queryString := fmt.Sprintf("get record %v.models", config.Config.DB.Name)
 	if filter != FILTER_DEFAULT {
 		queryString += fmt.Sprintf(" | filter %v", filter)
 	}
@@ -253,5 +248,8 @@ func GetModels(limit, filter, count, orderasc, orderdsc string) ([]map[string]in
 	if err != nil {
 		return nil, err
 	}
-	return data, nil
+	marshalled, _ := json.Marshal(data)
+	var output []Model
+	json.Unmarshal(marshalled, &output)
+	return output, nil
 }

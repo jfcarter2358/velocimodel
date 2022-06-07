@@ -1,6 +1,9 @@
 // import material.js
 // import theme.js
 // import modal.js
+// import user_menu.js
+// import status.js
+// import data.js
 
 var snapshots
 
@@ -38,7 +41,7 @@ function render() {
                 }).join('') +
                 '</td>' +
                 '<td class="table-link-cell">' +
-                '<a href="/ui/snapshot/' + snapshot.id + '" class="table-link-link w3-right-align dark theme-text" style="float:right;margin-right:16px;"><i class="fa-solid fa-link"></i></a>' +
+                '<a href="/ui/snapshot/' + snapshot.id + '" class="table-link-link w3-right-align light theme-text" style="float:right;margin-right:16px;"><i class="fa-solid fa-link"></i></a>' +
                 '</td>' +
                 '</tr>'
         }).join('');

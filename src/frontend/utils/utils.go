@@ -3,12 +3,13 @@
 package utils
 
 import (
-	"log"
+	"fmt"
+	"frontend/logging"
 
 	"github.com/gin-gonic/gin"
 )
 
 func Error(err error, c *gin.Context, statusCode int) {
-	log.Printf("Encountered error: %v", err)
+	logging.Logger.Error(fmt.Sprintf("Encountered error: %v", err))
 	c.JSON(statusCode, gin.H{"error": err.Error()})
 }

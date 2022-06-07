@@ -20,17 +20,13 @@ func EnsureLoggedIn() gin.HandlerFunc {
 		// If there's an error or if the token is empty
 		// the user is not logged in
 		token, err := c.Cookie("access_token")
-		log.Printf("TOKEN: %v", token)
-		log.Printf("ERROR: %v", err)
 		if err != nil {
-			log.Println("ACCESS TOKEN DOES NOT EXIST")
 			c.Redirect(307, "/auth/login")
 			return
 		}
 		client := http.Client{}
 		requestURL := "http://auth-manager:9005/oauth/userinfo"
 		req, err := http.NewRequest(http.MethodGet, requestURL, nil)
-		log.Printf("ACCESS TOKEN: %v", token)
 		req.Header = http.Header{
 			"Authorization": []string{"Bearer " + token},
 		}

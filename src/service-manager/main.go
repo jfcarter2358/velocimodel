@@ -6,6 +6,7 @@ import (
 	// "os"
 
 	"service-manager/api"
+	"service-manager/auth"
 	"service-manager/ceresdb"
 	"service-manager/config"
 	"service-manager/param"
@@ -30,18 +31,20 @@ func main() {
 	log := logrus.New()
 
 	config.LoadConfig()
+	auth.LoadOauthConfig()
+
 	routerPort := ":" + strconv.Itoa(config.Config.HTTPPort)
-	connection.Initialize(config.Config.DBUsername, config.Config.DBPassword, config.Config.DBHost, config.Config.DBPort)
+	connection.Initialize(config.Config.DB.Username, config.Config.DB.Password, config.Config.DB.Host, config.Config.DB.Port)
 
-	if err := ceresdb.VerifyDatabase(config.Config.DBName); err != nil {
+	if err := ceresdb.VerifyDatabase(config.Config.DB.Name); err != nil {
 		panic(err)
 	}
-	if err := ceresdb.VerifyCollections(config.Config.DBName); err != nil {
+	if err := ceresdb.VerifyCollections(config.Config.DB.Name); err != nil {
 		panic(err)
 	}
 
-	param.LoadParams(config.Config.DBHost, config.Config.DBName, config.Config.DBPort)
-	secret.LoadSecrets(config.Config.DBUsername, config.Config.DBPassword)
+	param.LoadParams(config.Config.DB.Host, config.Config.DB.Name, config.Config.DB.Port)
+	secret.LoadSecrets(config.Config.DB.Username, config.Config.DB.Password)
 
 	serviceID := uuid.New().String()
 

@@ -1,5 +1,9 @@
 // import material.js
 // import theme.js
+// import modal.js
+// import user_menu.js
+// import status.js
+// import data.js
 
 require.config({ paths: { vs: '../../../static/js/monaco-editor/min/vs' } });
 var editor;

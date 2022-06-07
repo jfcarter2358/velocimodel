@@ -1,4 +1,6 @@
-FROM golang:1.18.0-alpine
+FROM golang:1.18.1-alpine
+
+RUN apk update && apk add git
 
 WORKDIR /frontend-build
 COPY src/frontend /frontend-build
@@ -16,6 +18,9 @@ RUN apk update \
     && apk add bash
 
 SHELL ["/bin/bash", "-c"]
+
+RUN mkdir /home/frontend/data
+COPY data/frontend /home/frontend/data
 
 ADD src/frontend/start-frontend.sh /home/frontend/start-frontend.sh
 RUN chmod u+x /home/frontend/start-frontend.sh

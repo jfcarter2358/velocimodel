@@ -1,0 +1,23 @@
+<div class="w3-card-4 w3-round light theme-base w3-border theme-border-light">
+    <div class="w3-container velocimodel-blue w3-round param-title">
+        <div class="w3-container velocimodel-blue w3-round param-title">
+            <div class="card-title-bar">
+                <div class="icon" style="margin-top:10px;">
+                    <i class="fa-solid fa-floppy-disk w3-large pointer-cursor" onclick="saveParams()"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="param-card">
+        <div class="w3-card-4 w3-round w3-border theme-border-light theme-light light">
+            <div class="param-card" id="params-card">
+                {{ range $key, $value := .params }}
+                <label>{{ $key }}</label>
+                <input class="w3-input" type="text" id="params-{{ $key }}" value="{{ $value }}">
+                {{ end }}
+            </div>
+        </div>
+        <br>
+    </div>
+</div>

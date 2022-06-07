@@ -7,6 +7,7 @@ import (
 
 	"asset-manager/api"
 	"asset-manager/asset"
+	"asset-manager/auth"
 	"asset-manager/ceresdb"
 	"asset-manager/config"
 	"bytes"
@@ -30,7 +31,7 @@ var c cron.Cron
 var router *gin.Engine
 
 func checkAssetSync() {
-	assets, err := asset.GetAssets("0", "", "false")
+	assets, err := asset.GetAssets("0", "", "false", "NA", "NA")
 	if err != nil {
 		log.Printf("Git sync error: %v", err)
 		return
@@ -59,6 +60,7 @@ func main() {
 	log := logrus.New()
 
 	config.LoadConfig()
+	auth.LoadOauthConfig()
 
 	// Wait for api-server to become available
 	statusCode := http.StatusServiceUnavailable
@@ -78,19 +80,20 @@ func main() {
 
 	config.LoadParamsSecrets()
 
-	config.Config.DBHost = config.Params["db_host"].(string)
-	config.Config.DBPort = int(config.Params["db_port"].(float64))
-	config.Config.DBName = config.Params["db_name"].(string)
-	config.Config.DBUsername = config.Secrets["db_user"].(string)
-	config.Config.DBPassword = config.Secrets["db_pass"].(string)
+	config.Config.DB = config.DBObject{}
+	config.Config.DB.Host = config.Params["db_host"].(string)
+	config.Config.DB.Port = int(config.Params["db_port"].(float64))
+	config.Config.DB.Name = config.Params["db_name"].(string)
+	config.Config.DB.Username = config.Secrets["db_user"].(string)
+	config.Config.DB.Password = config.Secrets["db_pass"].(string)
 
 	routerPort := ":" + strconv.Itoa(config.Config.HTTPPort)
-	connection.Initialize(config.Config.DBUsername, config.Config.DBPassword, config.Config.DBHost, config.Config.DBPort)
+	connection.Initialize(config.Config.DB.Username, config.Config.DB.Password, config.Config.DB.Host, config.Config.DB.Port)
 
-	if err := ceresdb.VerifyDatabase(config.Config.DBName); err != nil {
+	if err := ceresdb.VerifyDatabase(config.Config.DB.Name); err != nil {
 		panic(err)
 	}
-	if err := ceresdb.VerifyCollections(config.Config.DBName); err != nil {
+	if err := ceresdb.VerifyCollections(config.Config.DB.Name); err != nil {
 		panic(err)
 	}
 
@@ -103,7 +106,15 @@ func main() {
 		panic(err)
 	}
 
-	_, err = http.Post(fmt.Sprintf("%v/api/service", config.Config.APIServerURL), "application/json", bytes.NewBuffer(json_data))
+	requestURL = fmt.Sprintf("%v/api/service", config.Config.APIServerURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodPost, requestURL, bytes.NewBuffer(json_data))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", config.Config.JoinToken))
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	_, err = client.Do(req)
 
 	if err != nil {
 		panic(err)

@@ -1,4 +1,6 @@
-FROM golang:1.18.0-alpine
+FROM golang:1.18.1-alpine
+
+RUN apk update && apk add git
 
 WORKDIR /api-server-build
 COPY src/api-server /api-server-build
@@ -16,6 +18,9 @@ RUN apk update \
     && apk add bash
 
 SHELL ["/bin/bash", "-c"]
+
+RUN mkdir /home/api-server/data
+COPY data/api-server /home/api-server/data
 
 ADD src/api-server/start-api-server.sh /home/api-server/start-api-server.sh
 RUN chmod u+x /home/api-server/start-api-server.sh

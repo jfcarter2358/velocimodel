@@ -1,4 +1,6 @@
-FROM golang:1.18.0-alpine
+FROM golang:1.18.1-alpine
+
+RUN apk update && apk add git
 
 WORKDIR /auth-manager-build
 COPY src/auth-manager /auth-manager-build

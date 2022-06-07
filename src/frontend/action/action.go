@@ -2,7 +2,6 @@ package action
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"frontend/config"
 	"io/ioutil"
@@ -13,12 +12,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetAssetByID(assetID string) (map[string]interface{}, error) {
+func GetAssetByID(c *gin.Context, assetID string) (map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	params := url.Values{}
 	params.Add("filter", fmt.Sprintf("id = \"%v\"", assetID))
 	requestURL := fmt.Sprintf("%v/api/asset?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -45,10 +57,23 @@ func GetAssetByID(assetID string) (map[string]interface{}, error) {
 	return obj[0], nil
 }
 
-func GetAssetsAll() ([]map[string]interface{}, error) {
+func GetAssetsAll(c *gin.Context) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	requestURL := fmt.Sprintf("%v/api/asset", config.Config.APIServerURL)
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -71,10 +96,23 @@ func GetAssetsAll() ([]map[string]interface{}, error) {
 	return obj, nil
 }
 
-func GetAssetsByIDList(assetIDs []string) ([]map[string]interface{}, error) {
+func GetAssetsByIDList(c *gin.Context, assetIDs []string) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	requestURL := fmt.Sprintf("%v/api/asset", config.Config.APIServerURL)
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -105,12 +143,25 @@ func GetAssetsByIDList(assetIDs []string) ([]map[string]interface{}, error) {
 	return output, nil
 }
 
-func GetAssetsLimit(limit string) ([]map[string]interface{}, error) {
+func GetAssetsLimit(c *gin.Context, limit string) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	params := url.Values{}
 	params.Add("limit", limit)
 	requestURL := fmt.Sprintf("%v/api/asset?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -133,13 +184,26 @@ func GetAssetsLimit(limit string) ([]map[string]interface{}, error) {
 	return obj, nil
 }
 
-func GetAssetsLimitLatest(limit string) ([]map[string]interface{}, error) {
+func GetAssetsLimitLatest(c *gin.Context, limit string) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	params := url.Values{}
 	params.Add("orderdsc", "updated")
 	params.Add("limit", limit)
 	requestURL := fmt.Sprintf("%v/api/asset?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -162,12 +226,25 @@ func GetAssetsLimitLatest(limit string) ([]map[string]interface{}, error) {
 	return obj, nil
 }
 
-func GetModelByID(modelID string) (map[string]interface{}, error) {
+func GetModelByID(c *gin.Context, modelID string) (map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	params := url.Values{}
 	params.Add("filter", fmt.Sprintf("id = \"%v\"", modelID))
 	requestURL := fmt.Sprintf("%v/api/model?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -194,10 +271,23 @@ func GetModelByID(modelID string) (map[string]interface{}, error) {
 	return obj[0], nil
 }
 
-func GetModelsByIDList(modelIDs []string) ([]map[string]interface{}, error) {
+func GetModelsByIDList(c *gin.Context, modelIDs []string) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	requestURL := fmt.Sprintf("%v/api/model", config.Config.APIServerURL)
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -228,10 +318,23 @@ func GetModelsByIDList(modelIDs []string) ([]map[string]interface{}, error) {
 	return output, nil
 }
 
-func GetModelsAll() ([]map[string]interface{}, error) {
+func GetModelsAll(c *gin.Context) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	requestURL := fmt.Sprintf("%v/api/model", config.Config.APIServerURL)
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -254,12 +357,25 @@ func GetModelsAll() ([]map[string]interface{}, error) {
 	return obj, nil
 }
 
-func GetModelsLimit(limit string) ([]map[string]interface{}, error) {
+func GetModelsLimit(c *gin.Context, limit string) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	params := url.Values{}
 	params.Add("limit", limit)
 	requestURL := fmt.Sprintf("%v/api/model?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -282,13 +398,26 @@ func GetModelsLimit(limit string) ([]map[string]interface{}, error) {
 	return obj, nil
 }
 
-func GetModelsLimitLatest(limit string) ([]map[string]interface{}, error) {
+func GetModelsLimitLatest(c *gin.Context, limit string) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	params := url.Values{}
 	params.Add("orderdsc", "updated")
 	params.Add("limit", limit)
 	requestURL := fmt.Sprintf("%v/api/model?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -311,12 +440,25 @@ func GetModelsLimitLatest(limit string) ([]map[string]interface{}, error) {
 	return obj, nil
 }
 
-func GetReleaseByID(releaseID string) (map[string]interface{}, error) {
+func GetReleaseByID(c *gin.Context, releaseID string) (map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	params := url.Values{}
 	params.Add("filter", fmt.Sprintf("id = \"%v\"", releaseID))
 	requestURL := fmt.Sprintf("%v/api/release?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -343,10 +485,23 @@ func GetReleaseByID(releaseID string) (map[string]interface{}, error) {
 	return obj[0], nil
 }
 
-func GetReleasesAll() ([]map[string]interface{}, error) {
+func GetReleasesAll(c *gin.Context) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	requestURL := fmt.Sprintf("%v/api/release", config.Config.APIServerURL)
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -369,10 +524,23 @@ func GetReleasesAll() ([]map[string]interface{}, error) {
 	return obj, nil
 }
 
-func GetReleasesByIDList(releaseIDs []string) ([]map[string]interface{}, error) {
+func GetReleasesByIDList(c *gin.Context, releaseIDs []string) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	requestURL := fmt.Sprintf("%v/api/release", config.Config.APIServerURL)
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -403,12 +571,25 @@ func GetReleasesByIDList(releaseIDs []string) ([]map[string]interface{}, error) 
 	return output, nil
 }
 
-func GetReleasesLimit(limit string) ([]map[string]interface{}, error) {
+func GetReleasesLimit(c *gin.Context, limit string) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	params := url.Values{}
 	params.Add("limit", limit)
 	requestURL := fmt.Sprintf("%v/api/release?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -431,13 +612,26 @@ func GetReleasesLimit(limit string) ([]map[string]interface{}, error) {
 	return obj, nil
 }
 
-func GetReleasesLimitLatest(limit string) ([]map[string]interface{}, error) {
+func GetReleasesLimitLatest(c *gin.Context, limit string) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	params := url.Values{}
 	params.Add("orderdsc", "updated")
 	params.Add("limit", limit)
 	requestURL := fmt.Sprintf("%v/api/release?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -460,12 +654,25 @@ func GetReleasesLimitLatest(limit string) ([]map[string]interface{}, error) {
 	return obj, nil
 }
 
-func GetSnapshotByID(snapshotID string) (map[string]interface{}, error) {
+func GetSnapshotByID(c *gin.Context, snapshotID string) (map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	params := url.Values{}
 	params.Add("filter", fmt.Sprintf("id = \"%v\"", snapshotID))
 	requestURL := fmt.Sprintf("%v/api/snapshot?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -492,10 +699,23 @@ func GetSnapshotByID(snapshotID string) (map[string]interface{}, error) {
 	return obj[0], nil
 }
 
-func GetSnapshotsAll() ([]map[string]interface{}, error) {
+func GetSnapshotsAll(c *gin.Context) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	requestURL := fmt.Sprintf("%v/api/snapshot", config.Config.APIServerURL)
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -518,10 +738,23 @@ func GetSnapshotsAll() ([]map[string]interface{}, error) {
 	return obj, nil
 }
 
-func GetSnapshotsByIDList(snapshotIDs []string) ([]map[string]interface{}, error) {
+func GetSnapshotsByIDList(c *gin.Context, snapshotIDs []string) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	requestURL := fmt.Sprintf("%v/api/snapshot", config.Config.APIServerURL)
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -552,12 +785,25 @@ func GetSnapshotsByIDList(snapshotIDs []string) ([]map[string]interface{}, error
 	return output, nil
 }
 
-func GetSnapshotsLimit(limit string) ([]map[string]interface{}, error) {
+func GetSnapshotsLimit(c *gin.Context, limit string) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	params := url.Values{}
 	params.Add("limit", limit)
 	requestURL := fmt.Sprintf("%v/api/snapshot?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -580,13 +826,26 @@ func GetSnapshotsLimit(limit string) ([]map[string]interface{}, error) {
 	return obj, nil
 }
 
-func GetSnapshotsLimitLatest(limit string) ([]map[string]interface{}, error) {
+func GetSnapshotsLimitLatest(c *gin.Context, limit string) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	params := url.Values{}
 	params.Add("orderdsc", "updated")
 	params.Add("limit", limit)
 	requestURL := fmt.Sprintf("%v/api/snapshot?%v", config.Config.APIServerURL, params.Encode())
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -609,10 +868,23 @@ func GetSnapshotsLimitLatest(limit string) ([]map[string]interface{}, error) {
 	return obj, nil
 }
 
-func GetSecretsAll() ([]map[string]interface{}, error) {
+func GetSecretsAll(c *gin.Context) (map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
 	var obj []map[string]interface{}
 	requestURL := fmt.Sprintf("%v/api/secret", config.Config.APIServerURL)
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
@@ -626,13 +898,13 @@ func GetSecretsAll() ([]map[string]interface{}, error) {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
 	}
-	err = json.Unmarshal([]byte(body), &obj)
+	err = json.Unmarshal(body, &obj)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return nil, err
 	}
 
-	return obj, nil
+	return obj[0], nil
 }
 
 func Contains(s []string, e string) bool {
@@ -652,6 +924,9 @@ func GetUserData(c *gin.Context) (map[string]interface{}, error) {
 	client := http.Client{}
 	requestURL := "http://auth-manager:9005/oauth/userinfo"
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
 	req.Header = http.Header{
 		"Authorization": []string{"Bearer " + token},
 	}
@@ -660,7 +935,7 @@ func GetUserData(c *gin.Context) (map[string]interface{}, error) {
 		return nil, err
 	}
 	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(fmt.Sprintf("Status code was :%v, not 200", res.StatusCode))
+		return nil, fmt.Errorf("status code was :%v, not 200", res.StatusCode)
 	}
 	var obj map[string]interface{}
 	body, err := ioutil.ReadAll(res.Body)
@@ -672,4 +947,258 @@ func GetUserData(c *gin.Context) (map[string]interface{}, error) {
 		return nil, err
 	}
 	return obj, nil
+}
+
+func GetUserByID(userID string, c *gin.Context) (map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
+	var obj []map[string]interface{}
+	params := url.Values{}
+	params.Add("filter", fmt.Sprintf("id = \"%v\"", userID))
+	requestURL := fmt.Sprintf("%v/api/user?%v", config.Config.APIServerURL, params.Encode())
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
+		return nil, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+
+	if len(obj) == 0 {
+		return nil, nil
+	}
+
+	return obj[0], nil
+}
+
+func GetUsersAll(c *gin.Context) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
+	var obj []map[string]interface{}
+	requestURL := fmt.Sprintf("%v/api/user", config.Config.APIServerURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	log.Printf("AUTH HEADER GET USERS ALL: %v", req.Header.Get("Authorization"))
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
+		return nil, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+
+	return obj, nil
+}
+
+func GetUsersByIDList(userIDs []string, c *gin.Context) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
+	var obj []map[string]interface{}
+	requestURL := fmt.Sprintf("%v/api/user", config.Config.APIServerURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
+		return nil, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+
+	output := make([]map[string]interface{}, 0)
+
+	for _, val := range obj {
+		if Contains(userIDs, val["id"].(string)) {
+			output = append(output, val)
+		}
+	}
+
+	return output, nil
+}
+
+func GetUsersLimit(limit string, c *gin.Context) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
+	var obj []map[string]interface{}
+	params := url.Values{}
+	params.Add("limit", limit)
+	requestURL := fmt.Sprintf("%v/api/user?%v", config.Config.APIServerURL, params.Encode())
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
+		return nil, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+
+	return obj, nil
+}
+
+func GetUsersLimitLatest(limit string, c *gin.Context) ([]map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
+	var obj []map[string]interface{}
+	params := url.Values{}
+	params.Add("orderdsc", "updated")
+	params.Add("limit", limit)
+	requestURL := fmt.Sprintf("%v/api/user?%v", config.Config.APIServerURL, params.Encode())
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
+		return nil, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+
+	return obj, nil
+}
+
+func GetParamsAll(c *gin.Context) (map[string]interface{}, error) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		return nil, err
+	}
+	var obj []map[string]interface{}
+	requestURL := fmt.Sprintf("%v/api/param", config.Config.APIServerURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Encountered error: Request failed with status code %v", resp.StatusCode)
+		return nil, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+	err = json.Unmarshal(body, &obj)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		return nil, err
+	}
+
+	return obj[0], nil
 }

@@ -17,6 +17,9 @@ func initializeRoutes() {
 	router.Static("/static/img", "./static/img")
 	router.Static("/static/js", "./static/js")
 
+	router.GET("/health", api.GetHealth)
+	router.GET("/status", api.GetStatuses)
+
 	router.GET("/", page.RedirectIndexPage)
 
 	router.NoRoute(func(c *gin.Context) {
@@ -48,6 +51,13 @@ func initializeRoutes() {
 		apiRoutes.PUT("/snapshot/:id", api.UpdateSnapshot)
 		apiRoutes.POST("/snapshot/:id/release", api.CreateRelease)
 		apiRoutes.GET("/snapshot/archive/:id", api.DownloadSnapshot)
+		apiRoutes.GET("/user", api.GetUsers)
+		apiRoutes.GET("/user/:id", api.GetUser)
+		apiRoutes.PUT("/user/:id", api.UpdateUser)
+		apiRoutes.DELETE("/user", api.DeleteUser)
+		apiRoutes.POST("/user", api.CreateNewUser)
+		apiRoutes.PUT("/param", api.UpdateParams)
+		apiRoutes.PUT("/secret", api.UpdateSecrets)
 	}
 
 	uiRoutes := router.Group("/ui")
@@ -65,6 +75,16 @@ func initializeRoutes() {
 		uiRoutes.GET("/snapshots", middleware.EnsureLoggedIn(), page.ShowSnapshotsPage)
 		uiRoutes.GET("/snapshot/:id", middleware.EnsureLoggedIn(), page.ShowSnapshotPage)
 		uiRoutes.GET("/snapshot/:id/code", middleware.EnsureLoggedIn(), page.ShowSnapshotCodePage)
+		uiRoutes.GET("/users", middleware.EnsureLoggedIn(), page.ShowUsersPage)
+		uiRoutes.GET("/user/:id", middleware.EnsureLoggedIn(), page.ShowUserPage)
+		uiRoutes.GET("/secrets", middleware.EnsureLoggedIn(), page.ShowSecretsPage)
+		uiRoutes.GET("/params", middleware.EnsureLoggedIn(), page.ShowParamsPage)
+		uiRoutes.GET("/404", func(c *gin.Context) {
+			c.HTML(http.StatusNotFound, "404.html", gin.H{})
+		})
+		uiRoutes.GET("/401", func(c *gin.Context) {
+			c.HTML(http.StatusUnauthorized, "401.html", gin.H{})
+		})
 	}
 
 	authRoutes := router.Group("/auth")

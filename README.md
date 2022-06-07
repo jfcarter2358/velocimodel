@@ -85,28 +85,39 @@ to bring up the services and navigate to `http://localhost:9000` to view the UI.
 
 **v0.2.0**
 
-- [ ] frontend
-   - [ ] param view
-   - [ ] param edit
-   - [ ] secret view
-   - [ ] secret edit
-   - [ ] user edit view
-   - [ ] user create view
-   - [ ] user delete view
-   - [ ] Service status badge
-- [ ] auth-manager
-- [ ] asset-manager
-   - [ ] SSH git clone support
-- [ ] service-manager
-   - [ ] Automated service health pings
-
+- [x] frontend
+   - [x] Param view/edit
+   - [x] Secret view/edit
+   - [x] User view
+   - [x] User edit view
+   - [x] User create view
+   - [x] User delete view
+   - [x] Service status badge
+- [x] auth-manager
+   - [x] Authorization flow
+- [x] api-server
+   - [x] All endpoints secured through api-server
+- [x] asset-manager
+   - [x] SSH git clone support
+- [x] service-manager
+   - [x] Automated service health pings
 
 **v0.3.0**
 
+- [ ] whitetail integration
+- [ ] velocimodel-sdk
+- [ ] frontend
+   - [ ] Better error propagation
+   - [ ] Add secrets view
+   - [ ] Delete secrets view
+   - [ ] Add params view
+   - [ ] Delete params view
 - [ ] automation-manager
 - [ ] runtime-manager
 - [ ] model-runtime
-
+- [ ] auth-manager
+   - [ ] password reset
+   
 **v0.4.0**
 
 - [ ] asset-manager

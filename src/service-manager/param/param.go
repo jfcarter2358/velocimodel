@@ -38,7 +38,7 @@ func LoadParams(dbHost, dbName string, dbPort int) {
 }
 
 func DeleteParam(paramNames []string) error {
-	queryString := fmt.Sprintf("get record %v.params", config.Config.DBName)
+	queryString := fmt.Sprintf("get record %v.params", config.Config.DB.Name)
 	currentData, err := connection.Query(queryString)
 	if err != nil {
 		return err
@@ -50,13 +50,13 @@ func DeleteParam(paramNames []string) error {
 		}
 	}
 	queryData, _ := json.Marshal(&ids)
-	queryString = fmt.Sprintf("delete record %v.params %v", config.Config.DBName, queryData)
+	queryString = fmt.Sprintf("delete record %v.params %v", config.Config.DB.Name, queryData)
 	_, err = connection.Query(queryString)
 	return err
 }
 
 func GetParams(limit, filter, count string) (map[string]interface{}, error) {
-	queryString := fmt.Sprintf("get record %v.params", config.Config.DBName)
+	queryString := fmt.Sprintf("get record %v.params", config.Config.DB.Name)
 	if filter != FILTER_DEFAULT {
 		queryString += fmt.Sprintf(" | filter %v", filter)
 	}
@@ -85,13 +85,13 @@ func RegisterParam(input map[string]interface{}) error {
 	}
 
 	queryData, _ := json.Marshal(&queryList)
-	queryString := fmt.Sprintf("post record %v.params %v", config.Config.DBName, string(queryData))
+	queryString := fmt.Sprintf("post record %v.params %v", config.Config.DB.Name, string(queryData))
 	_, err := connection.Query(queryString)
 	return err
 }
 
 func UpdateParam(input map[string]interface{}) error {
-	queryString := fmt.Sprintf("get record %v.params", config.Config.DBName)
+	queryString := fmt.Sprintf("get record %v.params", config.Config.DB.Name)
 	currentData, err := connection.Query(queryString)
 	if err != nil {
 		return err
@@ -114,7 +114,7 @@ func UpdateParam(input map[string]interface{}) error {
 	}
 	if len(currentData) > 0 {
 		queryData, _ := json.Marshal(&currentData)
-		queryString = fmt.Sprintf("put record %v.params %v", config.Config.DBName, string(queryData))
+		queryString = fmt.Sprintf("put record %v.params %v", config.Config.DB.Name, string(queryData))
 		_, err = connection.Query(queryString)
 		if err != nil {
 			return err
@@ -122,7 +122,7 @@ func UpdateParam(input map[string]interface{}) error {
 	}
 	if len(newData) > 0 {
 		queryData, _ := json.Marshal(&newData)
-		queryString = fmt.Sprintf("post record %v.params %v", config.Config.DBName, string(queryData))
+		queryString = fmt.Sprintf("post record %v.params %v", config.Config.DB.Name, string(queryData))
 		_, err = connection.Query(queryString)
 		if err != nil {
 			return err

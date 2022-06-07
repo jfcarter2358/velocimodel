@@ -16,11 +16,13 @@ var collectionSchemas = []map[string]string{
 		"given_name":              "STRING",
 		"family_name":             "STRING",
 		"id":                      "STRING",
-		"roles":                   "STRING",
-		"groups":                  "STRING",
+		"roles":                   "LIST",
+		"groups":                  "LIST",
 		"email":                   "STRING",
 		"reset_token":             "STRING",
 		"reset_token_create_date": "STRING",
+		"created":                 "STRING",
+		"updated":                 "STRING",
 	},
 }
 

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"model-manager/model"
 	"model-manager/release"
@@ -23,12 +24,11 @@ var Healthy = false
 // Health API
 
 func GetHealth(c *gin.Context) {
-	if Healthy == false {
+	if !Healthy {
 		c.Status(http.StatusServiceUnavailable)
 		return
 	}
 	c.Status(http.StatusOK)
-	return
 }
 
 // Model API
@@ -144,7 +144,11 @@ func DownloadModel(c *gin.Context) {
 		return
 	}
 
-	localPath, filename, err := utils.CollectObjects(models[0])
+	marshalled, _ := json.Marshal(models[0])
+	var object map[string]interface{}
+	json.Unmarshal(marshalled, &object)
+
+	localPath, filename, err := utils.CollectObjects(object)
 
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
@@ -195,6 +199,8 @@ func GetReleases(c *gin.Context) {
 	filter := FILTER_DEFAULT
 	limit := LIMIT_DEFAULT
 	count := COUNT_DEFAULT
+	orderasc := ORDERASC_DEFAULT
+	orderdsc := ORDERDSC_DEFAULT
 	if val, ok := c.GetQuery("filter"); ok {
 		filter = val
 	}
@@ -204,7 +210,13 @@ func GetReleases(c *gin.Context) {
 	if val, ok := c.GetQuery("count"); ok {
 		count = val
 	}
-	data, err := release.GetReleases(limit, filter, count)
+	if val, ok := c.GetQuery("orderasc"); ok {
+		orderasc = val
+	}
+	if val, ok := c.GetQuery("orderdsc"); ok {
+		orderdsc = val
+	}
+	data, err := release.GetReleases(limit, filter, count, orderasc, orderdsc)
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
@@ -231,14 +243,18 @@ func PostRelease(c *gin.Context) {
 func DownloadRelease(c *gin.Context) {
 	releaseID := c.Param("id")
 
-	releases, err := release.GetReleases(LIMIT_DEFAULT, fmt.Sprintf("id = \"%v\"", releaseID), COUNT_DEFAULT)
+	releases, err := release.GetReleases(LIMIT_DEFAULT, fmt.Sprintf("id = \"%v\"", releaseID), COUNT_DEFAULT, ORDERASC_DEFAULT, ORDERDSC_DEFAULT)
 
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 
-	localPath, filename, err := utils.CollectObjects(releases[0])
+	marshalled, _ := json.Marshal(releases[0])
+	var object map[string]interface{}
+	json.Unmarshal(marshalled, &object)
+
+	localPath, filename, err := utils.CollectObjects(object)
 
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
@@ -289,6 +305,8 @@ func GetSnapshots(c *gin.Context) {
 	filter := FILTER_DEFAULT
 	limit := LIMIT_DEFAULT
 	count := COUNT_DEFAULT
+	orderasc := ORDERASC_DEFAULT
+	orderdsc := ORDERDSC_DEFAULT
 	if val, ok := c.GetQuery("filter"); ok {
 		filter = val
 	}
@@ -298,7 +316,13 @@ func GetSnapshots(c *gin.Context) {
 	if val, ok := c.GetQuery("count"); ok {
 		count = val
 	}
-	data, err := snapshot.GetSnapshots(limit, filter, count)
+	if val, ok := c.GetQuery("orderasc"); ok {
+		orderasc = val
+	}
+	if val, ok := c.GetQuery("orderdsc"); ok {
+		orderdsc = val
+	}
+	data, err := snapshot.GetSnapshots(limit, filter, count, orderasc, orderdsc)
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
@@ -339,14 +363,18 @@ func PutSnapshot(c *gin.Context) {
 func DownloadSnapshot(c *gin.Context) {
 	snapshotID := c.Param("id")
 
-	snapshots, err := snapshot.GetSnapshots(LIMIT_DEFAULT, fmt.Sprintf("id = \"%v\"", snapshotID), COUNT_DEFAULT)
+	snapshots, err := snapshot.GetSnapshots(LIMIT_DEFAULT, fmt.Sprintf("id = \"%v\"", snapshotID), COUNT_DEFAULT, ORDERASC_DEFAULT, ORDERDSC_DEFAULT)
 
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 
-	localPath, filename, err := utils.CollectObjects(snapshots[0])
+	marshalled, _ := json.Marshal(snapshots[0])
+	var object map[string]interface{}
+	json.Unmarshal(marshalled, &object)
+
+	localPath, filename, err := utils.CollectObjects(object)
 
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)

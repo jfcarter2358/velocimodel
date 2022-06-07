@@ -1,0 +1,13 @@
+{
+    "http_host": "asset-manager",
+    "http_port": 9002,
+    "data_path": "/home/asset-manager/data/assets",
+    "api_server_url": "http://api-server:9004",
+    "join_token": "abcdefghijklmnopqrstuvwxyzjointoken",
+    "oauth": {
+        "client_id": "velocimodel-asset-manager",
+        "client_secret": "abc123DEFghijklmnop4567rstuvwxyzZYXWUT8910SRQPOnmlijhoauthplaygroundapplication",
+        "auth_manager_internal_url": "http://auth-manager:9005",
+        "auth_manager_external_url": "http://localhost:9005"
+    }
+}

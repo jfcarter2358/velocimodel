@@ -25,6 +25,8 @@ func initializeRoutes() {
 	router.Static("/static/img", "static/img")
 	router.Static("/static/css", "static/css")
 
+	router.GET("/health", api.GetHealth)
+
 	// api endpoints
 
 	// UI endpoints
@@ -147,24 +149,12 @@ func initializeRoutes() {
 		uRoutes.GET("/logout", middleware.EnsureLoggedIn(), user.Logout)
 	}
 
-	uiRoutes := router.Group("/ui")
-	{
-		uiRoutes.GET("/index", middleware.EnsureLoggedIn(), handlers.IndexHandler)
-		uiRoutes.GET("/create", middleware.EnsureLoggedIn(), middleware.EnsureGroupAllowed("admin"), handlers.CreateHandler)
-		uiRoutes.GET("/delete", middleware.EnsureLoggedIn(), middleware.EnsureGroupAllowed("admin"), handlers.DeleteHandler)
-		uiRoutes.GET("/edit", middleware.EnsureLoggedIn(), handlers.EditIndexHandler)
-		uiRoutes.GET("/edit/*id", middleware.EnsureLoggedIn(), middleware.EnsureGroupAllowed("admin"), handlers.EditHandler)
-		uiRoutes.GET("/401", handlers.Handler401)
-		uiRoutes.GET("/404", handlers.Handler404)
-	}
-
 	apiRoutes := router.Group("/api")
 	{
-		apiRoutes.GET("/user", middleware.EnsureLoggedIn(), api.UserGetAllHandler)
-		apiRoutes.GET("/user/:id", middleware.EnsureLoggedIn(), api.UserGetByIdHandler)
-		apiRoutes.DELETE("/user/:id", middleware.EnsureLoggedIn(), api.UserDeleteHandler)
-		apiRoutes.POST("/user/:id", middleware.EnsureLoggedIn(), api.UserUpdateHandler)
-		apiRoutes.POST("/user", middleware.EnsureLoggedIn(), api.UserCreateHandler)
+		apiRoutes.GET("/user", middleware.EnsureLoggedIn(), middleware.EnsureGroupAllowed("admin"), api.GetUsers)
+		apiRoutes.DELETE("/user", middleware.EnsureLoggedIn(), middleware.EnsureGroupAllowed("admin"), middleware.EnsureRoleAllowed("admin"), api.DeleteUser)
+		apiRoutes.PUT("/user", middleware.EnsureLoggedIn(), middleware.EnsureGroupAllowed("admin"), middleware.EnsureRoleAllowed("admin"), api.PutUser)
+		apiRoutes.POST("/user", middleware.EnsureLoggedIn(), middleware.EnsureGroupAllowed("admin"), middleware.EnsureRoleAllowed("write"), api.PostUser)
 	}
 
 	oauthRoutes := router.Group("/oauth")

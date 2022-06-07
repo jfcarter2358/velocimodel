@@ -1,0 +1,49 @@
+<div class="w3-card-4 w3-round light theme-base w3-border theme-border-light">
+    <div class="w3-container velocimodel-blue w3-round user-title">
+        <div class="w3-container velocimodel-blue w3-round user-title">
+            <div class="card-title-bar">
+                <div class="icon" style="margin-top:10px;">
+                    <i class="fa-solid fa-floppy-disk w3-large pointer-cursor" onclick="saveUser()"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="user-card">
+        <div class="w3-card-4 w3-round w3-border theme-border-light theme-light light">
+            <div class="user-card">
+                <label>Username</label>
+                <input class="w3-input" type="text" id="users-add-username" value="{{ .user.username }}">
+                <label>Password</label>
+                <input class="w3-input" type="password" id="users-add-password" value="{{ .user.password }}">
+                <label>Given Name</label>
+                <input class="w3-input" type="text" id="users-add-given-name" value="{{ .user.given_name }}">
+                <label>Family Name</label>
+                <input class="w3-input" type="text" id="users-add-family-name" value="{{ .user.family_name }}">
+                <label>Email</label>
+                <input class="w3-input" type="text" id="users-add-email" value="{{ .user.email }}">
+                <label>Roles</label>
+                <select class="w3-select w3-border" name="roles" id="users-add-roles" multiple>
+                    {{ range $key, $value := .roles_assigned }}
+                    {{ if $value }}
+                    <option value="{{ $key }}" selected>{{ $key }}</option>
+                    {{ else }}
+                    <option value="{{ $key }}">{{ $key }}</option>
+                    {{ end }}
+                    {{ end }}
+                </select>
+                <label>Groups</label>
+                <select class="w3-select w3-border" name="groups" id="users-add-groups" multiple>
+                    {{ range $key, $value := .groups_assigned }}
+                    {{ if $value }}
+                    <option value="{{ $key }}" selected>{{ $key }}</option>
+                    {{ else }}
+                    <option value="{{ $key }}">{{ $key }}</option>
+                    {{ end }}
+                    {{ end }}
+                </select>
+            </div>
+        </div>
+        <br>
+    </div>
+</div>

@@ -11,6 +11,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"model-manager/auth"
 	"model-manager/config"
 	"net/http"
 	"os"
@@ -65,7 +66,20 @@ func CollectObjects(object map[string]interface{}) (string, string, error) {
 
 	var obj []map[string]interface{}
 	requestURL := fmt.Sprintf("%v/api/asset", config.Config.APIServerURL)
-	resp, err := http.Get(requestURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return "", "", err
+	}
+	token, err := auth.GetToken()
+	if err != nil {
+		return "", "", err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token.AccessToken},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Encountered error: %v", err)
 		return "", "", err
@@ -132,7 +146,20 @@ func CollectObjects(object map[string]interface{}) (string, string, error) {
 func doFileDownload(filepath string, url string) error {
 
 	// Get the data
-	resp, err := http.Get(url)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return err
+	}
+	token, err := auth.GetToken()
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token.AccessToken},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}

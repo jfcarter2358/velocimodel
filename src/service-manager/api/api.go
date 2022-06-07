@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"service-manager/param"
@@ -20,12 +21,40 @@ var Healthy = false
 // Health API
 
 func GetHealth(c *gin.Context) {
-	if Healthy == false {
+	if !Healthy {
 		c.Status(http.StatusServiceUnavailable)
 		return
 	}
 	c.Status(http.StatusOK)
-	return
+}
+
+func GetStatuses(c *gin.Context) {
+	services, err := service.GetServices(LIMIT_DEFAULT, FILTER_DEFAULT, COUNT_DEFAULT)
+	if err != nil {
+		log.Printf("Encountered error: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	results := map[string]string{}
+	for _, serviceType := range service.AllowedTypes {
+		results[serviceType] = "unknown"
+	}
+	for _, srv := range services {
+		queryURL := fmt.Sprintf("http://%v:%v/health", srv["host"].(string), int(srv["port"].(float64)))
+		resp, err := http.Get(queryURL)
+		if err != nil {
+			log.Printf("Encountered error: %v", err)
+		}
+		serviceType := srv["type"].(string)
+		if resp.StatusCode == http.StatusOK {
+			results[serviceType] = "up"
+		} else {
+			if results[serviceType] == "unknown" {
+				results[serviceType] = "down"
+			}
+		}
+	}
+	c.JSON(http.StatusOK, results)
 }
 
 // Service API

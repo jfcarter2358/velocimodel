@@ -17,22 +17,22 @@ func RedirectIndexPage(c *gin.Context) {
 }
 
 func ShowDashboardPage(c *gin.Context) {
-	assets, err := action.GetAssetsLimitLatest("10")
+	assets, err := action.GetAssetsLimitLatest(c, "10")
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	models, err := action.GetModelsLimitLatest("10")
+	models, err := action.GetModelsLimitLatest(c, "10")
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	releases, err := action.GetReleasesLimitLatest("10")
+	releases, err := action.GetReleasesLimitLatest(c, "10")
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	snapshots, err := action.GetSnapshotsLimitLatest("10")
+	snapshots, err := action.GetSnapshotsLimitLatest(c, "10")
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -44,12 +44,18 @@ func ShowDashboardPage(c *gin.Context) {
 		return
 	}
 	isAdminRole := false
-	roles := strings.Split(userData["roles"].(string), ",")
+	roles := make([]string, len(userData["roles"].([]interface{})))
+	for idx, val := range userData["roles"].([]interface{}) {
+		roles[idx] = val.(string)
+	}
 	if StringSliceContains(roles, "admin") {
 		isAdminRole = true
 	}
 	isAdminGroup := false
-	groups := strings.Split(userData["groups"].(string), ",")
+	groups := make([]string, len(userData["groups"].([]interface{})))
+	for idx, val := range userData["groups"].([]interface{}) {
+		groups[idx] = val.(string)
+	}
 	if StringSliceContains(groups, "admin") {
 		isAdminGroup = true
 	}
@@ -68,7 +74,7 @@ func ShowDashboardPage(c *gin.Context) {
 func ShowAssetPage(c *gin.Context) {
 	assetID := c.Param("id")
 
-	asset, err := action.GetAssetByID(assetID)
+	asset, err := action.GetAssetByID(c, assetID)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -83,7 +89,7 @@ func ShowAssetPage(c *gin.Context) {
 	for idx, val := range asset["models"].([]interface{}) {
 		modelIDList[idx] = val.(string)
 	}
-	models, err := action.GetModelsByIDList(modelIDList)
+	models, err := action.GetModelsByIDList(c, modelIDList)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -106,12 +112,18 @@ func ShowAssetPage(c *gin.Context) {
 		return
 	}
 	isAdminRole := false
-	roles := strings.Split(userData["roles"].(string), ",")
+	roles := make([]string, len(userData["roles"].([]interface{})))
+	for idx, val := range userData["roles"].([]interface{}) {
+		roles[idx] = val.(string)
+	}
 	if StringSliceContains(roles, "admin") {
 		isAdminRole = true
 	}
 	isAdminGroup := false
-	groups := strings.Split(userData["groups"].(string), ",")
+	groups := make([]string, len(userData["groups"].([]interface{})))
+	for idx, val := range userData["groups"].([]interface{}) {
+		groups[idx] = val.(string)
+	}
 	if StringSliceContains(groups, "admin") {
 		isAdminGroup = true
 	}
@@ -128,20 +140,20 @@ func ShowAssetPage(c *gin.Context) {
 }
 
 func ShowAssetsPage(c *gin.Context) {
-	assets, err := action.GetAssetsAll()
+	assets, err := action.GetAssetsAll(c)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	secrets, err := action.GetSecretsAll()
+	secrets, err := action.GetSecretsAll(c)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
 	credentials := make([]string, 0)
-	for key := range secrets[0] {
+	for key := range secrets {
 		if strings.HasPrefix(key, "git_") {
 			parts := strings.Split(key, "_")
 			if !action.Contains(credentials, parts[1]) {
@@ -157,12 +169,18 @@ func ShowAssetsPage(c *gin.Context) {
 		return
 	}
 	isAdminRole := false
-	roles := strings.Split(userData["roles"].(string), ",")
+	roles := make([]string, len(userData["roles"].([]interface{})))
+	for idx, val := range userData["roles"].([]interface{}) {
+		roles[idx] = val.(string)
+	}
 	if StringSliceContains(roles, "admin") {
 		isAdminRole = true
 	}
 	isAdminGroup := false
-	groups := strings.Split(userData["groups"].(string), ",")
+	groups := make([]string, len(userData["groups"].([]interface{})))
+	for idx, val := range userData["groups"].([]interface{}) {
+		groups[idx] = val.(string)
+	}
 	if StringSliceContains(groups, "admin") {
 		isAdminGroup = true
 	}
@@ -179,7 +197,7 @@ func ShowAssetsPage(c *gin.Context) {
 func ShowAssetCodePage(c *gin.Context) {
 	assetID := c.Param("id")
 
-	asset, err := action.GetAssetByID(assetID)
+	asset, err := action.GetAssetByID(c, assetID)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -205,12 +223,18 @@ func ShowAssetCodePage(c *gin.Context) {
 		return
 	}
 	isAdminRole := false
-	roles := strings.Split(userData["roles"].(string), ",")
+	roles := make([]string, len(userData["roles"].([]interface{})))
+	for idx, val := range userData["roles"].([]interface{}) {
+		roles[idx] = val.(string)
+	}
 	if StringSliceContains(roles, "admin") {
 		isAdminRole = true
 	}
 	isAdminGroup := false
-	groups := strings.Split(userData["groups"].(string), ",")
+	groups := make([]string, len(userData["groups"].([]interface{})))
+	for idx, val := range userData["groups"].([]interface{}) {
+		groups[idx] = val.(string)
+	}
 	if StringSliceContains(groups, "admin") {
 		isAdminGroup = true
 	}
@@ -228,7 +252,7 @@ func ShowAssetCodePage(c *gin.Context) {
 func ShowModelPage(c *gin.Context) {
 	modelID := c.Param("id")
 
-	model, err := action.GetModelByID(modelID)
+	model, err := action.GetModelByID(c, modelID)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -243,7 +267,7 @@ func ShowModelPage(c *gin.Context) {
 	for idx, val := range model["assets"].([]interface{}) {
 		assetIDList[idx] = val.(string)
 	}
-	assets, err := action.GetAssetsByIDList(assetIDList)
+	assets, err := action.GetAssetsByIDList(c, assetIDList)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -258,7 +282,7 @@ func ShowModelPage(c *gin.Context) {
 	for idx, val := range model["snapshots"].([]interface{}) {
 		snapshotIDList[idx] = val.(string)
 	}
-	snapshots, err := action.GetSnapshotsByIDList(snapshotIDList)
+	snapshots, err := action.GetSnapshotsByIDList(c, snapshotIDList)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -268,20 +292,20 @@ func ShowModelPage(c *gin.Context) {
 	for idx, val := range model["releases"].([]interface{}) {
 		releaseIDList[idx] = val.(string)
 	}
-	releases, err := action.GetReleasesByIDList(releaseIDList)
+	releases, err := action.GetReleasesByIDList(c, releaseIDList)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	secrets, err := action.GetSecretsAll()
+	secrets, err := action.GetSecretsAll(c)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
 	credentials := make([]string, 0)
-	for key := range secrets[0] {
+	for key := range secrets {
 		if strings.HasPrefix(key, "git_") {
 			parts := strings.Split(key, "_")
 			if !action.Contains(credentials, parts[1]) {
@@ -291,7 +315,7 @@ func ShowModelPage(c *gin.Context) {
 	}
 	sort.Strings(credentials)
 
-	allAssets, err := action.GetAssetsAll()
+	allAssets, err := action.GetAssetsAll(c)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -322,12 +346,18 @@ func ShowModelPage(c *gin.Context) {
 		return
 	}
 	isAdminRole := false
-	roles := strings.Split(userData["roles"].(string), ",")
+	roles := make([]string, len(userData["roles"].([]interface{})))
+	for idx, val := range userData["roles"].([]interface{}) {
+		roles[idx] = val.(string)
+	}
 	if StringSliceContains(roles, "admin") {
 		isAdminRole = true
 	}
 	isAdminGroup := false
-	groups := strings.Split(userData["groups"].(string), ",")
+	groups := make([]string, len(userData["groups"].([]interface{})))
+	for idx, val := range userData["groups"].([]interface{}) {
+		groups[idx] = val.(string)
+	}
 	if StringSliceContains(groups, "admin") {
 		isAdminGroup = true
 	}
@@ -348,7 +378,7 @@ func ShowModelPage(c *gin.Context) {
 }
 
 func ShowModelsPage(c *gin.Context) {
-	models, err := action.GetModelsAll()
+	models, err := action.GetModelsAll(c)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -360,12 +390,18 @@ func ShowModelsPage(c *gin.Context) {
 		return
 	}
 	isAdminRole := false
-	roles := strings.Split(userData["roles"].(string), ",")
+	roles := make([]string, len(userData["roles"].([]interface{})))
+	for idx, val := range userData["roles"].([]interface{}) {
+		roles[idx] = val.(string)
+	}
 	if StringSliceContains(roles, "admin") {
 		isAdminRole = true
 	}
 	isAdminGroup := false
-	groups := strings.Split(userData["groups"].(string), ",")
+	groups := make([]string, len(userData["groups"].([]interface{})))
+	for idx, val := range userData["groups"].([]interface{}) {
+		groups[idx] = val.(string)
+	}
 	if StringSliceContains(groups, "admin") {
 		isAdminGroup = true
 	}
@@ -381,7 +417,7 @@ func ShowModelsPage(c *gin.Context) {
 func ShowModelCodePage(c *gin.Context) {
 	modelID := c.Param("id")
 
-	model, err := action.GetModelByID(modelID)
+	model, err := action.GetModelByID(c, modelID)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -407,12 +443,18 @@ func ShowModelCodePage(c *gin.Context) {
 		return
 	}
 	isAdminRole := false
-	roles := strings.Split(userData["roles"].(string), ",")
+	roles := make([]string, len(userData["roles"].([]interface{})))
+	for idx, val := range userData["roles"].([]interface{}) {
+		roles[idx] = val.(string)
+	}
 	if StringSliceContains(roles, "admin") {
 		isAdminRole = true
 	}
 	isAdminGroup := false
-	groups := strings.Split(userData["groups"].(string), ",")
+	groups := make([]string, len(userData["groups"].([]interface{})))
+	for idx, val := range userData["groups"].([]interface{}) {
+		groups[idx] = val.(string)
+	}
 	if StringSliceContains(groups, "admin") {
 		isAdminGroup = true
 	}
@@ -430,7 +472,7 @@ func ShowModelCodePage(c *gin.Context) {
 func ShowReleasePage(c *gin.Context) {
 	releaseID := c.Param("id")
 
-	release, err := action.GetReleaseByID(releaseID)
+	release, err := action.GetReleaseByID(c, releaseID)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -445,7 +487,7 @@ func ShowReleasePage(c *gin.Context) {
 	for idx, val := range release["assets"].([]interface{}) {
 		assetIDList[idx] = val.(string)
 	}
-	assets, err := action.GetAssetsByIDList(assetIDList)
+	assets, err := action.GetAssetsByIDList(c, assetIDList)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -468,12 +510,18 @@ func ShowReleasePage(c *gin.Context) {
 		return
 	}
 	isAdminRole := false
-	roles := strings.Split(userData["roles"].(string), ",")
+	roles := make([]string, len(userData["roles"].([]interface{})))
+	for idx, val := range userData["roles"].([]interface{}) {
+		roles[idx] = val.(string)
+	}
 	if StringSliceContains(roles, "admin") {
 		isAdminRole = true
 	}
 	isAdminGroup := false
-	groups := strings.Split(userData["groups"].(string), ",")
+	groups := make([]string, len(userData["groups"].([]interface{})))
+	for idx, val := range userData["groups"].([]interface{}) {
+		groups[idx] = val.(string)
+	}
 	if StringSliceContains(groups, "admin") {
 		isAdminGroup = true
 	}
@@ -490,13 +538,13 @@ func ShowReleasePage(c *gin.Context) {
 }
 
 func ShowReleasesPage(c *gin.Context) {
-	releases, err := action.GetReleasesAll()
+	releases, err := action.GetReleasesAll(c)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	allSnapshots, err := action.GetSnapshotsAll()
+	allSnapshots, err := action.GetSnapshotsAll(c)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -518,12 +566,18 @@ func ShowReleasesPage(c *gin.Context) {
 		return
 	}
 	isAdminRole := false
-	roles := strings.Split(userData["roles"].(string), ",")
+	roles := make([]string, len(userData["roles"].([]interface{})))
+	for idx, val := range userData["roles"].([]interface{}) {
+		roles[idx] = val.(string)
+	}
 	if StringSliceContains(roles, "admin") {
 		isAdminRole = true
 	}
 	isAdminGroup := false
-	groups := strings.Split(userData["groups"].(string), ",")
+	groups := make([]string, len(userData["groups"].([]interface{})))
+	for idx, val := range userData["groups"].([]interface{}) {
+		groups[idx] = val.(string)
+	}
 	if StringSliceContains(groups, "admin") {
 		isAdminGroup = true
 	}
@@ -540,7 +594,7 @@ func ShowReleasesPage(c *gin.Context) {
 func ShowReleaseCodePage(c *gin.Context) {
 	releaseID := c.Param("id")
 
-	release, err := action.GetReleaseByID(releaseID)
+	release, err := action.GetReleaseByID(c, releaseID)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -566,12 +620,18 @@ func ShowReleaseCodePage(c *gin.Context) {
 		return
 	}
 	isAdminRole := false
-	roles := strings.Split(userData["roles"].(string), ",")
+	roles := make([]string, len(userData["roles"].([]interface{})))
+	for idx, val := range userData["roles"].([]interface{}) {
+		roles[idx] = val.(string)
+	}
 	if StringSliceContains(roles, "admin") {
 		isAdminRole = true
 	}
 	isAdminGroup := false
-	groups := strings.Split(userData["groups"].(string), ",")
+	groups := make([]string, len(userData["groups"].([]interface{})))
+	for idx, val := range userData["groups"].([]interface{}) {
+		groups[idx] = val.(string)
+	}
 	if StringSliceContains(groups, "admin") {
 		isAdminGroup = true
 	}
@@ -589,7 +649,7 @@ func ShowReleaseCodePage(c *gin.Context) {
 func ShowSnapshotPage(c *gin.Context) {
 	snapshotID := c.Param("id")
 
-	snapshot, err := action.GetSnapshotByID(snapshotID)
+	snapshot, err := action.GetSnapshotByID(c, snapshotID)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -604,7 +664,7 @@ func ShowSnapshotPage(c *gin.Context) {
 	for idx, val := range snapshot["assets"].([]interface{}) {
 		assetIDList[idx] = val.(string)
 	}
-	assets, err := action.GetAssetsByIDList(assetIDList)
+	assets, err := action.GetAssetsByIDList(c, assetIDList)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -614,7 +674,7 @@ func ShowSnapshotPage(c *gin.Context) {
 	for idx, val := range snapshot["releases"].([]interface{}) {
 		releaseIDList[idx] = val.(string)
 	}
-	releases, err := action.GetReleasesByIDList(releaseIDList)
+	releases, err := action.GetReleasesByIDList(c, releaseIDList)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -637,12 +697,18 @@ func ShowSnapshotPage(c *gin.Context) {
 		return
 	}
 	isAdminRole := false
-	roles := strings.Split(userData["roles"].(string), ",")
+	roles := make([]string, len(userData["roles"].([]interface{})))
+	for idx, val := range userData["roles"].([]interface{}) {
+		roles[idx] = val.(string)
+	}
 	if StringSliceContains(roles, "admin") {
 		isAdminRole = true
 	}
 	isAdminGroup := false
-	groups := strings.Split(userData["groups"].(string), ",")
+	groups := make([]string, len(userData["groups"].([]interface{})))
+	for idx, val := range userData["groups"].([]interface{}) {
+		groups[idx] = val.(string)
+	}
 	if StringSliceContains(groups, "admin") {
 		isAdminGroup = true
 	}
@@ -660,13 +726,13 @@ func ShowSnapshotPage(c *gin.Context) {
 }
 
 func ShowSnapshotsPage(c *gin.Context) {
-	snapshots, err := action.GetSnapshotsAll()
+	snapshots, err := action.GetSnapshotsAll(c)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	allModels, err := action.GetModelsAll()
+	allModels, err := action.GetModelsAll(c)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -688,12 +754,18 @@ func ShowSnapshotsPage(c *gin.Context) {
 		return
 	}
 	isAdminRole := false
-	roles := strings.Split(userData["roles"].(string), ",")
+	roles := make([]string, len(userData["roles"].([]interface{})))
+	for idx, val := range userData["roles"].([]interface{}) {
+		roles[idx] = val.(string)
+	}
 	if StringSliceContains(roles, "admin") {
 		isAdminRole = true
 	}
 	isAdminGroup := false
-	groups := strings.Split(userData["groups"].(string), ",")
+	groups := make([]string, len(userData["groups"].([]interface{})))
+	for idx, val := range userData["groups"].([]interface{}) {
+		groups[idx] = val.(string)
+	}
 	if StringSliceContains(groups, "admin") {
 		isAdminGroup = true
 	}
@@ -710,7 +782,7 @@ func ShowSnapshotsPage(c *gin.Context) {
 func ShowSnapshotCodePage(c *gin.Context) {
 	snapshotID := c.Param("id")
 
-	snapshot, err := action.GetSnapshotByID(snapshotID)
+	snapshot, err := action.GetSnapshotByID(c, snapshotID)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -736,12 +808,18 @@ func ShowSnapshotCodePage(c *gin.Context) {
 		return
 	}
 	isAdminRole := false
-	roles := strings.Split(userData["roles"].(string), ",")
+	roles := make([]string, len(userData["roles"].([]interface{})))
+	for idx, val := range userData["roles"].([]interface{}) {
+		roles[idx] = val.(string)
+	}
 	if StringSliceContains(roles, "admin") {
 		isAdminRole = true
 	}
 	isAdminGroup := false
-	groups := strings.Split(userData["groups"].(string), ",")
+	groups := make([]string, len(userData["groups"].([]interface{})))
+	for idx, val := range userData["groups"].([]interface{}) {
+		groups[idx] = val.(string)
+	}
 	if StringSliceContains(groups, "admin") {
 		isAdminGroup = true
 	}
@@ -755,6 +833,193 @@ func ShowSnapshotCodePage(c *gin.Context) {
 		"is_admin_role":  isAdminRole,
 		"is_admin_group": isAdminGroup},
 		"snapshot-code.html")
+}
+
+func ShowUsersPage(c *gin.Context) {
+	users, err := action.GetUsersAll(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	userData, err := action.GetUserData(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	isAdminRole := false
+	roles := make([]string, len(userData["roles"].([]interface{})))
+	for idx, val := range userData["roles"].([]interface{}) {
+		roles[idx] = val.(string)
+	}
+	if StringSliceContains(roles, "admin") {
+		isAdminRole = true
+	}
+	isAdminGroup := false
+	groups := make([]string, len(userData["groups"].([]interface{})))
+	for idx, val := range userData["groups"].([]interface{}) {
+		groups[idx] = val.(string)
+	}
+	if StringSliceContains(groups, "admin") {
+		isAdminGroup = true
+	}
+
+	params, err := action.GetParamsAll(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	available_groups := strings.Split(params["available_groups"].(string), ",")
+
+	render(c, gin.H{
+		"users":            users,
+		"user_data":        userData,
+		"is_admin_role":    isAdminRole,
+		"is_admin_group":   isAdminGroup,
+		"available_groups": available_groups},
+		"users.html")
+}
+
+func ShowUserPage(c *gin.Context) {
+	userID := c.Param("id")
+
+	user, err := action.GetUserByID(userID, c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	userData, err := action.GetUserData(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	isAdminRole := false
+	roles := make([]string, len(userData["roles"].([]interface{})))
+	for idx, val := range userData["roles"].([]interface{}) {
+		roles[idx] = val.(string)
+	}
+	if StringSliceContains(roles, "admin") {
+		isAdminRole = true
+	}
+	isAdminGroup := false
+	groups := make([]string, len(userData["groups"].([]interface{})))
+	for idx, val := range userData["groups"].([]interface{}) {
+		groups[idx] = val.(string)
+	}
+	if StringSliceContains(groups, "admin") {
+		isAdminGroup = true
+	}
+
+	params, err := action.GetParamsAll(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	available_groups := strings.Split(params["available_groups"].(string), ",")
+	available_roles := []string{"read", "write", "admin"}
+
+	groups_assigned := map[string]bool{}
+	roles_assigned := map[string]bool{}
+
+	for _, group := range available_groups {
+		if StringSliceContains(groups, group) {
+			groups_assigned[group] = true
+		} else {
+			groups_assigned[group] = false
+		}
+	}
+
+	for _, role := range available_roles {
+		if StringSliceContains(roles, role) {
+			roles_assigned[role] = true
+		} else {
+			roles_assigned[role] = false
+		}
+	}
+
+	render(c, gin.H{
+		"user":            user,
+		"user_data":       userData,
+		"is_admin_role":   isAdminRole,
+		"is_admin_group":  isAdminGroup,
+		"groups_assigned": groups_assigned,
+		"roles_assigned":  roles_assigned},
+		"user.html")
+}
+
+func ShowParamsPage(c *gin.Context) {
+	params, err := action.GetParamsAll(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	userData, err := action.GetUserData(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	isAdminRole := false
+	roles := make([]string, len(userData["roles"].([]interface{})))
+	for idx, val := range userData["roles"].([]interface{}) {
+		roles[idx] = val.(string)
+	}
+	if StringSliceContains(roles, "admin") {
+		isAdminRole = true
+	}
+	isAdminGroup := false
+	groups := make([]string, len(userData["groups"].([]interface{})))
+	for idx, val := range userData["groups"].([]interface{}) {
+		groups[idx] = val.(string)
+	}
+	if StringSliceContains(groups, "admin") {
+		isAdminGroup = true
+	}
+
+	render(c, gin.H{
+		"params":         params,
+		"user_data":      userData,
+		"is_admin_role":  isAdminRole,
+		"is_admin_group": isAdminGroup},
+		"params.html")
+}
+
+func ShowSecretsPage(c *gin.Context) {
+	secrets, err := action.GetSecretsAll(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	userData, err := action.GetUserData(c)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	isAdminRole := false
+	roles := make([]string, len(userData["roles"].([]interface{})))
+	for idx, val := range userData["roles"].([]interface{}) {
+		roles[idx] = val.(string)
+	}
+	if StringSliceContains(roles, "admin") {
+		isAdminRole = true
+	}
+	isAdminGroup := false
+	groups := make([]string, len(userData["groups"].([]interface{})))
+	for idx, val := range userData["groups"].([]interface{}) {
+		groups[idx] = val.(string)
+	}
+	if StringSliceContains(groups, "admin") {
+		isAdminGroup = true
+	}
+
+	render(c, gin.H{
+		"secrets":        secrets,
+		"user_data":      userData,
+		"is_admin_role":  isAdminRole,
+		"is_admin_group": isAdminGroup},
+		"secrets.html")
 }
 
 func ShowLoginPage(c *gin.Context) {

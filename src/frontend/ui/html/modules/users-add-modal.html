@@ -1,0 +1,39 @@
+<div id="users-add-modal" class="w3-modal">
+    <div class="w3-modal-content w3-animate-top w3-card-4 w3-round light theme-light w3-border theme-border-light w3-round">
+        <header class="w3-container velocimodel-blue">
+            <span onclick="closeModal('users-add-modal')" class="w3-button w3-display-topright">&times;</span>
+            <h4>Add User</h4>
+        </header>
+        <div class="w3-container">
+            <br>
+            <label>Username</label>
+            <input class="w3-input" type="text" id="users-add-username">
+            <label>Password</label>
+            <input class="w3-input" type="password" id="users-add-password">
+            <label>Given Name</label>
+            <input class="w3-input" type="text" id="users-add-given-name">
+            <label>Family Name</label>
+            <input class="w3-input" type="text" id="users-add-family-name">
+            <label>Email</label>
+            <input class="w3-input" type="text" id="users-add-email">
+            <label>Roles</label>
+            <select class="w3-select w3-border" name="roles" id="users-add-roles" multiple>
+                <option value="read">read</option>
+                <option value="write">write</option>
+                <option value="admin">admin</option>
+            </select>
+            <label>Groups</label>
+            <select class="w3-select w3-border" name="groups" id="users-add-groups" multiple>
+                {{ range .available_groups }}
+                <option value="{{ . }}">{{ . }}</option>
+                {{ end }}
+            </select>
+            <br>
+            <br>
+            <button class="w3-button velocimodel-green w3-round w3-right" onclick="addUser()">Add User</button>
+            <button class="w3-button velocimodel-red w3-round w3-right" style="margin-right:8px;" onclick="closeModal('users-add-modal')">Cancel</button>
+            <br>
+            <br>
+        </div>
+    </div>
+</div>

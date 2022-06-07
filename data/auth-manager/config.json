@@ -1,15 +1,36 @@
 {
     "http_port": 9005,
     "http_host": "auth-manager",
-    "db_port": 7437,
-    "db_host": "ceresdb",
-    "db_username": "ceresdb",
-    "db_password": "ceresdb",
-    "db_name": "velocimodel",
     "api_server_url": "http://api-server:9004",
+    "join_token": "abcdefghijklmnopqrstuvwxyzjointoken",
     "clients": [
         {
+            "client_id": "velocimodel-api-server",
+            "client_secret": "abc123DEFghijklmnop4567rstuvwxyzZYXWUT8910SRQPOnmlijhoauthplaygroundapplication",
+            "redirect_url": ""
+        },
+        {
+            "client_id": "velocimodel-asset-manager",
+            "client_secret": "abc123DEFghijklmnop4567rstuvwxyzZYXWUT8910SRQPOnmlijhoauthplaygroundapplication",
+            "redirect_url": ""
+        },
+        {
+            "client_id": "velocimodel-auth-manager",
+            "client_secret": "abc123DEFghijklmnop4567rstuvwxyzZYXWUT8910SRQPOnmlijhoauthplaygroundapplication",
+            "redirect_url": ""
+        },
+        {
             "client_id": "velocimodel-frontend",
+            "client_secret": "abc123DEFghijklmnop4567rstuvwxyzZYXWUT8910SRQPOnmlijhoauthplaygroundapplication",
+            "redirect_url": "http://localhost:9000/auth/redirect"
+        },
+        {
+            "client_id": "velocimodel-model-manager",
+            "client_secret": "abc123DEFghijklmnop4567rstuvwxyzZYXWUT8910SRQPOnmlijhoauthplaygroundapplication",
+            "redirect_url": "http://localhost:9000/auth/redirect"
+        },
+        {
+            "client_id": "velocimodel-service-manager",
             "client_secret": "abc123DEFghijklmnop4567rstuvwxyzZYXWUT8910SRQPOnmlijhoauthplaygroundapplication",
             "redirect_url": "http://localhost:9000/auth/redirect"
         }
@@ -21,5 +42,11 @@
         "username": "admin",
         "password": "admin"
     },
-    "url": "http://localhost:9005"
+    "url": "http://localhost:9005",
+    "oauth": {
+        "client_id": "velocimodel-auth-manager",
+        "client_secret": "abc123DEFghijklmnop4567rstuvwxyzZYXWUT8910SRQPOnmlijhoauthplaygroundapplication",
+        "auth_manager_internal_url": "http://auth-manager:9005",
+        "auth_manager_external_url": "http://localhost:9005"
+    }
 }

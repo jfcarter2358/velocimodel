@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -11,20 +12,34 @@ import (
 )
 
 const DEFAULT_CONFIG_PATH = "/home/auth-manager/data/config.json"
+const ENV_PREFIX = "AUTH_MANAGER_"
 
 type ConfigObject struct {
-	DBUsername   string
-	DBPassword   string
-	DBName       string
-	DBHost       string
-	DBPort       int
-	HTTPHost     string         `json:"http_host" env:"AUTH_MANAGER_HTTP_HOST"`
-	HTTPPort     int            `json:"http_port" env:"AUTH_MANAGER_HTTP_PORT"`
-	Clients      []ClientObject `json:"clients" env:"AUTH_MANAGER_CLIENTS"`
-	LDAP         LDAPObject     `json:"ldap" env:"AUTH_MANAGER_LDAP"`
-	Admin        AdminObject    `json:"admin" env:"AUTH_MANAGER_ADMIN"`
-	URL          string         `json:"url" env:"AUTH_MANAGER_URL"`
-	APIServerURL string         `json:"api_server_url" env:"AUTH_MANAGER_API_SERVER_URL"`
+	DB           DBObject
+	HTTPHost     string         `json:"http_host" env:"HTTP_HOST"`
+	HTTPPort     int            `json:"http_port" env:"HTTP_PORT"`
+	Clients      []ClientObject `json:"clients" env:"CLIENTS"`
+	LDAP         LDAPObject     `json:"ldap" env:"LDAP"`
+	Admin        AdminObject    `json:"admin" env:"ADMIN"`
+	URL          string         `json:"url" env:"URL"`
+	APIServerURL string         `json:"api_server_url" env:"API_SERVER_URL"`
+	JoinToken    string         `json:"join_token" env:"JOIN_TOKEN"`
+	Oauth        OauthObject    `json:"oauth" env:"OAUTH"`
+}
+
+type DBObject struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Name     string `json:"name"`
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+}
+
+type OauthObject struct {
+	ClientID              string `json:"client_id"`
+	ClientSecret          string `json:"client_secret"`
+	AuthServerInternalURL string `json:"auth_manager_internal_url"`
+	AuthServerExternalURL string `json:"auth_manager_external_url"`
 }
 
 type ClientObject struct {
@@ -62,7 +77,7 @@ var Params map[string]interface{}
 var Secrets map[string]interface{}
 
 func LoadConfig() {
-	configPath := os.Getenv("AUTH_MANAGER_CONFIG_PATH")
+	configPath := os.Getenv(ENV_PREFIX + "CONFIG_PATH")
 	if configPath == "" {
 		configPath = DEFAULT_CONFIG_PATH
 	}
@@ -89,9 +104,8 @@ func LoadConfig() {
 		}
 
 		value := field.Tag.Get("env")
-		log.Printf("%v: %v", field.Name, field.Type)
 		if value != "" {
-			val, present := os.LookupEnv(value)
+			val, present := os.LookupEnv(ENV_PREFIX + value)
 			if present {
 				w := reflect.ValueOf(&Config).Elem().FieldByName(t.Field(i).Name)
 				x := getAttr(&Config, t.Field(i).Name).Kind().String()
@@ -174,7 +188,15 @@ func LoadParamsSecrets() {
 
 func loadFromServiceManager(path string) map[string]interface{} {
 	tmpObj := make([]map[string]interface{}, 0)
-	resp, err := http.Get(Config.APIServerURL + path)
+	requestURL := Config.APIServerURL + path
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", Config.JoinToken))
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	resp, err := client.Do(req)
 	if err != nil {
 		panic(err)
 	}

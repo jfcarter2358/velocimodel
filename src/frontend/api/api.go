@@ -58,12 +58,52 @@ func mustOpen(f string) *os.File {
 // Health API
 
 func GetHealth(c *gin.Context) {
-	if Healthy == false {
+	if !Healthy {
 		c.Status(http.StatusServiceUnavailable)
 		return
 	}
 	c.Status(http.StatusOK)
-	return
+}
+
+func GetStatuses(c *gin.Context) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		token = "TOKEN_MISSING"
+	}
+
+	var obj []map[string]interface{}
+
+	requestURL := fmt.Sprintf("%v/status", config.Config.APIServerURL)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		utils.Error(err, c, resp.StatusCode)
+		return
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	err = json.Unmarshal(body, &obj)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	if len(obj) > 0 {
+		c.JSON(http.StatusOK, obj[0])
+		return
+	}
+	c.JSON(http.StatusOK, obj)
 }
 
 func GetAssets(c *gin.Context) {
@@ -121,6 +161,7 @@ func GetAsset(c *gin.Context) {
 	}
 	if len(obj) > 0 {
 		c.JSON(http.StatusOK, obj[0])
+		return
 	}
 	c.JSON(http.StatusOK, obj)
 }
@@ -317,7 +358,7 @@ func DownloadAsset(c *gin.Context) {
 
 func SyncGitAsset(c *gin.Context) {
 	assetID := c.Param("id")
-	asset, err := action.GetAssetByID(assetID)
+	asset, err := action.GetAssetByID(c, assetID)
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
@@ -422,6 +463,7 @@ func GetModel(c *gin.Context) {
 	}
 	if len(obj) > 0 {
 		c.JSON(http.StatusOK, obj[0])
+		return
 	}
 	c.JSON(http.StatusOK, obj)
 }
@@ -543,6 +585,7 @@ func GetRelease(c *gin.Context) {
 	}
 	if len(obj) > 0 {
 		c.JSON(http.StatusOK, obj[0])
+		return
 	}
 	c.JSON(http.StatusOK, obj)
 }
@@ -552,7 +595,7 @@ func CreateRelease(c *gin.Context) {
 
 	var obj map[string]interface{}
 
-	snapshot, err := action.GetSnapshotByID(snapshotID)
+	snapshot, err := action.GetSnapshotByID(c, snapshotID)
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
@@ -671,6 +714,7 @@ func GetSnapshot(c *gin.Context) {
 	}
 	if len(obj) > 0 {
 		c.JSON(http.StatusOK, obj[0])
+		return
 	}
 	c.JSON(http.StatusOK, obj)
 }
@@ -679,7 +723,7 @@ func CreateSnapshot(c *gin.Context) {
 	modelID := c.Param("id")
 	var obj map[string]interface{}
 
-	model, err := action.GetModelByID(modelID)
+	model, err := action.GetModelByID(c, modelID)
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
@@ -770,4 +814,266 @@ func DownloadSnapshot(c *gin.Context) {
 	delete(extraHeaders, "Content-Type")
 
 	c.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
+}
+
+func CreateNewUser(c *gin.Context) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		token = "TOKEN_MISSING"
+	}
+
+	var input map[string]interface{}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	var obj map[string]interface{}
+	requestURL := fmt.Sprintf("%v/api/user", config.Config.APIServerURL)
+	json_data, err := json.Marshal(input)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodPost, requestURL, bytes.NewBuffer(json_data))
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, obj)
+}
+
+func GetUsers(c *gin.Context) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		token = "TOKEN_MISSING"
+	}
+
+	var obj []map[string]interface{}
+
+	queryParams := c.Request.URL.Query()
+	requestURL := fmt.Sprintf("%v/api/user", config.Config.APIServerURL)
+	if len(queryParams) > 0 {
+		requestURL += "?"
+		params := url.Values{}
+		for key, val := range queryParams {
+			params.Add(key, val[0])
+		}
+		requestURL += params.Encode()
+	}
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		utils.Error(err, c, resp.StatusCode)
+		return
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	err = json.Unmarshal(body, &obj)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, obj)
+}
+
+func GetUser(c *gin.Context) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		token = "TOKEN_MISSING"
+	}
+
+	userID := c.Param("id")
+	var obj []map[string]interface{}
+
+	params := url.Values{}
+	params.Add("filter", fmt.Sprintf("id = \"%v\"", userID))
+	requestURL := fmt.Sprintf("%v/api/user?%v", config.Config.APIServerURL, params.Encode())
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		utils.Error(err, c, resp.StatusCode)
+		return
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	err = json.Unmarshal([]byte(body), &obj)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	if len(obj) > 0 {
+		c.JSON(http.StatusOK, obj[0])
+		return
+	}
+	c.JSON(http.StatusOK, obj)
+}
+
+func UpdateUser(c *gin.Context) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		token = "TOKEN_MISSING"
+	}
+
+	modelID := c.Param("id")
+	requestURL := fmt.Sprintf("%v/api/user", config.Config.APIServerURL)
+	var data map[string]interface{}
+	if err := c.ShouldBindJSON(&data); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	data["id"] = modelID
+	json_data, err := json.Marshal(data)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodPut, requestURL, bytes.NewBuffer(json_data))
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.Status(resp.StatusCode)
+}
+
+func DeleteUser(c *gin.Context) {
+	token, err := c.Cookie("access_token")
+	if err != nil {
+		token = "TOKEN_MISSING"
+	}
+
+	var input []string
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	requestURL := fmt.Sprintf("%v/api/user", config.Config.APIServerURL)
+	json_data, err := json.Marshal(input)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodDelete, requestURL, bytes.NewBuffer(json_data))
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header = http.Header{
+		"Authorization": []string{"Bearer " + token},
+	}
+	_, err = client.Do(req)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
+}
+
+func UpdateParams(c *gin.Context) {
+	requestURL := fmt.Sprintf("%v/api/param", config.Config.APIServerURL)
+	var data map[string]interface{}
+	if err := c.ShouldBindJSON(&data); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	json_data, err := json.Marshal(data)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodPut, requestURL, bytes.NewBuffer(json_data))
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	resp, err := client.Do(req)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.Status(resp.StatusCode)
+}
+
+func UpdateSecrets(c *gin.Context) {
+	requestURL := fmt.Sprintf("%v/api/secret", config.Config.APIServerURL)
+	var data map[string]interface{}
+	if err := c.ShouldBindJSON(&data); err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	json_data, err := json.Marshal(data)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodPut, requestURL, bytes.NewBuffer(json_data))
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	resp, err := client.Do(req)
+	if err != nil {
+		utils.Error(err, c, http.StatusInternalServerError)
+		return
+	}
+	c.Status(resp.StatusCode)
 }

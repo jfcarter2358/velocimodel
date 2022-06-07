@@ -5,7 +5,7 @@ import (
 	"asset-manager/asset"
 	"asset-manager/config"
 	"asset-manager/utils"
-	"errors"
+	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -24,6 +24,8 @@ import (
 const LIMIT_DEFAULT = "0"
 const FILTER_DEFAULT = ""
 const COUNT_DEFAULT = "false"
+const ORDERASC_DEFAULT = "NA"
+const ORDERDSC_DEFAULT = "NA"
 
 var Healthy = false
 
@@ -36,12 +38,11 @@ type CreateGitObject struct {
 // Health API
 
 func GetHealth(c *gin.Context) {
-	if Healthy == false {
+	if !Healthy {
 		c.Status(http.StatusServiceUnavailable)
 		return
 	}
 	c.Status(http.StatusOK)
-	return
 }
 
 // Asset API
@@ -64,6 +65,8 @@ func GetAssets(c *gin.Context) {
 	filter := FILTER_DEFAULT
 	limit := LIMIT_DEFAULT
 	count := COUNT_DEFAULT
+	orderasc := ORDERASC_DEFAULT
+	orderdsc := ORDERDSC_DEFAULT
 	if val, ok := c.GetQuery("filter"); ok {
 		filter = val
 	}
@@ -73,7 +76,13 @@ func GetAssets(c *gin.Context) {
 	if val, ok := c.GetQuery("count"); ok {
 		count = val
 	}
-	data, err := asset.GetAssets(limit, filter, count)
+	if val, ok := c.GetQuery("orderasc"); ok {
+		orderasc = val
+	}
+	if val, ok := c.GetQuery("orderdsc"); ok {
+		orderdsc = val
+	}
+	data, err := asset.GetAssets(limit, filter, count, orderasc, orderdsc)
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
@@ -169,35 +178,19 @@ func CreateGitAsset(c *gin.Context) {
 
 	gitEmail := ""
 	gitName := ""
-	gitUser := ""
-	gitPass := ""
 
 	// Grab credentials from service-manager
 	if val, ok := config.Params["git_email"]; ok {
 		gitEmail = val.(string)
 	} else {
-		utils.Error(errors.New(fmt.Sprintf("Invalid git configuration, email does not exist for credential %v", input.Credential)), c, http.StatusInternalServerError)
+		utils.Error(fmt.Errorf("invalid git configuration, email does not exist for credential %v", input.Credential), c, http.StatusInternalServerError)
 		return
 	}
 	if val, ok := config.Params["git_name"]; ok {
 		gitName = val.(string)
 	} else {
-		utils.Error(errors.New(fmt.Sprintf("Invalid git configuration, name does not exist for credential %v", input.Credential)), c, http.StatusInternalServerError)
+		utils.Error(fmt.Errorf("invalid git configuration, name does not exist for credential %v", input.Credential), c, http.StatusInternalServerError)
 		return
-	}
-	if input.Credential != "none" {
-		if val, ok := config.Secrets[fmt.Sprintf("git_%v_user", input.Credential)]; ok {
-			gitUser = val.(string)
-		} else {
-			utils.Error(errors.New(fmt.Sprintf("Invalid git configuration, user does not exist for credential %v", input.Credential)), c, http.StatusInternalServerError)
-			return
-		}
-		if val, ok := config.Secrets[fmt.Sprintf("git_%v_pass", input.Credential)]; ok {
-			gitPass = val.(string)
-		} else {
-			utils.Error(errors.New(fmt.Sprintf("Invalid git configuration, password does not exist for credential %v", input.Credential)), c, http.StatusInternalServerError)
-			return
-		}
 	}
 
 	// Configure git
@@ -216,28 +209,122 @@ func CreateGitAsset(c *gin.Context) {
 	}
 
 	// Shallow clone the git repo
-	prefix := "https://"
-	if strings.HasPrefix(input.Repo, "http://") {
-		prefix = "http://"
-	} else {
-		if !strings.HasPrefix(input.Repo, "https://") {
-			input.Repo = "https://" + input.Repo
+	if strings.HasPrefix(input.Repo, "git@") {
+		sshKey := ""
+		if input.Credential != "none" {
+			if val, ok := config.Secrets[fmt.Sprintf("git_%v_ssh_key", input.Credential)]; ok {
+				sshKey = val.(string)
+			} else {
+				utils.Error(fmt.Errorf("invalid git configuration, ssh key does not exist for credential %v", input.Credential), c, http.StatusInternalServerError)
+				return
+			}
 		}
-	}
-	domain := input.Repo[len(prefix):]
-	if input.Credential != "none" {
-		out, err = exec.Command("git", "clone", "--depth", "1", "-b", input.Branch, fmt.Sprintf("%v%v:%v@%v", prefix, gitUser, gitPass, domain), dir).CombinedOutput()
+
+		dec, err := base64.StdEncoding.DecodeString(sshKey)
+		if err != nil {
+			panic(err)
+		}
+
+		f, err := ioutil.TempFile("/tmp", "ssh-key-")
+		if err != nil {
+			utils.Error(fmt.Errorf("could not open ssh key file for writing"), c, http.StatusInternalServerError)
+			return
+		}
+		defer f.Close()
+
+		if _, err := f.Write(dec); err != nil {
+			utils.Error(fmt.Errorf("could not write ssh key"), c, http.StatusInternalServerError)
+			return
+		}
+		if err := f.Sync(); err != nil {
+			utils.Error(fmt.Errorf("could not sync ssh key file"), c, http.StatusInternalServerError)
+			return
+		}
+		defer os.Remove(f.Name())
+
+		parts := strings.Split(input.Repo, "@")
+		domain := strings.Split(parts[1], ":")[0]
+
+		out, err := exec.Command("ssh-keyscan", "-H", domain).CombinedOutput()
+		if err != nil {
+			log.Printf("Keyscan: %v", string(out))
+			utils.Error(err, c, http.StatusInternalServerError)
+			return
+		}
+		knownHostsLoc := os.ExpandEnv("$HOME/.ssh/known_hosts")
+		khf, err := os.OpenFile(knownHostsLoc, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Printf("Keyscan write 1: %v", err)
+			utils.Error(err, c, http.StatusInternalServerError)
+			return
+		}
+		defer khf.Close()
+		if _, err := khf.WriteString(string(out)); err != nil {
+			log.Printf("Keyscan write 2: %v", err)
+			utils.Error(err, c, http.StatusInternalServerError)
+			return
+		}
+		err = os.Chmod(f.Name(), 0600)
+		if err != nil {
+			log.Printf("Permission change: %v", err)
+			utils.Error(err, c, http.StatusInternalServerError)
+			return
+		}
+
+		if input.Credential == "none" {
+			log.Printf("SSH Key is required")
+			utils.Error(err, c, http.StatusInternalServerError)
+			return
+		}
+
+		out, err = exec.Command("/bin/bash", "-c", fmt.Sprintf("GIT_SSH_COMMAND='ssh -i %v' git clone --depth 1 -b %v %v %v", f.Name(), input.Branch, input.Repo, dir)).CombinedOutput()
 		if err != nil {
 			log.Printf("Git clone: %v", string(out))
 			utils.Error(err, c, http.StatusInternalServerError)
 			return
 		}
+
 	} else {
-		out, err = exec.Command("git", "clone", "--depth", "1", "-b", input.Branch, fmt.Sprintf("%v%v", prefix, domain), dir).CombinedOutput()
-		if err != nil {
-			log.Printf("Git clone: %v", string(out))
-			utils.Error(err, c, http.StatusInternalServerError)
-			return
+		gitUser := ""
+		gitPass := ""
+		if input.Credential != "none" {
+			if val, ok := config.Secrets[fmt.Sprintf("git_%v_user", input.Credential)]; ok {
+				gitUser = val.(string)
+			} else {
+				utils.Error(fmt.Errorf("invalid git configuration, user does not exist for credential %v", input.Credential), c, http.StatusInternalServerError)
+				return
+			}
+			if val, ok := config.Secrets[fmt.Sprintf("git_%v_pass", input.Credential)]; ok {
+				gitPass = val.(string)
+			} else {
+				utils.Error(fmt.Errorf("invalid git configuration, password does not exist for credential %v", input.Credential), c, http.StatusInternalServerError)
+				return
+			}
+		}
+
+		prefix := "https://"
+		if strings.HasPrefix(input.Repo, "http://") {
+			prefix = "http://"
+		} else {
+			if !strings.HasPrefix(input.Repo, "https://") {
+				input.Repo = "https://" + input.Repo
+			}
+		}
+		domain := input.Repo[len(prefix):]
+		if input.Credential != "none" {
+			out, err = exec.Command("git", "clone", "--depth", "1", "-b", input.Branch, fmt.Sprintf("%v%v:%v@%v", prefix, gitUser, gitPass, domain), dir).CombinedOutput()
+			if err != nil {
+				log.Printf("Git clone: %v", string(out))
+				utils.Error(err, c, http.StatusInternalServerError)
+				return
+			}
+		} else {
+			out, err = exec.Command("git", "clone", "--depth", "1", "-b", input.Branch, fmt.Sprintf("%v%v", prefix, domain), dir).CombinedOutput()
+			if err != nil {
+				log.Printf("Git clone: %v", string(out))
+				utils.Error(err, c, http.StatusInternalServerError)
+				return
+			}
 		}
 	}
 	out, err = exec.Command("git", "-C", dir, "log", "--format=\"%H\"", "-n", "1").CombinedOutput()
@@ -323,14 +410,14 @@ func SyncGitAsset(c *gin.Context) {
 func DownloadFileAsset(c *gin.Context) {
 	assetID := c.Param("id")
 
-	assets, err := asset.GetAssets(LIMIT_DEFAULT, fmt.Sprintf("id = \"%v\"", assetID), COUNT_DEFAULT)
+	assets, err := asset.GetAssets(LIMIT_DEFAULT, fmt.Sprintf("id = \"%v\"", assetID), COUNT_DEFAULT, ORDERASC_DEFAULT, ORDERDSC_DEFAULT)
 
 	if err != nil {
 		utils.Error(err, c, http.StatusInternalServerError)
 		return
 	}
 
-	filename := assets[0]["metadata"].(map[string]interface{})["filename"].(string)
+	filename := assets[0].Metadata["filename"].(string)
 	extension := filepath.Ext(filename)
 
 	localPath := filepath.Join(config.Config.DataPath, fmt.Sprintf("%v%v", assetID, extension))

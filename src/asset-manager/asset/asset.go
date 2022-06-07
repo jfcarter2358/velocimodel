@@ -4,6 +4,7 @@ import (
 	"asset-manager/action"
 	"asset-manager/config"
 	"asset-manager/utils"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -38,38 +39,30 @@ const S3_TYPE = "s3"
 const LIMIT_DEFAULT = "0"
 const FILTER_DEFAULT = ""
 const COUNT_DEFAULT = "false"
+const ORDERASC_DEFAULT = "NA"
+const ORDERDSC_DEFAULT = "NA"
 
 var allowedTypes = []string{FILE_TYPE, GIT_TYPE, S3_TYPE}
 
 func RegisterAsset(newAsset Asset) error {
-	countObj, _ := connection.Query(fmt.Sprintf("get record %v.assets | count", config.Config.DBName))
-	startCount := int(countObj[0]["count"].(float64))
-	endCount := startCount
 	if newAsset.ID == "" {
 		newAsset.ID = uuid.New().String()
 	}
 	if !utils.Contains(allowedTypes, newAsset.Type) {
-		err := errors.New(fmt.Sprintf("Asset type of %v does not exist", newAsset.Type))
+		err := fmt.Errorf("asset type of %v does not exist", newAsset.Type)
 		return err
 	}
 	currentTime := time.Now().UTC()
 	newAsset.Created = currentTime.Format("2006-01-02T15:04:05Z")
 	newAsset.Updated = currentTime.Format("2006-01-02T15:04:05Z")
 	queryData, _ := json.Marshal(&newAsset)
-	for endCount == startCount {
-		queryString := fmt.Sprintf("post record %v.assets %v", config.Config.DBName, string(queryData))
-		_, err := connection.Query(queryString)
-		if err != nil {
-			return err
-		}
-		countObj, _ := connection.Query(fmt.Sprintf("get record %v.assets | count", config.Config.DBName))
-		endCount = int(countObj[0]["count"].(float64))
-	}
-	return nil
+	queryString := fmt.Sprintf("post record %v.assets %v", config.Config.DB.Name, string(queryData))
+	_, err := connection.Query(queryString)
+	return err
 }
 
 func DeleteAsset(assetIDs []string) error {
-	queryString := fmt.Sprintf("get record %v.assets", config.Config.DBName)
+	queryString := fmt.Sprintf("get record %v.assets", config.Config.DB.Name)
 	currentData, err := connection.Query(queryString)
 	if err != nil {
 		return err
@@ -81,7 +74,7 @@ func DeleteAsset(assetIDs []string) error {
 		}
 	}
 	queryData, _ := json.Marshal(&ids)
-	queryString = fmt.Sprintf("delete record %v.assets %v", config.Config.DBName, string(queryData))
+	queryString = fmt.Sprintf("delete record %v.assets %v", config.Config.DB.Name, string(queryData))
 	_, err = connection.Query(queryString)
 	return err
 }
@@ -91,7 +84,7 @@ func UpdateAsset(newAsset Asset) error {
 		err := errors.New("'id' field is required to update an asset")
 		return err
 	}
-	queryString := fmt.Sprintf("get record %v.assets", config.Config.DBName)
+	queryString := fmt.Sprintf("get record %v.assets", config.Config.DB.Name)
 	currentData, err := connection.Query(queryString)
 	if err != nil {
 		return err
@@ -129,7 +122,7 @@ func UpdateAsset(newAsset Asset) error {
 			currentTime := time.Now().UTC()
 			datum["updated"] = currentTime.Format("2006-01-02T15:04:05Z")
 			queryData, _ := json.Marshal(&datum)
-			queryString := fmt.Sprintf("put record %v.assets %v", config.Config.DBName, string(queryData))
+			queryString := fmt.Sprintf("put record %v.assets %v", config.Config.DB.Name, string(queryData))
 			_, err := connection.Query(queryString)
 			if err != nil {
 				return err
@@ -141,8 +134,8 @@ func UpdateAsset(newAsset Asset) error {
 	return err
 }
 
-func GetAssets(limit, filter, count string) ([]map[string]interface{}, error) {
-	queryString := fmt.Sprintf("get record %v.assets", config.Config.DBName)
+func GetAssets(limit, filter, count, orderasc, orderdsc string) ([]Asset, error) {
+	queryString := fmt.Sprintf("get record %v.assets", config.Config.DB.Name)
 	if filter != FILTER_DEFAULT {
 		queryString += fmt.Sprintf(" | filter %v", filter)
 	}
@@ -152,11 +145,20 @@ func GetAssets(limit, filter, count string) ([]map[string]interface{}, error) {
 	if count != COUNT_DEFAULT {
 		queryString += " | count"
 	}
+	if orderdsc != ORDERDSC_DEFAULT {
+		queryString += fmt.Sprintf(" | orderdsc %v", orderdsc)
+	}
+	if count != COUNT_DEFAULT {
+		queryString += " | count"
+	}
 	data, err := connection.Query(queryString)
 	if err != nil {
 		return nil, err
 	}
-	return data, nil
+	marshalled, _ := json.Marshal(data)
+	var output []Asset
+	json.Unmarshal(marshalled, &output)
+	return output, nil
 }
 
 func DoGitSync(input Asset) error {
@@ -168,31 +170,17 @@ func DoGitSync(input Asset) error {
 
 	gitEmail := ""
 	gitName := ""
-	gitUser := ""
-	gitPass := ""
 
 	// Grab credentials from service-manager
 	if val, ok := config.Params["git_email"]; ok {
 		gitEmail = val.(string)
 	} else {
-		return errors.New("Invalid git configuration, git_email does not exist")
+		return errors.New("invalid git configuration, git_email does not exist")
 	}
 	if val, ok := config.Params["git_name"]; ok {
 		gitName = val.(string)
 	} else {
-		return errors.New("Invalid git configuration, git_name does not exist")
-	}
-	if input.Metadata["credential"].(string) != "none" {
-		if val, ok := config.Secrets[fmt.Sprintf("git_%v_user", input.Metadata["credential"].(string))]; ok {
-			gitUser = val.(string)
-		} else {
-			return errors.New(fmt.Sprintf("Invalid git configuration, user does not exist for credential %v", input.Metadata["credential"].(string)))
-		}
-		if val, ok := config.Secrets[fmt.Sprintf("git_%v_pass", input.Metadata["credential"].(string))]; ok {
-			gitPass = val.(string)
-		} else {
-			return errors.New(fmt.Sprintf("Invalid git configuration, password does not exist for credential %v", input.Metadata["credential"].(string)))
-		}
+		return errors.New("invalid git configuration, git_name does not exist")
 	}
 
 	// Configure git
@@ -209,26 +197,107 @@ func DoGitSync(input Asset) error {
 	}
 
 	// Shallow clone the git repo
-	prefix := "https://"
-	if strings.HasPrefix(input.URL, "http://") {
-		prefix = "http://"
-	} else {
-		if !strings.HasPrefix(input.URL, "https://") {
-			input.URL = "https://" + input.URL
+	if strings.HasPrefix(input.URL, "git@") {
+		sshKey := ""
+		if input.Metadata["credential"].(string) != "none" {
+			if val, ok := config.Secrets[fmt.Sprintf("git_%v_ssh_key", input.Metadata["credential"].(string))]; ok {
+				sshKey = val.(string)
+			} else {
+				return fmt.Errorf("invalid git configuration, ssh key does not exist for credential %v", input.Metadata["credential"].(string))
+			}
 		}
-	}
-	domain := input.URL[len(prefix):]
-	if input.Metadata["credential"].(string) != "none" {
-		out, err = exec.Command("git", "clone", "--depth", "1", "-b", input.Metadata["branch"].(string), fmt.Sprintf("%v%v:%v@%v", prefix, gitUser, gitPass, domain), dir).CombinedOutput()
+
+		dec, err := base64.StdEncoding.DecodeString(sshKey)
+		if err != nil {
+			panic(err)
+		}
+
+		f, err := ioutil.TempFile("/tmp", "ssh-key-")
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		if _, err := f.Write(dec); err != nil {
+			return err
+		}
+		if err := f.Sync(); err != nil {
+			return err
+		}
+		defer os.Remove(f.Name())
+
+		parts := strings.Split(input.URL, "@")
+		domain := strings.Split(parts[1], ":")[0]
+
+		out, err := exec.Command("ssh-keyscan", "-H", domain).CombinedOutput()
+		if err != nil {
+			log.Printf("Keyscan: %v", string(out))
+			return err
+		}
+		knownHostsLoc := os.ExpandEnv("$HOME/.ssh/known_hosts")
+		khf, err := os.OpenFile(knownHostsLoc, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Printf("Keyscan write 1: %v", err)
+			return err
+		}
+		defer khf.Close()
+		if _, err := khf.WriteString(string(out)); err != nil {
+			log.Printf("Keyscan write 2: %v", err)
+			return err
+		}
+		err = os.Chmod(f.Name(), 0600)
+		if err != nil {
+			log.Printf("Permission change: %v", err)
+			return err
+		}
+
+		if input.Metadata["credential"].(string) == "none" {
+			log.Printf("SSH Key is required")
+			return errors.New("ssh key is required")
+		}
+
+		out, err = exec.Command("/bin/bash", "-c", fmt.Sprintf("GIT_SSH_COMMAND='ssh -i %v' git clone --depth 1 -b %v %v %v", f.Name(), input.Metadata["branch"].(string), input.URL, dir)).CombinedOutput()
 		if err != nil {
 			log.Printf("Git clone: %v", string(out))
 			return err
 		}
 	} else {
-		out, err = exec.Command("git", "clone", "--depth", "1", "-b", input.Metadata["branch"].(string), fmt.Sprintf("%v%v", prefix, domain), dir).CombinedOutput()
-		if err != nil {
-			log.Printf("Git clone: %v", string(out))
-			return err
+		gitUser := ""
+		gitPass := ""
+		if input.Metadata["credential"].(string) != "none" {
+			if val, ok := config.Secrets[fmt.Sprintf("git_%v_user", input.Metadata["credential"].(string))]; ok {
+				gitUser = val.(string)
+			} else {
+				return fmt.Errorf("invalid git configuration, user does not exist for credential %v", input.Metadata["credential"].(string))
+			}
+			if val, ok := config.Secrets[fmt.Sprintf("git_%v_pass", input.Metadata["credential"].(string))]; ok {
+				gitPass = val.(string)
+			} else {
+				return fmt.Errorf("invalid git configuration, password does not exist for credential %v", input.Metadata["credential"].(string))
+			}
+		}
+
+		prefix := "https://"
+		if strings.HasPrefix(input.URL, "http://") {
+			prefix = "http://"
+		} else {
+			if !strings.HasPrefix(input.URL, "https://") {
+				input.URL = "https://" + input.URL
+			}
+		}
+		domain := input.URL[len(prefix):]
+		if input.Metadata["credential"].(string) != "none" {
+			out, err = exec.Command("git", "clone", "--depth", "1", "-b", input.Metadata["branch"].(string), fmt.Sprintf("%v%v:%v@%v", prefix, gitUser, gitPass, domain), dir).CombinedOutput()
+			if err != nil {
+				log.Printf("Git clone: %v", string(out))
+				return err
+			}
+		} else {
+			out, err = exec.Command("git", "clone", "--depth", "1", "-b", input.Metadata["branch"].(string), fmt.Sprintf("%v%v", prefix, domain), dir).CombinedOutput()
+			if err != nil {
+				log.Printf("Git clone: %v", string(out))
+				return err
+			}
 		}
 	}
 	out, err = exec.Command("git", "-C", dir, "log", "--format=\"%H\"", "-n", "1").CombinedOutput()

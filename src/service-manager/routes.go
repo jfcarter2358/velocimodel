@@ -8,6 +8,7 @@ import (
 
 func initializeRoutes() {
 	router.GET("/health", api.GetHealth)
+	router.GET("/status", api.GetStatuses)
 	apiRoutes := router.Group("/api")
 	{
 		// Service

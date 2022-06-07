@@ -1,8 +1,8 @@
-<div class="w3-card-4 w3-round dark theme-base w3-border theme-border-light">
+<div class="w3-card-4 w3-round light theme-base w3-border theme-border-light">
     <div class="w3-container velocimodel-blue w3-round asset-title">
         <div class="w3-container velocimodel-blue w3-round asset-title">
             <div class="card-title-bar">
-                <input id="asset-name" class="w3-input card-title name-field dark theme-text-light" type="text" value="{{ .asset.name }}">
+                <input id="asset-name" class="w3-input card-title name-field light theme-text-light" type="text" value="{{ .asset.name }}">
                 <a href="/ui/asset/{{ .asset.id }}/code" class="icon" style="margin-top:10px;color:#fff;">
                     <i class="fa-solid fa-code w3-large"></i>
                 </a>
@@ -24,7 +24,7 @@
     </div>
     <br>
     <div class="asset-card">
-        <div class="w3-card-4 w3-round w3-border theme-border-light theme-light dark">
+        <div class="w3-card-4 w3-round w3-border theme-border-light theme-light light">
             <div class="w3-container velocimodel-blue w3-round asset-title">
                 <div class="card-title-bar">
                     <h4 class="w3-left-align">Metadata</h4>
@@ -37,11 +37,11 @@
                 <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Type: </strong></span>{{ .asset.type }}</div>
                 <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>URL: </strong></span>{{ .asset.url }}</div>
                 <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Metadata</strong></span></div>
-                <pre class="w3-code jsHigh notranslate dark theme-base">{{ .metadata_json }}</pre>
+                <pre class="w3-code jsHigh notranslate light theme-base">{{ .metadata_json }}</pre>
             </div>
         </div>
         <br>
-        <div class="w3-card-4 w3-round w3-border theme-border-light theme-light dark">
+        <div class="w3-card-4 w3-round w3-border theme-border-light theme-light light">
             <div class="w3-container velocimodel-blue w3-round asset-title">
                 <div class="card-title-bar">
                     <h4 class="w3-left-align card-header">Tags</h4>
@@ -54,7 +54,7 @@
             <br>
         </div>
         <br>
-        <div class="w3-card-4 w3-round w3-border theme-border-light theme-light dark">
+        <div class="w3-card-4 w3-round w3-border theme-border-light theme-light light">
             <div class="w3-container velocimodel-blue w3-round asset-title">
                 <div class="card-title-bar">
                     <h4 class="w3-left-align card-header">Models</h4>
@@ -83,7 +83,7 @@
                         <td>{{ .language }}</td>
                         <td>{{ .id }}</td>
                         <td class="table-link-cell">
-                            <a href="/ui/model/{{ .id }}" class="table-link-link dark theme-text">
+                            <a href="/ui/model/{{ .id }}" class="table-link-link light theme-text">
                                 <i class="fa-solid fa-link"></i>
                             </a>
                         </td>

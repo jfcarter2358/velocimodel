@@ -1,0 +1,44 @@
+<div class="w3-card-4 w3-round light theme-light w3-border theme-border-light">
+    <div class="w3-container velocimodel-blue w3-round user-title">
+        <h4>Users</h4>
+        <input id="search" class="w3-input w3-round search-bar light theme-light" type="text" name="search" placeholder="Search Users" oninput="render()">
+    </div>
+    <table class="w3-table w3-bordered light w3-border theme-border-light" id="users-table">
+        <tr>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                <span class="table-title-text">Username</span>
+            </th>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                <span class="table-title-text">Roles</span>
+            </th>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                <span class="table-title-text">Groups</span>
+            </th>
+            <th class="table-title w3-medium velocimodel-text-blue">
+                <span class="table-title-text">Email</span>
+            </th>
+            <th></th>
+            <th>
+                <div class="w3-round w3-button velocimodel-green" onclick="openModal('users-add-modal')">Create New</div>
+            </th>
+        </tr>
+        {{ range .users }}
+            <tr>
+                <td>{{ .username }}</td>
+                <td>{{ .roles }}</td>
+                <td>{{ .groups }}</td>
+                <td>{{ .email }}</td>
+                <td class="table-link-cell">
+                    <a href="/ui/user/{{ .id }}" class="table-link-link w3-right-align light theme-text" style="float:right;margin-right:16px;">
+                        <i class="fa-solid fa-link"></i>
+                    </a>
+                </td>
+                <td class="table-link-cell">
+                    <div class="table-link-link w3-right-align light theme-text" style="float:right;margin-right:16px;">
+                        <i class="fa-solid fa-trash pointer-cursor" onclick="openDeleteModal('{{ .username }}', '{{ .id }}')"></i>
+                    </div>
+                </td>
+            </tr>
+        {{ end }}
+    </table>
+</div>

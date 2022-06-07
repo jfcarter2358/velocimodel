@@ -1,0 +1,21 @@
+{
+    "db": {
+        "username": "ceresdb",
+        "password": "ceresdb",
+        "host": "ceresdb",
+        "name": "velocimodel",
+        "port": 7437
+    },
+    "params_path": "/home/service-manager/data/params.json",
+    "secrets_path": "/home/service-manager/data/secrets.json",
+    "encryption_key": "abcdefghijklmnopqrstuvqxyz012345",
+    "http_host": "service-manager",
+    "http_port": 9001,
+    "join_token": "abcdefghijklmnopqrstuvwxyzjointoken",
+    "oauth": {
+        "client_id": "velocimodel-service-manager",
+        "client_secret": "abc123DEFghijklmnop4567rstuvwxyzZYXWUT8910SRQPOnmlijhoauthplaygroundapplication",
+        "auth_manager_internal_url": "http://auth-manager:9005",
+        "auth_manager_external_url": "http://localhost:9005"
+    }
+}

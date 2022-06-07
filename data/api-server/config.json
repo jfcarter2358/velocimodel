@@ -1,0 +1,12 @@
+{
+    "http_host": "api-server",
+    "http_port": 9004,
+    "service_manager_url": "http://service-manager:9001",
+    "join_token": "abcdefghijklmnopqrstuvwxyzjointoken",
+    "oauth": {
+        "client_id": "velocimodel-api-server",
+        "client_secret": "abc123DEFghijklmnop4567rstuvwxyzZYXWUT8910SRQPOnmlijhoauthplaygroundapplication",
+        "auth_manager_internal_url": "http://auth-manager:9005",
+        "auth_manager_external_url": "http://localhost:9005"
+    }
+}

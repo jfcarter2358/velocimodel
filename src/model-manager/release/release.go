@@ -32,11 +32,13 @@ const RAW_TYPE = "raw"
 const LIMIT_DEFAULT = "0"
 const FILTER_DEFAULT = ""
 const COUNT_DEFAULT = "false"
+const ORDERASC_DEFAULT = "NA"
+const ORDERDSC_DEFAULT = "NA"
 
 var allowedTypes = []string{GIT_TYPE, RAW_TYPE}
 
 func CreateReleaseFromSnapshot(input snapshot.Snapshot) (string, error) {
-	countObj, err := connection.Query(fmt.Sprintf("get record %v.releases | filter snapshot = \"%v\" | count", config.Config.DBName, input.ID))
+	countObj, err := connection.Query(fmt.Sprintf("get record %v.releases | filter snapshot = \"%v\" | count", config.Config.DB.Name, input.ID))
 	if err != nil {
 		return "", err
 	}
@@ -57,13 +59,13 @@ func CreateReleaseFromSnapshot(input snapshot.Snapshot) (string, error) {
 		Version:  startCount + 1,
 	}
 	queryData, _ := json.Marshal(&newRelease)
-	queryString := fmt.Sprintf("post record %v.releases %v", config.Config.DBName, string(queryData))
+	queryString := fmt.Sprintf("post record %v.releases %v", config.Config.DB.Name, string(queryData))
 	_, err = connection.Query(queryString)
 	if err != nil {
 		return "", err
 	}
 
-	modelObjects, err := connection.Query(fmt.Sprintf("get record %v.models | filter id = \"%v\"", config.Config.DBName, input.Model))
+	modelObjects, err := connection.Query(fmt.Sprintf("get record %v.models | filter id = \"%v\"", config.Config.DB.Name, input.Model))
 	if err != nil {
 		return "", err
 	}
@@ -74,11 +76,11 @@ func CreateReleaseFromSnapshot(input snapshot.Snapshot) (string, error) {
 	modelReleaseList := modelObjects[0]["releases"].([]interface{})
 	modelReleaseList = append(modelReleaseList, releaseID)
 	modelReleaseBytes, _ := json.Marshal(modelReleaseList)
-	_, err = connection.Query(fmt.Sprintf("patch record %v.models \"%v\" {\"releases\":%v}", config.Config.DBName, realModelID, string(modelReleaseBytes)))
+	_, err = connection.Query(fmt.Sprintf("patch record %v.models \"%v\" {\"releases\":%v}", config.Config.DB.Name, realModelID, string(modelReleaseBytes)))
 	if err != nil {
 		return "", err
 	}
-	snapshotObjects, err := connection.Query(fmt.Sprintf("get record %v.snapshots | filter id = \"%v\"", config.Config.DBName, input.ID))
+	snapshotObjects, err := connection.Query(fmt.Sprintf("get record %v.snapshots | filter id = \"%v\"", config.Config.DB.Name, input.ID))
 	if err != nil {
 		return "", err
 	}
@@ -89,7 +91,7 @@ func CreateReleaseFromSnapshot(input snapshot.Snapshot) (string, error) {
 	snapshotReleaseList := snapshotObjects[0]["releases"].([]interface{})
 	snapshotReleaseList = append(snapshotReleaseList, releaseID)
 	snapshotReleaseBytes, _ := json.Marshal(snapshotReleaseList)
-	_, err = connection.Query(fmt.Sprintf("patch record %v.snapshots \"%v\" {\"releases\":%v}", config.Config.DBName, realSnapshotID, string(snapshotReleaseBytes)))
+	_, err = connection.Query(fmt.Sprintf("patch record %v.snapshots \"%v\" {\"releases\":%v}", config.Config.DB.Name, realSnapshotID, string(snapshotReleaseBytes)))
 	if err != nil {
 		return "", err
 	}
@@ -108,17 +110,13 @@ func RegisterRelease(newRelease Release) error {
 	newRelease.Created = currentTime.Format("2006-01-02T15:04:05Z")
 	newRelease.Updated = currentTime.Format("2006-01-02T15:04:05Z")
 	queryData, _ := json.Marshal(&newRelease)
-	queryString := fmt.Sprintf("post record %v.releases %v", config.Config.DBName, string(queryData))
+	queryString := fmt.Sprintf("post record %v.releases %v", config.Config.DB.Name, string(queryData))
 	_, err := connection.Query(queryString)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func DeleteRelease(releaseIDs []string) error {
-	queryString := fmt.Sprintf("get record %v.releases", config.Config.DBName)
+	queryString := fmt.Sprintf("get record %v.releases", config.Config.DB.Name)
 	currentData, err := connection.Query(queryString)
 	if err != nil {
 		return err
@@ -130,13 +128,13 @@ func DeleteRelease(releaseIDs []string) error {
 		}
 	}
 	queryData, _ := json.Marshal(&ids)
-	queryString = fmt.Sprintf("delete record %v.releases %v", config.Config.DBName, string(queryData))
+	queryString = fmt.Sprintf("delete record %v.releases %v", config.Config.DB.Name, string(queryData))
 	_, err = connection.Query(queryString)
 	return err
 }
 
-func GetReleases(limit, filter, count string) ([]map[string]interface{}, error) {
-	queryString := fmt.Sprintf("get record %v.releases", config.Config.DBName)
+func GetReleases(limit, filter, count, orderasc, orderdsc string) ([]Release, error) {
+	queryString := fmt.Sprintf("get record %v.releases", config.Config.DB.Name)
 	if filter != FILTER_DEFAULT {
 		queryString += fmt.Sprintf(" | filter %v", filter)
 	}
@@ -146,9 +144,18 @@ func GetReleases(limit, filter, count string) ([]map[string]interface{}, error) 
 	if count != COUNT_DEFAULT {
 		queryString += " | count"
 	}
+	if orderdsc != ORDERDSC_DEFAULT {
+		queryString += fmt.Sprintf(" | orderdsc %v", orderdsc)
+	}
+	if count != COUNT_DEFAULT {
+		queryString += " | count"
+	}
 	data, err := connection.Query(queryString)
 	if err != nil {
 		return nil, err
 	}
-	return data, nil
+	marshalled, _ := json.Marshal(data)
+	var output []Release
+	json.Unmarshal(marshalled, &output)
+	return output, nil
 }

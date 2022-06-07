@@ -1,4 +1,6 @@
-FROM golang:1.18.0-alpine
+FROM golang:1.18.1-alpine
+
+RUN apk update && apk add git
 
 WORKDIR /model-manager-build
 COPY src/model-manager /model-manager-build
@@ -19,6 +21,9 @@ RUN apk update \
     git
 
 SHELL ["/bin/bash", "-c"]
+
+RUN mkdir /home/model-manager/data
+COPY data/model-manager /home/model-manager/data
 
 ADD src/model-manager/start-model-manager.sh /home/model-manager/start-model-manager.sh
 RUN chmod u+x /home/model-manager/start-model-manager.sh

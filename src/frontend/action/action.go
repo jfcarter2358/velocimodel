@@ -922,7 +922,7 @@ func GetUserData(c *gin.Context) (map[string]interface{}, error) {
 		return nil, err
 	}
 	client := http.Client{}
-	requestURL := "http://auth-manager:9005/oauth/userinfo"
+	requestURL := fmt.Sprintf("%s/oauth/userinfo", config.Config.Oauth.AuthServerInternalURL)
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
 		return nil, err

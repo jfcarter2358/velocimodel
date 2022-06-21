@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -32,7 +33,7 @@ func LoadOauthConfig() {
 		ClientID:     config.Config.Oauth.ClientID,
 		ClientSecret: config.Config.Oauth.ClientSecret,
 		Scopes:       []string{"all"},
-		RedirectURL:  fmt.Sprintf("http://%s:9000/auth/redirect", config.Config.ExternalHTTPHost),
+		RedirectURL:  fmt.Sprintf("http://%s:9000%s/auth/redirect", config.Config.ExternalHTTPHost, config.Config.HTTPBasePath),
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  config.Config.Oauth.AuthServerExternalURL + "/oauth/authorize",
 			TokenURL: config.Config.Oauth.AuthServerInternalURL + "/oauth/token",
@@ -76,7 +77,7 @@ func HandleRedirect(c *gin.Context) {
 	c.SetCookie("access_token", token.AccessToken, 3600, "/", config.Config.ExternalHTTPHost, true, false)
 	c.SetCookie("refresh_token", token.RefreshToken, 3600, "/", config.Config.ExternalHTTPHost, true, false)
 
-	c.Redirect(http.StatusFound, "/ui/dashboard")
+	c.Redirect(http.StatusFound, config.Config.HTTPBasePath+"/ui/dashboard")
 }
 
 func HandleLogin(c *gin.Context) {
@@ -84,13 +85,14 @@ func HandleLogin(c *gin.Context) {
 		oauth2.SetAuthURLParam("code_challenge", genCodeChallengeS256(CODE_CHALLENGE)),
 		oauth2.SetAuthURLParam("code_challenge_method", "S256"),
 	)
+	log.Printf("login URL: %v", url)
 	c.Redirect(http.StatusFound, url)
 }
 
 func HandleLogout(c *gin.Context) {
 	c.SetCookie("access_token", "", 0, "/", config.Config.ExternalHTTPHost, true, false)
 	c.SetCookie("refresh_token", "", 0, "/", config.Config.ExternalHTTPHost, true, false)
-	c.Redirect(http.StatusFound, "/auth/login")
+	c.Redirect(http.StatusFound, config.Config.HTTPBasePath+"/auth/login")
 }
 
 func genCodeChallengeS256(s string) string {

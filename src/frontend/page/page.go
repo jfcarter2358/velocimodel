@@ -5,6 +5,7 @@ package page
 import (
 	"encoding/json"
 	"frontend/action"
+	"frontend/config"
 	"net/http"
 	"sort"
 	"strings"
@@ -13,7 +14,11 @@ import (
 )
 
 func RedirectIndexPage(c *gin.Context) {
-	c.Redirect(301, "/ui/dashboard")
+	c.Redirect(301, config.Config.HTTPBasePath+"/ui/dashboard")
+}
+
+func RedirectProxyIndexPage(c *gin.Context) {
+	c.Redirect(301, config.Config.HTTPBasePath+"/ui/dashboard")
 }
 
 func ShowDashboardPage(c *gin.Context) {
@@ -67,7 +72,8 @@ func ShowDashboardPage(c *gin.Context) {
 		"snapshots":      snapshots,
 		"user_data":      userData,
 		"is_admin_role":  isAdminRole,
-		"is_admin_group": isAdminGroup},
+		"is_admin_group": isAdminGroup,
+		"base_path":      config.Config.HTTPBasePath},
 		"dashboard.html")
 }
 
@@ -135,7 +141,8 @@ func ShowAssetPage(c *gin.Context) {
 		"metadata_json":  string(metadataJSON),
 		"user_data":      userData,
 		"is_admin_role":  isAdminRole,
-		"is_admin_group": isAdminGroup},
+		"is_admin_group": isAdminGroup,
+		"base_path":      config.Config.HTTPBasePath},
 		"asset.html")
 }
 
@@ -190,7 +197,8 @@ func ShowAssetsPage(c *gin.Context) {
 		"credentials":    credentials,
 		"user_data":      userData,
 		"is_admin_role":  isAdminRole,
-		"is_admin_group": isAdminGroup},
+		"is_admin_group": isAdminGroup,
+		"base_path":      config.Config.HTTPBasePath},
 		"assets.html")
 }
 
@@ -245,7 +253,8 @@ func ShowAssetCodePage(c *gin.Context) {
 		"asset":          asset,
 		"user_data":      userData,
 		"is_admin_role":  isAdminRole,
-		"is_admin_group": isAdminGroup},
+		"is_admin_group": isAdminGroup,
+		"base_path":      config.Config.HTTPBasePath},
 		"asset-code.html")
 }
 
@@ -373,7 +382,8 @@ func ShowModelPage(c *gin.Context) {
 		"metadata_json":  string(metadataJSON),
 		"user_data":      userData,
 		"is_admin_role":  isAdminRole,
-		"is_admin_group": isAdminGroup},
+		"is_admin_group": isAdminGroup,
+		"base_path":      config.Config.HTTPBasePath},
 		"model.html")
 }
 
@@ -410,7 +420,8 @@ func ShowModelsPage(c *gin.Context) {
 		"models":         models,
 		"user_data":      userData,
 		"is_admin_role":  isAdminRole,
-		"is_admin_group": isAdminGroup},
+		"is_admin_group": isAdminGroup,
+		"base_path":      config.Config.HTTPBasePath},
 		"models.html")
 }
 
@@ -465,7 +476,8 @@ func ShowModelCodePage(c *gin.Context) {
 		"model":          model,
 		"user_data":      userData,
 		"is_admin_role":  isAdminRole,
-		"is_admin_group": isAdminGroup},
+		"is_admin_group": isAdminGroup,
+		"base_path":      config.Config.HTTPBasePath},
 		"model-code.html")
 }
 
@@ -533,7 +545,8 @@ func ShowReleasePage(c *gin.Context) {
 		"metadata_json":  string(metadataJSON),
 		"user_data":      userData,
 		"is_admin_role":  isAdminRole,
-		"is_admin_group": isAdminGroup},
+		"is_admin_group": isAdminGroup,
+		"base_path":      config.Config.HTTPBasePath},
 		"release.html")
 }
 
@@ -587,7 +600,8 @@ func ShowReleasesPage(c *gin.Context) {
 		"all_snapshots":  allSnapshots,
 		"user_data":      userData,
 		"is_admin_role":  isAdminRole,
-		"is_admin_group": isAdminGroup},
+		"is_admin_group": isAdminGroup,
+		"base_path":      config.Config.HTTPBasePath},
 		"releases.html")
 }
 
@@ -642,7 +656,8 @@ func ShowReleaseCodePage(c *gin.Context) {
 		"release":        release,
 		"user_data":      userData,
 		"is_admin_role":  isAdminRole,
-		"is_admin_group": isAdminGroup},
+		"is_admin_group": isAdminGroup,
+		"base_path":      config.Config.HTTPBasePath},
 		"release-code.html")
 }
 
@@ -721,7 +736,8 @@ func ShowSnapshotPage(c *gin.Context) {
 		"metadata_json":  string(metadataJSON),
 		"user_data":      userData,
 		"is_admin_role":  isAdminRole,
-		"is_admin_group": isAdminGroup},
+		"is_admin_group": isAdminGroup,
+		"base_path":      config.Config.HTTPBasePath},
 		"snapshot.html")
 }
 
@@ -775,7 +791,8 @@ func ShowSnapshotsPage(c *gin.Context) {
 		"all_models":     allModels,
 		"user_data":      userData,
 		"is_admin_role":  isAdminRole,
-		"is_admin_group": isAdminGroup},
+		"is_admin_group": isAdminGroup,
+		"base_path":      config.Config.HTTPBasePath},
 		"snapshots.html")
 }
 
@@ -831,7 +848,8 @@ func ShowSnapshotCodePage(c *gin.Context) {
 		"snapshot":       snapshot,
 		"user_data":      userData,
 		"is_admin_role":  isAdminRole,
-		"is_admin_group": isAdminGroup},
+		"is_admin_group": isAdminGroup,
+		"base_path":      config.Config.HTTPBasePath},
 		"snapshot-code.html")
 }
 
@@ -876,7 +894,8 @@ func ShowUsersPage(c *gin.Context) {
 		"user_data":        userData,
 		"is_admin_role":    isAdminRole,
 		"is_admin_group":   isAdminGroup,
-		"available_groups": available_groups},
+		"available_groups": available_groups,
+		"base_path":        config.Config.HTTPBasePath},
 		"users.html")
 }
 
@@ -944,7 +963,8 @@ func ShowUserPage(c *gin.Context) {
 		"is_admin_role":   isAdminRole,
 		"is_admin_group":  isAdminGroup,
 		"groups_assigned": groups_assigned,
-		"roles_assigned":  roles_assigned},
+		"roles_assigned":  roles_assigned,
+		"base_path":       config.Config.HTTPBasePath},
 		"user.html")
 }
 
@@ -981,7 +1001,8 @@ func ShowParamsPage(c *gin.Context) {
 		"params":         params,
 		"user_data":      userData,
 		"is_admin_role":  isAdminRole,
-		"is_admin_group": isAdminGroup},
+		"is_admin_group": isAdminGroup,
+		"base_path":      config.Config.HTTPBasePath},
 		"params.html")
 }
 
@@ -1018,7 +1039,8 @@ func ShowSecretsPage(c *gin.Context) {
 		"secrets":        secrets,
 		"user_data":      userData,
 		"is_admin_role":  isAdminRole,
-		"is_admin_group": isAdminGroup},
+		"is_admin_group": isAdminGroup,
+		"base_path":      config.Config.HTTPBasePath},
 		"secrets.html")
 }
 

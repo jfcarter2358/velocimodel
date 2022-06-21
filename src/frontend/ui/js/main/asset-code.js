@@ -11,6 +11,10 @@ var model
 
 function saveAsset() {
     parts = window.location.href.split('/')
+    basePath = ''
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     assetID = parts[parts.length - 2]
 
     data = JSON.parse(editor.getValue())
@@ -19,7 +23,7 @@ function saveAsset() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/asset/" + assetID,
+        url: basePath + "/api/asset/" + assetID,
         type: "PUT",
         contentType: 'application/json',
         data: JSON.stringify(data),

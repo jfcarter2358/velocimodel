@@ -93,8 +93,10 @@ to bring up the services and navigate to `http://localhost:9000` to view the UI.
    - [x] User create view
    - [x] User delete view
    - [x] Service status badge
+   - [x] BasePath support
 - [x] auth-manager
    - [x] Authorization flow
+   - [x] BasePath support
 - [x] api-server
    - [x] All endpoints secured through api-server
 - [x] asset-manager

@@ -9,8 +9,12 @@
 var models
 
 function getModels() {
+    parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     $.ajax({
-        url: "/api/model",
+        url: basePath + "/api/model",
         type: "GET",
         success: function (result) {
             models = result
@@ -41,7 +45,7 @@ function render() {
                 }).join('') +
                 '</td>' +
                 '<td class="table-link-cell">' +
-                '<a href="/ui/model/' + model.id + '" class="table-link-link w3-right-align light theme-text" style="float:right;margin-right:16px;"><i class="fa-solid fa-link"></i></a>' +
+                '<a href="{{ .base_path }}/ui/model/' + model.id + '" class="table-link-link w3-right-align light theme-text" style="float:right;margin-right:16px;"><i class="fa-solid fa-link"></i></a>' +
                 '</td>' +
                 '</tr>'
         }).join('');
@@ -56,6 +60,11 @@ $(document).ready(
 )
 
 function createModel() {
+    parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
+
     data = {
         "id": "",
         "name": $("#models-create-name").val(),
@@ -74,7 +83,7 @@ function createModel() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/model",
+        url: basePath + "/api/model",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -83,7 +92,7 @@ function createModel() {
             $("#page-darken").css("opacity", "0")
             modelID = response['id']
             closeModal('models-create-modal');
-            window.location.assign('/ui/model/' + modelID);
+            window.location.assign(basePath + '/ui/model/' + modelID);
         },
         error: function(response) {
             console.log(response)

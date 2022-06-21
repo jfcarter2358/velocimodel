@@ -1,0 +1,100 @@
+version: "3.9"
+services:
+  api-server:
+    image: "api-server"
+    ports:
+      - "127.0.0.1:9004:9004"
+    environment:
+      API_SERVER_SLEEP: "5"
+      API_SERVER_OAUTH: |
+        {
+          "client_id": "velocimodel-api-server",
+          "client_secret": "abc123DEFghijklmnop4567rstuvwxyzZYXWUT8910SRQPOnmlijhoauthplaygroundapplication",
+          "auth_manager_internal_url": "http://auth-manager:9005/provider",
+          "auth_manager_external_url": "http://localhost:8080/provider"
+        }
+    depends_on:
+      - "ceresdb"
+      - "service-manager"
+    tty: true
+  asset-manager:
+    image: "asset-manager"
+    ports:
+      - "127.0.0.1:9002:9002"
+    environment:
+      ASSET_MANAGER_SLEEP: "5"
+      ASSET_MANAGER_OAUTH: |
+        {
+          "client_id": "velocimodel-asset-manager",
+          "client_secret": "abc123DEFghijklmnop4567rstuvwxyzZYXWUT8910SRQPOnmlijhoauthplaygroundapplication",
+          "auth_manager_internal_url": "http://auth-manager:9005/provider",
+          "auth_manager_external_url": "http://localhost:8080/provider"
+        }
+    depends_on:
+      - "api-server"
+    tty: true
+  auth-manager:
+    image: "auth-manager"
+    ports:
+      - "127.0.0.1:9005:9005"
+    environment:
+      AUTH_MANAGER_SLEEP: "5"
+      AUTH_MANAGER_HTTP_BASE_PATH: "/provider"
+    depends_on:
+      - "api-server"
+    tty: true
+  ceresdb:
+    image: "ceresdb"
+    ports:
+      - "127.0.0.1:7437:7437"
+    environment:
+      CERESDB_LOG_LEVEL: "info"
+  frontend:
+    image: "frontend"
+    ports:
+      - "0.0.0.0:9000:9000"
+    environment:
+      FRONTEND_SLEEP: "5"
+      FRONTEND_HTTP_BASE_PATH: "/velocimodel"
+      FRONTEND_OAUTH: |
+        {
+          "client_id": "velocimodel-frontend",
+          "client_secret": "abc123DEFghijklmnop4567rstuvwxyzZYXWUT8910SRQPOnmlijhoauthplaygroundapplication",
+          "auth_manager_internal_url": "http://auth-manager:9005/provider",
+          "auth_manager_external_url": "http://localhost:8080/provider"
+        }
+    depends_on:
+      - "api-server"
+    tty: true
+  model-manager:
+    image: "model-manager"
+    ports:
+      - "127.0.0.1:9003:9003"
+    environment:
+      MODEL_MANAGER_SLEEP: "5"
+      MODEL_MANAGER_OAUTH: |
+        {
+          "client_id": "velocimodel-model-manager",
+          "client_secret": "abc123DEFghijklmnop4567rstuvwxyzZYXWUT8910SRQPOnmlijhoauthplaygroundapplication",
+          "auth_manager_internal_url": "http://auth-manager:9005/provider",
+          "auth_manager_external_url": "http://localhost:8080/provider"
+        }
+    depends_on:
+      - "api-server"
+    tty: true
+  service-manager:
+    image: "service-manager"
+    ports:
+      - "127.0.0.1:9001:9001"
+    environment:
+      SERVICE_MANAGER_SLEEP: "5"
+      SERVICE_MANAGER_OAUTH: |
+        {
+          "client_id": "velocimodel-service-manager",
+          "client_secret": "abc123DEFghijklmnop4567rstuvwxyzZYXWUT8910SRQPOnmlijhoauthplaygroundapplication",
+          "auth_manager_internal_url": "http://auth-manager:9005/provider",
+          "auth_manager_external_url": "http://localhost:8080/provider"
+        }
+    depends_on:
+      - "ceresdb"
+    tty: true

@@ -21,9 +21,9 @@ import (
 )
 
 func initializeRoutes() {
-	router.Static("/static/js", "static/js")
-	router.Static("/static/img", "static/img")
-	router.Static("/static/css", "static/css")
+	router.Static(config.Config.HTTPBasePath+"/static/js", "static/js")
+	router.Static(config.Config.HTTPBasePath+"/static/img", "static/img")
+	router.Static(config.Config.HTTPBasePath+"/static/css", "static/css")
 
 	router.GET("/health", api.GetHealth)
 
@@ -31,8 +31,8 @@ func initializeRoutes() {
 
 	// UI endpoints
 	router.GET("/", middleware.EnsureLoggedIn(), handlers.RedirectIndexHandler)
-	router.GET("/login", handlers.LoginGetHandler)
-	router.POST("/login", func(c *gin.Context) {
+	router.GET(config.Config.HTTPBasePath+"/login", handlers.LoginGetHandler)
+	router.POST(config.Config.HTTPBasePath+"/login", func(c *gin.Context) {
 		store, err := session.Start(c.Request.Context(), c.Writer, c.Request)
 		if err != nil {
 			http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
@@ -107,7 +107,7 @@ func initializeRoutes() {
 				store.Set("LoggedInUserID", userIdent)
 				store.Save()
 
-				c.Writer.Header().Set("Location", "/auth")
+				c.Writer.Header().Set("Location", config.Config.HTTPBasePath+"/auth")
 				c.Writer.WriteHeader(http.StatusFound)
 			} else {
 				c.HTML(http.StatusBadRequest, "login.html", gin.H{
@@ -116,24 +116,24 @@ func initializeRoutes() {
 			}
 		}
 	})
-	router.GET("/auth", handlers.AuthGetHandler)
+	router.GET(config.Config.HTTPBasePath+"/auth", handlers.AuthGetHandler)
 
-	router.GET("/.well-known/openid-configuration/", func(c *gin.Context) {
+	router.GET(config.Config.HTTPBasePath+"/.well-known/openid-configuration/", func(c *gin.Context) {
 		response := gin.H{
-			"issuer":                                config.Config.URL,
-			"authorization_endpoint":                config.Config.URL + "/oauth/authorize",
-			"token_endpoint":                        config.Config.URL + "/oauth/token",
-			"userinfo_endpoint":                     config.Config.URL + "/oauth/userinfo",
-			"end_session_endpoint":                  config.Config.URL + "/oauth/logout",
-			"introspection_endpoint":                config.Config.URL + "/oauth/introspect",
-			"jwks_uri":                              config.Config.URL + "/JWKS",
+			"issuer":                                config.Config.URL + config.Config.HTTPBasePath,
+			"authorization_endpoint":                config.Config.URL + config.Config.HTTPBasePath + "/oauth/authorize",
+			"token_endpoint":                        config.Config.URL + config.Config.HTTPBasePath + "/oauth/token",
+			"userinfo_endpoint":                     config.Config.URL + config.Config.HTTPBasePath + "/oauth/userinfo",
+			"end_session_endpoint":                  config.Config.URL + config.Config.HTTPBasePath + "/oauth/logout",
+			"introspection_endpoint":                config.Config.URL + config.Config.HTTPBasePath + "/oauth/introspect",
+			"jwks_uri":                              config.Config.URL + config.Config.HTTPBasePath + "/JWKS",
 			"subject_types_supported":               []string{"public"},
 			"token_endpoint_auth_methods_supported": []string{"client_secret_post"},
 		}
 		c.JSON(200, response)
 	})
 
-	router.GET("/JWKS", func(c *gin.Context) {
+	router.GET(config.Config.HTTPBasePath+"/JWKS", func(c *gin.Context) {
 		jsonData := JWKS
 		c.Data(http.StatusOK, "application/json", jsonData)
 	})
@@ -141,13 +141,6 @@ func initializeRoutes() {
 	router.NoRoute(func(c *gin.Context) {
 		c.HTML(http.StatusNotFound, "404.html", gin.H{})
 	})
-
-	uRoutes := router.Group("/u")
-	{
-		uRoutes.GET("/login", middleware.EnsureNotLoggedIn(), handlers.LocalLoginHandler)
-		uRoutes.POST("/login", user.PerformLogin)
-		uRoutes.GET("/logout", middleware.EnsureLoggedIn(), user.Logout)
-	}
 
 	apiRoutes := router.Group("/api")
 	{
@@ -157,7 +150,7 @@ func initializeRoutes() {
 		apiRoutes.POST("/user", middleware.EnsureLoggedIn(), middleware.EnsureGroupAllowed("admin"), middleware.EnsureRoleAllowed("write"), api.PostUser)
 	}
 
-	oauthRoutes := router.Group("/oauth")
+	oauthRoutes := router.Group(config.Config.HTTPBasePath + "/oauth")
 	{
 		oauthRoutes.POST("/introspect", func(c *gin.Context) {
 			c.Request.ParseForm()

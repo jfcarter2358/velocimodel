@@ -37,6 +37,9 @@ function saveSnapshot() {
     }
 
     parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     snapshotID = parts[parts.length - 1]
 
     snapshotName = $("#snapshot-name").val();
@@ -53,7 +56,7 @@ function saveSnapshot() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/snapshot/" + snapshotID,
+        url: basePath + "/api/snapshot/" + snapshotID,
         type: "PUT",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -73,13 +76,16 @@ function saveSnapshot() {
 
 function createRelease() {
     parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     modelID = parts[parts.length - 1]
 
     $("#spinner").css("display", "block")
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/snapshot/" + snapshotID + "/release",
+        url: basePath + "/api/snapshot/" + snapshotID + "/release",
         type: "POST",
         success: function(response) {
             $("#spinner").css("display", "none")
@@ -98,13 +104,16 @@ function createRelease() {
 
 function createRelease() {
     parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     snapshotID = parts[parts.length - 1]
 
     $("#spinner").css("display", "block")
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/snapshot/" + snapshotID + "/release",
+        url: basePath + "/api/snapshot/" + snapshotID + "/release",
         type: "POST",
         success: function(response) {
             $("#spinner").css("display", "none")

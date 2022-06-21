@@ -4,7 +4,7 @@
 <head>
 	<!-- import head.html -->
 	<!-- add custom css -->
-	<link rel="stylesheet" type="text/css" href="/static/css/login.css">
+	<link rel="stylesheet" type="text/css" href="{{ .base_path }}/static/css/login.css">
 </head>
 
 <body class="light theme-base">
@@ -15,7 +15,7 @@
 			</div>
 		</div>
 		<br>
-		<form class="w3-container" action="/auth/login" id="login_form" method="POST">
+		<form class="w3-container" action="{{ .base_path }}/auth/login" id="login_form" method="POST">
 			<div class="form-group">
 				<label for="username" class="label-text">Username</label>
 				<input type="text" class="form-control w3-round" id="username" name="username" placeholder="Username">

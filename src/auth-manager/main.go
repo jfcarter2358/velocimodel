@@ -235,7 +235,7 @@ func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string
 		store.Set("ReturnUri", r.Form)
 		store.Save()
 
-		w.Header().Set("Location", "/login")
+		w.Header().Set("Location", config.Config.HTTPBasePath+"/login")
 		w.WriteHeader(http.StatusFound)
 		return
 	}

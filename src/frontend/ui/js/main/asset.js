@@ -24,6 +24,9 @@ function saveAsset() {
     }
 
     parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     assetID = parts[parts.length - 1]
 
     assetName = $("#asset-name").val();
@@ -41,7 +44,7 @@ function saveAsset() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/asset/" + assetID,
+        url: basePath + "/api/asset/" + assetID,
         type: "PUT",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -69,11 +72,16 @@ function downloadFileAsset(url) {
 }
 
 function syncGitAsset(assetID) {
+    parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
+
     $("#spinner").css("display", "block")
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/asset/git/sync/" + assetID,
+        url: basePath + "/api/asset/git/sync/" + assetID,
         type: "POST",
         success: function(response) {
             $("#spinner").css("display", "none")

@@ -3,7 +3,7 @@
         <div class="w3-container velocimodel-blue w3-round snapshot-title">
             <div class="card-title-bar">
                 <input id="snapshot-name" class="w3-input card-title name-field light theme-text-light" type="text" value="{{ .snapshot.name }}">
-                <a href="/ui/snapshot/{{ .snapshot.id }}/code" class="icon" style="margin-top:10px;">
+                <a href="{{ .base_path }}/ui/snapshot/{{ .snapshot.id }}/code" class="icon" style="margin-top:10px;">
                     <i class="fa-solid fa-code w3-large"></i>
                 </a>
                 <div class="icon" style="margin-top:10px;">
@@ -23,7 +23,7 @@
             </div>
             <div class="snapshot-card">
                 <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>ID: </strong></span>{{ .snapshot.id }}</div>
-                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Model: </strong></span><a href="/ui/model/{{ .snapshot.model }}" class="light theme-text">{{ .snapshot.model }}</a></div>
+                <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Model: </strong></span><a href="{{ .base_path }}/ui/model/{{ .snapshot.model }}" class="light theme-text">{{ .snapshot.model }}</a></div>
                 <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Version: </strong></span>{{ .snapshot.version }}</div>
                 <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Created: </strong></span>{{ .snapshot.created }}</div>
                 <div class="w3-left-align"><span class="velocimodel-text-blue"><strong>Updated: </strong></span>{{ .snapshot.updated }}</div>
@@ -55,7 +55,7 @@
             {{ range .assets }}
             <button type="button" class="collapsible light theme-light theme-hover-base w3-border-bottom theme-border-base">
                 <span style="float:left;">{{ .id }}</span>
-                <a href="/ui/asset/{{ .id }}" style="float:right;margin-right:8px;" class="light theme-text">
+                <a href="{{ $.base_path }}/ui/asset/{{ .id }}" style="float:right;margin-right:8px;" class="light theme-text">
                     <i class="fa-solid fa-link pointer-cursor"></i>
                 </a>
                 <span style="float:right;margin-right:8px;">{{ .type }}</span>
@@ -103,7 +103,7 @@
                         <td>{{ .version }}</td>
                         <td>{{ .id }}</td>
                         <td class="table-link-cell">
-                            <a href="/ui/release/{{ .id }}" class="table-link-link light theme-text">
+                            <a href="{{ $.base_path }}/ui/release/{{ .id }}" class="table-link-link light theme-text">
                                 <i class="fa-solid fa-link"></i>
                             </a>
                         </td>

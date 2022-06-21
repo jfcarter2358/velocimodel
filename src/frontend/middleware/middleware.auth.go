@@ -4,6 +4,7 @@ package middleware
 
 import (
 	"encoding/json"
+	"frontend/config"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -21,11 +22,11 @@ func EnsureLoggedIn() gin.HandlerFunc {
 		// the user is not logged in
 		token, err := c.Cookie("access_token")
 		if err != nil {
-			c.Redirect(307, "/auth/login")
+			c.Redirect(307, config.Config.HTTPBasePath+"/auth/login")
 			return
 		}
 		client := http.Client{}
-		requestURL := "http://auth-manager:9005/oauth/userinfo"
+		requestURL := config.Config.Oauth.AuthServerInternalURL + "/oauth/userinfo"
 		req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 		req.Header = http.Header{
 			"Authorization": []string{"Bearer " + token},
@@ -33,12 +34,12 @@ func EnsureLoggedIn() gin.HandlerFunc {
 		res, err := client.Do(req)
 		if err != nil {
 			log.Printf("Error on checking userinfo: %v", err)
-			c.Redirect(307, "/auth/login")
+			c.Redirect(307, config.Config.HTTPBasePath+"/auth/login")
 			return
 		}
 		if res.StatusCode != http.StatusOK {
 			log.Printf("Token is invalid: %v", err)
-			c.Redirect(307, "/auth/login")
+			c.Redirect(307, config.Config.HTTPBasePath+"/auth/login")
 			return
 		}
 	}
@@ -54,7 +55,7 @@ func EnsureLoggedInAbort() gin.HandlerFunc {
 			return
 		}
 		client := http.Client{}
-		requestURL := "http://auth-manager:9005/oauth/userinfo"
+		requestURL := config.Config.Oauth.AuthServerInternalURL + "/oauth/userinfo"
 		req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 		req.Header = http.Header{
 			"Authorization": []string{"Bearer " + token},
@@ -84,7 +85,7 @@ func EnsureNotLoggedIn() gin.HandlerFunc {
 			return
 		}
 		client := http.Client{}
-		requestURL := "http://auth-manager:9005/oauth/userinfo"
+		requestURL := config.Config.Oauth.AuthServerInternalURL + "/oauth/userinfo"
 		req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 		req.Header = http.Header{
 			"Authorization": []string{"Bearer " + token},
@@ -110,7 +111,7 @@ func EnsureGroupAllowed(group string) gin.HandlerFunc {
 			return
 		}
 		client := http.Client{}
-		requestURL := "http://auth-manager:9005/oauth/userinfo"
+		requestURL := config.Config.Oauth.AuthServerInternalURL + "/oauth/userinfo"
 		req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 		req.Header = http.Header{
 			"Authorization": []string{"Bearer " + token},
@@ -155,7 +156,7 @@ func EnsureRoleAllowed(role string) gin.HandlerFunc {
 			return
 		}
 		client := http.Client{}
-		requestURL := "http://auth-manager:9005/oauth/userinfo"
+		requestURL := config.Config.Oauth.AuthServerInternalURL + "/oauth/userinfo"
 		req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 		req.Header = http.Header{
 			"Authorization": []string{"Bearer " + token},

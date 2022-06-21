@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"auth-manager/config"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -35,7 +36,7 @@ func LoginGetHandler(c *gin.Context) {
 		return
 	}
 
-	render(c, gin.H{}, "login.html")
+	render(c, gin.H{"base_path": config.Config.HTTPBasePath}, "login.html")
 }
 
 func AuthGetHandler(c *gin.Context) {
@@ -46,12 +47,12 @@ func AuthGetHandler(c *gin.Context) {
 	}
 
 	if _, ok := store.Get("LoggedInUserID"); !ok {
-		c.Writer.Header().Set("Location", "/login")
+		c.Writer.Header().Set("Location", config.Config.HTTPBasePath+"/login")
 		c.Writer.WriteHeader(http.StatusFound)
 		return
 	}
 
-	render(c, gin.H{}, "auth.html")
+	render(c, gin.H{"base_path": config.Config.HTTPBasePath}, "auth.html")
 }
 
 func Handler401(c *gin.Context) {

@@ -2,7 +2,7 @@
     <div class="w3-container velocimodel-blue w3-round release-title">
         <div class="card-title-bar">
             <h4 class="card-title">{{ .release.name }}</h4>
-            <a href="/ui/release/{{ .release_id }}" class="icon w3-large" style="margin-top:11px;color:#fff;">
+            <a href="{{ .base_path }}/ui/release/{{ .release_id }}" class="icon w3-large" style="margin-top:11px;color:#fff;">
                 <i class="fa-solid fa-trash-undo"></i>
             </a>
         </div>

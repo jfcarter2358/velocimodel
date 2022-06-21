@@ -3,6 +3,7 @@
 package middleware
 
 import (
+	"auth-manager/config"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -32,7 +33,7 @@ func EnsureLoggedIn() gin.HandlerFunc {
 			token = strings.Split(authString, " ")[1]
 		}
 		client := http.Client{}
-		requestURL := "http://auth-manager:9005/oauth/userinfo"
+		requestURL := "http://auth-manager:9005" + config.Config.HTTPBasePath + "/oauth/userinfo"
 		req, _ := http.NewRequest(http.MethodGet, requestURL, nil)
 		req.Header = http.Header{
 			"Authorization": []string{"Bearer " + token},
@@ -68,7 +69,7 @@ func EnsureLoggedInAbort() gin.HandlerFunc {
 			token = strings.Split(authString, " ")[1]
 		}
 		client := http.Client{}
-		requestURL := "http://auth-manager:9005/oauth/userinfo"
+		requestURL := "http://auth-manager:9005" + config.Config.HTTPBasePath + "/oauth/userinfo"
 		req, _ := http.NewRequest(http.MethodGet, requestURL, nil)
 		req.Header = http.Header{
 			"Authorization": []string{"Bearer " + token},
@@ -105,7 +106,7 @@ func EnsureNotLoggedIn() gin.HandlerFunc {
 			token = strings.Split(authString, " ")[1]
 		}
 		client := http.Client{}
-		requestURL := "http://auth-manager:9005/oauth/userinfo"
+		requestURL := "http://auth-manager:9005" + config.Config.HTTPBasePath + "/oauth/userinfo"
 		req, _ := http.NewRequest(http.MethodGet, requestURL, nil)
 		req.Header = http.Header{
 			"Authorization": []string{"Bearer " + token},
@@ -138,7 +139,7 @@ func EnsureGroupAllowed(group string) gin.HandlerFunc {
 			token = strings.Split(authString, " ")[1]
 		}
 		client := http.Client{}
-		requestURL := "http://auth-manager:9005/oauth/userinfo"
+		requestURL := "http://auth-manager:9005" + config.Config.HTTPBasePath + "/oauth/userinfo"
 		req, _ := http.NewRequest(http.MethodGet, requestURL, nil)
 		req.Header = http.Header{
 			"Authorization": []string{"Bearer " + token},
@@ -192,7 +193,7 @@ func EnsureRoleAllowed(role string) gin.HandlerFunc {
 			token = strings.Split(authString, " ")[1]
 		}
 		client := http.Client{}
-		requestURL := "http://auth-manager:9005/oauth/userinfo"
+		requestURL := "http://auth-manager:9005" + config.Config.HTTPBasePath + "/oauth/userinfo"
 		req, _ := http.NewRequest(http.MethodGet, requestURL, nil)
 		req.Header = http.Header{
 			"Authorization": []string{"Bearer " + token},

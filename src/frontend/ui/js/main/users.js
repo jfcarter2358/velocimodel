@@ -9,8 +9,12 @@
 var users
 
 function getUsers() {
+    parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     $.ajax({
-        url: "/api/user",
+        url: basePath + "/api/user",
         type: "GET",
         success: function (result) {
             users = result
@@ -38,7 +42,7 @@ function render() {
                 '<td>' + user.groups + '</td>' +
                 '<td>' + user.email + '</td>' +
                 '<td class="table-link-cell">' +
-                '<a href="/ui/user/' + user.id + '" class="table-link-link w3-right-align light theme-text" style="float:right;margin-right:16px;"><i class="fa-solid fa-link"></i></a>' +
+                '<a href="{{ .base_path }}/ui/user/' + user.id + '" class="table-link-link w3-right-align light theme-text" style="float:right;margin-right:16px;"><i class="fa-solid fa-link"></i></a>' +
                 '</td>' +
                 '</tr>'
         }).join('');
@@ -47,6 +51,11 @@ function render() {
 }
 
 function addUser() {
+    parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
+
     data = {
         "username": $("#users-add-username").val(),
         "password": $("#users-add-password").val(),
@@ -66,7 +75,7 @@ function addUser() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/user",
+        url: basePath + "/api/user",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -75,7 +84,7 @@ function addUser() {
             $("#page-darken").css("opacity", "0")
             userID = response['id']
             closeModal('users-add-modal');
-            window.location.assign('/ui/user/' + userID);
+            window.location.assign(basePath + '/ui/user/' + userID);
         },
         error: function(response) {
             closeModal('users-delete-modal');
@@ -95,6 +104,11 @@ function openDeleteModal(username, id) {
 }
 
 function deleteUser() {
+    parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
+
     id = $("#user-delete-id").text()
     data = [id]
 
@@ -102,7 +116,7 @@ function deleteUser() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/user",
+        url: basePath + "/api/user",
         type: "DELETE",
         contentType: 'application/json',
         data: JSON.stringify(data),

@@ -8,8 +8,12 @@
 var releases
 
 function getReleases() {
+    parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     $.ajax({
-        url: "/api/release",
+        url: basePath + "/api/release",
         type: "GET",
         success: function (result) {
             releases = result
@@ -41,7 +45,7 @@ function render() {
                 }).join('') +
                 '</td>' +
                 '<td class="table-link-cell">' +
-                '<a href="/ui/release/' + release.id + '" class="table-link-link w3-right-align light theme-text" style="float:right;margin-right:16px;"><i class="fa-solid fa-link"></i></a>' +
+                '<a href="{{ .base_path }}/ui/release/' + release.id + '" class="table-link-link w3-right-align light theme-text" style="float:right;margin-right:16px;"><i class="fa-solid fa-link"></i></a>' +
                 '</td>' +
                 '</tr>'
         }).join('');
@@ -80,18 +84,22 @@ function filterFunction() {
 }
 
 function createReleaseFromSnapshot(snapshotID) {
+    parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     $("#spinner").css("display", "block")
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/snapshot/" + snapshotID + "/release",
+        url: basePath + "/api/snapshot/" + snapshotID + "/release",
         type: "POST",
         success: function(response) {
             $("#spinner").css("display", "none")
             $("#page-darken").css("opacity", "0")
             releaseID = response["id"]
             closeModal('create-from-snapshot-modal');
-            window.location.assign('/ui/release/' + releaseID);
+            window.location.assign(basePath + '/ui/release/' + releaseID);
         },
         error: function(response) {
             console.log(response)

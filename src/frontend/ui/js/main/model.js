@@ -49,6 +49,9 @@ function saveModel() {
     }
 
     parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     modelID = parts[parts.length - 1]
 
     modelName = $("#model-name").val();
@@ -71,7 +74,7 @@ function saveModel() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/model/" + modelID,
+        url: basePath + "/api/model/" + modelID,
         type: "PUT",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -91,13 +94,16 @@ function saveModel() {
 
 function createSnapshot() {
     parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     modelID = parts[parts.length - 1]
 
     $("#spinner").css("display", "block")
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/model/" + modelID + "/snapshot",
+        url: basePath + "/api/model/" + modelID + "/snapshot",
         type: "POST",
         success: function(response) {
             $("#spinner").css("display", "none")
@@ -131,6 +137,9 @@ function openGitModal() {
 
 function addExistingAsset(assetID) {
     parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     modelID = parts[parts.length - 1]
     
     data = {
@@ -142,7 +151,7 @@ function addExistingAsset(assetID) {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/model/asset",
+        url: basePath + "/api/model/asset",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -165,6 +174,9 @@ function addExistingAsset(assetID) {
 
 function deleteAsset(assetID) {
     parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     modelID = parts[parts.length - 1]
     
     data = {
@@ -176,7 +188,7 @@ function deleteAsset(assetID) {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/model/asset",
+        url: basePath + "/api/model/asset",
         type: "DELETE",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -197,6 +209,9 @@ function deleteAsset(assetID) {
 
 function addGitAsset() {
     parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     modelID = parts[parts.length - 1]
 
     data = {
@@ -209,7 +224,7 @@ function addGitAsset() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/asset/git",
+        url: basePath + "/api/asset/git",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -220,7 +235,7 @@ function addGitAsset() {
                 "asset": assetID
             }
             $.ajax({
-                url: "/api/model/asset",
+                url: basePath + "/api/model/asset",
                 type: "POST",
                 contentType: 'application/json',
                 data: JSON.stringify(addAssetData),
@@ -252,10 +267,13 @@ function addGitAsset() {
 
 function addFileAsset() {
     parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     modelID = parts[parts.length - 1]
 
     $('#file-form').ajaxSubmit({
-        url : '/api/asset/file',
+        url : basePath + '/api/asset/file',
         type: "POST",
         success : function (response) {
             assetID = response["id"]
@@ -264,7 +282,7 @@ function addFileAsset() {
                 "asset": assetID
             }
             $.ajax({
-                url: "/api/model/asset",
+                url: basePath + "/api/model/asset",
                 type: "POST",
                 contentType: 'application/json',
                 data: JSON.stringify(addAssetData),
@@ -334,11 +352,15 @@ function downloadModel(url) {
 }
 
 function syncGitAsset(assetID) {
+    parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     $("#spinner").css("display", "block")
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/asset/git/sync/" + assetID,
+        url: basePath + "/api/asset/git/sync/" + assetID,
         type: "POST",
         success: function(response) {
             $("#spinner").css("display", "none")

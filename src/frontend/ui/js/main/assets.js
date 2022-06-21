@@ -9,8 +9,12 @@
 var assets
 
 function getAssets() {
+    parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     $.ajax({
-        url: "/api/asset",
+        url: basePath + "/api/asset",
         type: "GET",
         success: function (result) {
             assets = result
@@ -41,7 +45,7 @@ function render() {
                 }).join('') +
                 '</td>' +
                 '<td class="table-link-cell">' +
-                '<a href="/ui/asset/' + asset.id + '" class="table-link-link w3-right-align light theme-text" style="float:right;margin-right:16px;"><i class="fa-solid fa-link"></i></a>' +
+                '<a href="{{ .base_path }}/ui/asset/' + asset.id + '" class="table-link-link w3-right-align light theme-text" style="float:right;margin-right:16px;"><i class="fa-solid fa-link"></i></a>' +
                 '</td>' +
                 '</tr>'
         }).join('');
@@ -67,6 +71,9 @@ function openGitModal() {
 
 function addGitAsset() {
     parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     modelID = parts[parts.length - 1]
 
     data = {
@@ -79,7 +86,7 @@ function addGitAsset() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/asset/git",
+        url: basePath + "/api/asset/git",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify(data),
@@ -88,7 +95,7 @@ function addGitAsset() {
             $("#page-darken").css("opacity", "0")
             assetID = response["id"]
             closeModal('add-git-asset-modal');
-            window.location.assign('/ui/asset/' + assetID);
+            window.location.assign(basePath + '/ui/asset/' + assetID);
         },
         error: function(response) {
             console.log(response)
@@ -105,14 +112,14 @@ function addFileAsset() {
     modelID = parts[parts.length - 1]
 
     $('#file-form').ajaxSubmit({
-        url : '/api/asset/file',
+        url : basePath + '/api/asset/file',
         type: "POST",
         success : function (response) {
             $("#spinner").css("display", "none")
             $("#page-darken").css("opacity", "0")
             assetID = response["id"]
             closeModal('add-file-asset-modal');
-            window.location.assign('/ui/asset/' + assetID);
+            window.location.assign(basePath + '/ui/asset/' + assetID);
         },
         error: function(response) {
             console.log(response)

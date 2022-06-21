@@ -6,6 +6,7 @@ import (
 	"api-server/config"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 
@@ -35,7 +36,8 @@ func EnsureLoggedIn() gin.HandlerFunc {
 			return
 		}
 		client := http.Client{}
-		requestURL := "http://auth-manager:9005/oauth/userinfo"
+		log.Println(config.Config.Oauth.AuthServerInternalURL + "/oauth/userinfo")
+		requestURL := config.Config.Oauth.AuthServerInternalURL + "/oauth/userinfo"
 		req, _ := http.NewRequest(http.MethodGet, requestURL, nil)
 		req.Header = http.Header{
 			"Authorization": []string{"Bearer " + token},
@@ -72,7 +74,7 @@ func EnsureGroupAllowed(group string) gin.HandlerFunc {
 			return
 		}
 		client := http.Client{}
-		requestURL := "http://auth-manager:9005/oauth/userinfo"
+		requestURL := config.Config.Oauth.AuthServerInternalURL + "/oauth/userinfo"
 		req, _ := http.NewRequest(http.MethodGet, requestURL, nil)
 		req.Header = http.Header{
 			"Authorization": []string{"Bearer " + token},
@@ -127,7 +129,7 @@ func EnsureRoleAllowed(role string) gin.HandlerFunc {
 			return
 		}
 		client := http.Client{}
-		requestURL := "http://auth-manager:9005/oauth/userinfo"
+		requestURL := config.Config.Oauth.AuthServerInternalURL + "/oauth/userinfo"
 		req, _ := http.NewRequest(http.MethodGet, requestURL, nil)
 		req.Header = http.Header{
 			"Authorization": []string{"Bearer " + token},

@@ -3,12 +3,12 @@
         <div class="w3-container velocimodel-blue w3-round asset-title">
             <div class="card-title-bar">
                 <input id="asset-name" class="w3-input card-title name-field light theme-text-light" type="text" value="{{ .asset.name }}">
-                <a href="/ui/asset/{{ .asset.id }}/code" class="icon" style="margin-top:10px;color:#fff;">
+                <a href="{{ .base_path }}/ui/asset/{{ .asset.id }}/code" class="icon" style="margin-top:10px;color:#fff;">
                     <i class="fa-solid fa-code w3-large"></i>
                 </a>
                 {{ if eq .asset.type "file" }}
                 <div class="icon" style="margin-top:10px;">
-                    <i class="fa-solid fa-download w3-large pointer-cursor" onclick="downloadFileAsset('/api/asset/file/{{ .asset.id }}')"></i>
+                    <i class="fa-solid fa-download w3-large pointer-cursor" onclick="downloadFileAsset('{{ .base_path }}/api/asset/file/{{ .asset.id }}')"></i>
                 </div>
                 {{ end }}
                 {{ if eq .asset.type "git" }}
@@ -83,7 +83,7 @@
                         <td>{{ .language }}</td>
                         <td>{{ .id }}</td>
                         <td class="table-link-cell">
-                            <a href="/ui/model/{{ .id }}" class="table-link-link light theme-text">
+                            <a href="{{ $.base_path }}/ui/model/{{ .id }}" class="table-link-link light theme-text">
                                 <i class="fa-solid fa-link"></i>
                             </a>
                         </td>

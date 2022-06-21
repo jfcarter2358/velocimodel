@@ -8,6 +8,9 @@
 
 function saveUser() {
     parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     userID = parts[parts.length - 1]
 
     data = {
@@ -29,7 +32,7 @@ function saveUser() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/user/" + userID,
+        url: basePath + "/api/user/" + userID,
         type: "PUT",
         contentType: 'application/json',
         data: JSON.stringify(data),

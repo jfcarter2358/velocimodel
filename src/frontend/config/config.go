@@ -15,6 +15,7 @@ const ENV_PREFIX = "FRONTEND_"
 type ConfigObject struct {
 	HTTPHost         string      `json:"http_host" env:"HTTP_HOST"`
 	HTTPPort         int         `json:"http_port" env:"HTTP_PORT"`
+	HTTPBasePath     string      `json:"http_base_path" env:"HTTP_BASE_PATH"`
 	ExternalHTTPHost string      `json:"external_http_host" env:"EXTERNAL_HTTP_HOST"`
 	APIServerURL     string      `json:"api_server_url" env:"API_SERVER_URL"`
 	JoinToken        string      `json:"join_token" env:"JOIN_TOKEN"`

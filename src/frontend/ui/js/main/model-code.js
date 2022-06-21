@@ -11,6 +11,9 @@ var model
 
 function saveModel() {
     parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     modelID = parts[parts.length - 2]
     
     data = JSON.parse(editor.getValue())
@@ -19,7 +22,7 @@ function saveModel() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/model/" + modelID,
+        url: basePath + "/api/model/" + modelID,
         type: "PUT",
         contentType: 'application/json',
         data: JSON.stringify(data),

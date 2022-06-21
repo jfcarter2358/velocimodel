@@ -5,6 +5,7 @@ package main
 import (
 	"frontend/api"
 	"frontend/auth"
+	"frontend/config"
 	"frontend/middleware"
 	"frontend/page"
 	"net/http"
@@ -13,20 +14,24 @@ import (
 )
 
 func initializeRoutes() {
-	router.Static("/static/css", "./static/css")
-	router.Static("/static/img", "./static/img")
-	router.Static("/static/js", "./static/js")
+	router.Static(config.Config.HTTPBasePath+"/static/css", "./static/css")
+	router.Static(config.Config.HTTPBasePath+"/static/img", "./static/img")
+	router.Static(config.Config.HTTPBasePath+"/static/js", "./static/js")
 
 	router.GET("/health", api.GetHealth)
 	router.GET("/status", api.GetStatuses)
 
 	router.GET("/", page.RedirectIndexPage)
 
+	if config.Config.HTTPBasePath != "" {
+		router.GET(config.Config.HTTPBasePath+"/", page.RedirectProxyIndexPage)
+	}
+
 	router.NoRoute(func(c *gin.Context) {
 		c.HTML(http.StatusNotFound, "404.html", gin.H{})
 	})
 
-	apiRoutes := router.Group("/api")
+	apiRoutes := router.Group(config.Config.HTTPBasePath + "/api")
 	{
 		apiRoutes.GET("/asset", api.GetAssets)
 		apiRoutes.GET("/asset/:id", api.GetAsset)
@@ -60,7 +65,7 @@ func initializeRoutes() {
 		apiRoutes.PUT("/secret", api.UpdateSecrets)
 	}
 
-	uiRoutes := router.Group("/ui")
+	uiRoutes := router.Group(config.Config.HTTPBasePath + "/ui")
 	{
 		uiRoutes.GET("/assets", middleware.EnsureLoggedIn(), page.ShowAssetsPage)
 		uiRoutes.GET("/asset/:id", middleware.EnsureLoggedIn(), page.ShowAssetPage)
@@ -87,7 +92,7 @@ func initializeRoutes() {
 		})
 	}
 
-	authRoutes := router.Group("/auth")
+	authRoutes := router.Group(config.Config.HTTPBasePath + "/auth")
 	{
 		authRoutes.GET("/redirect", auth.HandleRedirect)
 		authRoutes.GET("/login", auth.HandleLogin)

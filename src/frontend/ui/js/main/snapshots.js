@@ -8,8 +8,12 @@
 var snapshots
 
 function getSnapshots() {
+    parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     $.ajax({
-        url: "/api/snapshot",
+        url: basePath + "/api/snapshot",
         type: "GET",
         success: function (result) {
             snapshots = result
@@ -41,7 +45,7 @@ function render() {
                 }).join('') +
                 '</td>' +
                 '<td class="table-link-cell">' +
-                '<a href="/ui/snapshot/' + snapshot.id + '" class="table-link-link w3-right-align light theme-text" style="float:right;margin-right:16px;"><i class="fa-solid fa-link"></i></a>' +
+                '<a href="{{ .base_path }}/ui/snapshot/' + snapshot.id + '" class="table-link-link w3-right-align light theme-text" style="float:right;margin-right:16px;"><i class="fa-solid fa-link"></i></a>' +
                 '</td>' +
                 '</tr>'
         }).join('');
@@ -80,18 +84,22 @@ function filterFunction() {
 }
 
 function createSnapshotFromModel(modelID) {
+    parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     $("#spinner").css("display", "block")
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/model/" + modelID + "/snapshot",
+        url: basePath + "/api/model/" + modelID + "/snapshot",
         type: "POST",
         success: function(response) {
             $("#spinner").css("display", "none")
             $("#page-darken").css("opacity", "0")
             snapshotID = response["id"]
             closeModal('create-from-model-modal');
-            window.location.assign('/ui/snapshot/' + snapshotID);
+            window.location.assign(basePath + '/ui/snapshot/' + snapshotID);
         },
         error: function(response) {
             console.log(response)

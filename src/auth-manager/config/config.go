@@ -18,6 +18,7 @@ type ConfigObject struct {
 	DB           DBObject
 	HTTPHost     string         `json:"http_host" env:"HTTP_HOST"`
 	HTTPPort     int            `json:"http_port" env:"HTTP_PORT"`
+	HTTPBasePath string         `json:"http_base_path" env:"HTTP_BASE_PATH"`
 	Clients      []ClientObject `json:"clients" env:"CLIENTS"`
 	LDAP         LDAPObject     `json:"ldap" env:"LDAP"`
 	Admin        AdminObject    `json:"admin" env:"ADMIN"`

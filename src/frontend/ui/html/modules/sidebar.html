@@ -4,34 +4,34 @@
             <i class="fa-solid fa-bars w3-large" onclick="toggleSidebar()"></i>
         </div>
         <div class="w3-large w3-container w3-cell w3-cell-middle w3-left-align sidebar-item">
-            <a href="/ui/dashboard">
+            <a href="{{ .base_path }}/ui/dashboard">
                 <h3>VelociModel</h3>
             </a>
         </div>
     </div>
-    <a href="/ui/dashboard" class="w3-bar-item w3-button light velocimodel-hover-blue w3-border-bottom theme-border-light">
+    <a href="{{ .base_path }}/ui/dashboard" class="w3-bar-item w3-button light velocimodel-hover-blue w3-border-bottom theme-border-light">
         <i class="fa-solid fa-table-columns"></i> Dashboard
     </a>
-    <a href="/ui/models" class="w3-bar-item w3-button light velocimodel-hover-blue w3-border-bottom theme-border-light">
+    <a href="{{ .base_path }}/ui/models" class="w3-bar-item w3-button light velocimodel-hover-blue w3-border-bottom theme-border-light">
         <i class="fa-solid fa-code"></i> Models
     </a>
-    <a href="/ui/snapshots" class="w3-bar-item w3-button light velocimodel-hover-blue w3-border-bottom theme-border-light">
+    <a href="{{ .base_path }}/ui/snapshots" class="w3-bar-item w3-button light velocimodel-hover-blue w3-border-bottom theme-border-light">
         <i class="fa-solid fa-box-archive"></i> Snapshots
     </a>
-    <a href="/ui/releases" class="w3-bar-item w3-button light velocimodel-hover-blue w3-border-bottom theme-border-light">
+    <a href="{{ .base_path }}/ui/releases" class="w3-bar-item w3-button light velocimodel-hover-blue w3-border-bottom theme-border-light">
         <i class="fa-solid fa-box-check"></i> Releases
     </a>
-    <a href="/ui/assets" class="w3-bar-item w3-button light velocimodel-hover-blue w3-border-bottom theme-border-light">
+    <a href="{{ .base_path }}/ui/assets" class="w3-bar-item w3-button light velocimodel-hover-blue w3-border-bottom theme-border-light">
         <i class="fa-solid fa-database"></i> Assets
     </a>
     {{ if and .is_admin_group .is_admin_role }}
-    <a href="/ui/secrets" class="w3-bar-item w3-button light velocimodel-hover-blue w3-border-bottom theme-border-light">
+    <a href="{{ .base_path }}/ui/secrets" class="w3-bar-item w3-button light velocimodel-hover-blue w3-border-bottom theme-border-light">
         <i class="fa-solid fa-lock"></i> Secrets
     </a>
-    <a href="/ui/params" class="w3-bar-item w3-button light velocimodel-hover-blue w3-border-bottom theme-border-light">
+    <a href="{{ .base_path }}/ui/params" class="w3-bar-item w3-button light velocimodel-hover-blue w3-border-bottom theme-border-light">
         <i class="fa-solid fa-gear"></i> Config
     </a>
-    <a href="/ui/users" class="w3-bar-item w3-button light velocimodel-hover-blue w3-border-bottom theme-border-light">
+    <a href="{{ .base_path }}/ui/users" class="w3-bar-item w3-button light velocimodel-hover-blue w3-border-bottom theme-border-light">
         <i class="fa-solid fa-users"></i> Users
     </a>
     {{ end }}

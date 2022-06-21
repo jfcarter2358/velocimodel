@@ -7,6 +7,10 @@
 // import data.js
 
 function saveSecrets() {
+    parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     
     data = {}
     $("#secrets-card").children("input").each(function() {
@@ -15,13 +19,11 @@ function saveSecrets() {
         data[key] = this.value
     })
 
-    console.log(data)
-
     $("#spinner").css("display", "block")
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/secret",
+        url: basePath + "/api/secret",
         type: "PUT",
         contentType: 'application/json',
         data: JSON.stringify(data),

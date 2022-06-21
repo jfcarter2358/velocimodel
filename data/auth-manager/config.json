@@ -1,6 +1,7 @@
 {
     "http_port": 9005,
     "http_host": "auth-manager",
+    "http_base_path": "",
     "api_server_url": "http://api-server:9004",
     "join_token": "abcdefghijklmnopqrstuvwxyzjointoken",
     "clients": [

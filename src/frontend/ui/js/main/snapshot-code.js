@@ -11,6 +11,9 @@ var model
 
 function saveSnapshot() {
     parts = window.location.href.split('/')
+    if (parts[0] != 'ui') {
+        basePath = "/" + parts[3]
+    }
     snapshotID = parts[parts.length - 2]
 
     data = JSON.parse(editor.getValue())
@@ -19,7 +22,7 @@ function saveSnapshot() {
     $("#page-darken").css("opacity", "1")
 
     $.ajax({
-        url: "/api/snapshot/" + snapshotID,
+        url: basePath + "/api/snapshot/" + snapshotID,
         type: "PUT",
         contentType: 'application/json',
         data: JSON.stringify(data),

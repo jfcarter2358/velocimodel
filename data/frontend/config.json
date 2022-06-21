@@ -1,6 +1,7 @@
 {
     "http_host": "frontend",
     "http_port": 9000,
+    "http_base_path": "",
     "external_http_host": "localhost",
     "api_server_url": "http://api-server:9004",
     "join_token": "abcdefghijklmnopqrstuvwxyzjointoken",

@@ -3,13 +3,13 @@
         <i class="fa-solid fa-bars w3-large" onclick="toggleSidebar()"></i>
     </div>
     <div class="w3-large light theme-light w3-container w3-cell w3-cell-middle w3-right-align breadcrumb" style="display:inline-block;margin-top:10px;">
-        <a href="/ui/releases" class="light theme-text">Releases</a>
+        <a href="{{ .base_path }}/ui/releases" class="light theme-text">Releases</a>
     </div>
     <div class="w3-dropdown-click light theme-light w3-container" style="float:right;margin-right:8px;margin-top:2px;">
         <i class="fa-solid fa-circle-user pointer-cursor w3-xxxlarge light theme-light" onclick="toggleMenu()"></i>
         <div class="w3-dropdown-content w3-bar-block w3-round" style="position:absolute;right:40px;top:56px;background-color: transparent;" id="user-menu">
             <div class="light theme-light w3-border">
-                <a href="/auth/logout" class="w3-bar-item w3-button light theme-light velocimodel-hover-blue" style="position:relative;z-index:100">Logout</a>
+                <a href="{{ .base_path }}/auth/logout" class="w3-bar-item w3-button light theme-light velocimodel-hover-blue" style="position:relative;z-index:100">Logout</a>
             </div>
         </div>
     </div>

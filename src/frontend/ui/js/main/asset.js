@@ -24,7 +24,8 @@ function saveAsset() {
     }
 
     parts = window.location.href.split('/')
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
     assetID = parts[parts.length - 1]
@@ -73,7 +74,8 @@ function downloadFileAsset(url) {
 
 function syncGitAsset(assetID) {
     parts = window.location.href.split('/')
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
 

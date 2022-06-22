@@ -10,7 +10,8 @@ var users
 
 function getUsers() {
     parts = window.location.href.split('/')
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
     $.ajax({
@@ -52,7 +53,8 @@ function render() {
 
 function addUser() {
     parts = window.location.href.split('/')
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
 
@@ -105,7 +107,8 @@ function openDeleteModal(username, id) {
 
 function deleteUser() {
     parts = window.location.href.split('/')
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
 

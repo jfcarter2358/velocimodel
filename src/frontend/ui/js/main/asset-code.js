@@ -12,7 +12,8 @@ var model
 function saveAsset() {
     parts = window.location.href.split('/')
     basePath = ''
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
     assetID = parts[parts.length - 2]

@@ -37,7 +37,8 @@ function saveSnapshot() {
     }
 
     parts = window.location.href.split('/')
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
     snapshotID = parts[parts.length - 1]
@@ -76,7 +77,8 @@ function saveSnapshot() {
 
 function createRelease() {
     parts = window.location.href.split('/')
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
     modelID = parts[parts.length - 1]
@@ -104,7 +106,8 @@ function createRelease() {
 
 function createRelease() {
     parts = window.location.href.split('/')
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
     snapshotID = parts[parts.length - 1]

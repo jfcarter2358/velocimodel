@@ -8,7 +8,8 @@
 
 function saveSecrets() {
     parts = window.location.href.split('/')
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
     

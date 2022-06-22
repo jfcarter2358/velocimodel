@@ -9,7 +9,8 @@ var releases
 
 function getReleases() {
     parts = window.location.href.split('/')
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
     $.ajax({
@@ -85,7 +86,8 @@ function filterFunction() {
 
 function createReleaseFromSnapshot(snapshotID) {
     parts = window.location.href.split('/')
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
     $("#spinner").css("display", "block")

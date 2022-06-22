@@ -49,7 +49,8 @@ function saveModel() {
     }
 
     parts = window.location.href.split('/')
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
     modelID = parts[parts.length - 1]
@@ -94,7 +95,8 @@ function saveModel() {
 
 function createSnapshot() {
     parts = window.location.href.split('/')
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
     modelID = parts[parts.length - 1]
@@ -137,7 +139,8 @@ function openGitModal() {
 
 function addExistingAsset(assetID) {
     parts = window.location.href.split('/')
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
     modelID = parts[parts.length - 1]
@@ -174,7 +177,8 @@ function addExistingAsset(assetID) {
 
 function deleteAsset(assetID) {
     parts = window.location.href.split('/')
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
     modelID = parts[parts.length - 1]
@@ -209,7 +213,8 @@ function deleteAsset(assetID) {
 
 function addGitAsset() {
     parts = window.location.href.split('/')
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
     modelID = parts[parts.length - 1]
@@ -267,7 +272,8 @@ function addGitAsset() {
 
 function addFileAsset() {
     parts = window.location.href.split('/')
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
     modelID = parts[parts.length - 1]
@@ -353,7 +359,8 @@ function downloadModel(url) {
 
 function syncGitAsset(assetID) {
     parts = window.location.href.split('/')
-    if (parts[0] != 'ui') {
+    basePath = ''
+if (parts[3] != 'ui') {
         basePath = "/" + parts[3]
     }
     $("#spinner").css("display", "block")
